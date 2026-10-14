@@ -36,8 +36,8 @@ pełnej instalacji na Raspberry Pi ani aktualizacji istniejącego komputera.
 Audyt pochodzenia inspiracji pozostaje otwarty; nie upubliczniaj repozytorium
 bez zamknięcia listy w docs/PUBLISHING.md.
 '''
-(root/'RELEASE-NOTES.md').write_text(notes)
-with (root/'SHA256SUMS.txt').open('w') as output:
+(root/'RELEASE-NOTES.md').write_text(notes, encoding='utf-8', newline='\n')
+with (root/'SHA256SUMS.txt').open('w', encoding='utf-8', newline='\n') as output:
     for path in sorted(root.iterdir()):
         if path.is_file() and path.name!='SHA256SUMS.txt':
             digest=hashlib.sha256()
