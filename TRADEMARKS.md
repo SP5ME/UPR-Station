@@ -1,6 +1,6 @@
 # Nazwa i identyfikacja projektu
 
-UPR Terminal Desktop i UPR Terminal Server to nazwy wariantów tego projektu.
+UPR Terminal (desktop) i UPR Station (serwer) to nazwy produktów tego projektu.
 W źródłach i istniejących instalacjach występują historyczne nazwy UltimatePR
 oraz UltimatePR Station. Nie oznacza to odrębnej licencji kodu.
 

@@ -312,7 +312,11 @@ impl Station {
         self.notify(
             NotificationKind::ApplicationStarted,
             "Uruchomienie aplikacji",
-            "UltimatePR Station jest gotowa do pracy",
+            if self.runtime == "desktop" {
+                "UPR Terminal jest gotowy do pracy"
+            } else {
+                "UPR Station jest gotowa do pracy"
+            },
         );
     }
     pub fn set_mqtt_discovery_sender(&mut self, sender: Option<std::sync::mpsc::SyncSender<()>>) {

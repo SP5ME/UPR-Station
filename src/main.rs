@@ -7,7 +7,7 @@ fn run() -> Result<(), String> {
     let demo = options.demo;
     let station = runtime::start(options, None)?;
     println!(
-        "UltimatePR Station: http://{}\nConfiguration: {}\n{}",
+        "UPR Station: http://{}\nConfiguration: {}\n{}",
         station.address,
         path.display(),
         if demo {

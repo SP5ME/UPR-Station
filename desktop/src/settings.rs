@@ -250,7 +250,7 @@ impl Options {
                 }
                 "--help" | "-h" => {
                     println!(
-                        "UltimatePR Station desktop\n--config PATH\n--web-config PATH\n--demo (isolated data)\n--minimized\n--mode desktop|server (Linux; desktop is default)\n--headless (alias for --mode server)"
+                        "UPR Terminal\n--config PATH\n--web-config PATH\n--demo (isolated data)\n--minimized\n--mode desktop|server (Linux; desktop is default)\n--headless (alias for --mode server)"
                     );
                     return Ok(None);
                 }

@@ -58,7 +58,7 @@ fn report(app: &tauri::AppHandle, message: &str) {
     log(&state.options.data.join("desktop.log"), message);
     app.dialog()
         .message(message)
-        .title("UltimatePR Station")
+        .title("UPR Terminal")
         .show(|_| {});
 }
 fn reveal(app: &tauri::AppHandle) {
@@ -74,7 +74,7 @@ fn shutdown(app: &tauri::AppHandle) {
         return;
     }
     if let Some(window) = app.get_webview_window("main") {
-        let _ = window.set_title("UltimatePR Station — kończenie pracy…");
+        let _ = window.set_title("UPR Terminal — kończenie pracy…");
     }
     let handle = app.clone();
     thread::spawn(move || {
@@ -137,7 +137,7 @@ fn handle_menu(app: &tauri::AppHandle, id: &str) {
         "help" => {
             app.dialog()
                 .message(include_str!("../../docs/DEPLOYMENT.md"))
-                .title("UltimatePR Station — instrukcja offline")
+                .title("UPR Terminal — instrukcja offline")
                 .show(|_| {});
             return;
         }
@@ -344,7 +344,7 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
                 .ok_or("Application icon missing")?
                 .clone(),
         )
-        .tooltip("UltimatePR Station")
+        .tooltip("UPR Terminal")
         .menu(&tray_menu)
         .on_tray_icon_event(|tray, event| {
             if matches!(event, TrayIconEvent::DoubleClick { .. }) {
@@ -374,9 +374,9 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
     );
     tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::External(url.parse()?))
         .title(if state.options.demo {
-            "UltimatePR Station — DEMO"
+            "UPR Terminal — DEMO"
         } else {
-            "UltimatePR Station"
+            "UPR Terminal"
         })
         .inner_size(1280.0, 850.0)
         .min_inner_size(800.0, 600.0)
@@ -451,7 +451,7 @@ fn run(options: Options) -> Result<(), String> {
                     let handle = app.clone();
                     app.dialog()
                         .message("Zasobnik jest niedostępny. Zakończyć pracę stacji?")
-                        .title("UltimatePR Station")
+                        .title("UPR Terminal")
                         .buttons(MessageDialogButtons::OkCancelCustom(
                             "Zakończ".into(),
                             "Pozostaw otwarte".into(),
@@ -505,7 +505,7 @@ fn run_server_mode(options: &Options) -> Result<(), String> {
             },
             None,
         )?;
-        eprintln!("UltimatePR Station server: http://{}", station.address);
+        eprintln!("UPR Station: http://{}", station.address);
         return station.wait();
     }
     #[cfg(not(target_os = "linux"))]
@@ -542,9 +542,9 @@ fn startup_error(path: Option<PathBuf>, message: &str) {
         }
         log(&path, message);
     }
-    eprintln!("UltimatePR Station desktop: {message}");
+    eprintln!("UPR Terminal: {message}");
     rfd::MessageDialog::new()
-        .set_title("UltimatePR Station — błąd uruchomienia")
+        .set_title("UPR Terminal — błąd uruchomienia")
         .set_description(message)
         .set_level(rfd::MessageLevel::Error)
         .show();

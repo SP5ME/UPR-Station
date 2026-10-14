@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../web/app.js'),'utf8');
 const start=source.indexOf('let notificationAudioContext=null;');
-const end=source.indexOf('function notificationTime',start);
+const end=source.indexOf('function syncProductIdentity',start);
 assert(start>=0&&end>start);
 function audio(stored=null,{desktop=false,blocked=false}={}){
   const peaks=[];

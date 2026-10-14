@@ -1,0 +1,162 @@
+name: Build release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Unique release tag (application version stays unchanged)
+        required: true
+        type: string
+      publish:
+        description: Publish as pre-release after all checks (otherwise draft)
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ inputs.tag }}
+  cancel-in-progress: false
+env:
+  RELEASE_TAG: ${{ inputs.tag }}
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: rustup update stable --no-self-update
+      - run: python3 scripts/verify-publication.py
+      - name: Validate tag
+        run: python3 -c 'import os,re; assert re.fullmatch(r"v[0-9][A-Za-z0-9._-]{0,99}",os.environ["RELEASE_TAG"]), "Invalid release tag"'
+      - run: cargo +stable test --locked --tests
+      - run: cargo +stable build --locked --bin ultimatepr-station
+      - run: python3 tests/e2e.py target/debug/ultimatepr-station
+      - run: |
+          node tests/mheard-routes.cjs
+          node tests/notification-audio.cjs
+          node tests/notification-sounds.cjs
+          node tests/product-identity.cjs
+          bash tests/server-installer.sh
+          python3 tests/release-download.py
+          python3 tests/server-package.py
+
+  desktop:
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: rustup update stable --no-self-update
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libdbus-1-dev patchelf
+      - run: cargo install tauri-cli --version 2.11.5 --locked
+      - run: cargo fetch --locked --manifest-path desktop/Cargo.toml
+      - run: python scripts/desktop-licenses.py
+      - run: python -c "from pathlib import Path; assert not Path('desktop/target/legal/MISSING-LICENSE-TEXTS.txt').exists()"
+      - run: cargo test --locked --manifest-path desktop/Cargo.toml
+      - if: runner.os == 'Windows'
+        working-directory: desktop
+        run: cargo tauri build --bundles nsis --no-sign -- --locked
+      - if: runner.os == 'Linux'
+        working-directory: desktop
+        run: cargo tauri build --bundles deb -- --locked
+      - name: Collect desktop installer
+        shell: bash
+        run: python scripts/collect-desktop-release.py "$RUNNER_OS" "$RELEASE_TAG" target/release-assets
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-${{ runner.os }}
+          path: target/release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+
+  server:
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            target: x86_64-unknown-linux-musl
+            platform: linux/amd64
+          - arch: aarch64
+            target: aarch64-unknown-linux-musl
+            platform: linux/arm64
+          - arch: armv7
+            target: armv7-unknown-linux-musleabihf
+            platform: linux/arm/v7
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: rustup update stable --no-self-update && rustup target add ${{ matrix.target }}
+      - run: python3 -m pip install ziglang==0.13.0
+      - run: cargo install cargo-zigbuild --version 0.20.1 --locked
+      - run: cargo zigbuild --locked --release --target ${{ matrix.target }} --bin ultimatepr-station
+      - name: Verify static binary
+        run: |
+          file target/${{ matrix.target }}/release/ultimatepr-station
+          if readelf -l target/${{ matrix.target }}/release/ultimatepr-station | grep -q INTERP; then echo 'Binary is not static'; exit 1; fi
+      - run: cargo fetch --locked --target ${{ matrix.target }}
+      - run: python3 scripts/desktop-licenses.py --manifest Cargo.toml --target ${{ matrix.target }} --output target/server-licenses
+      - run: python3 scripts/package-server.py --binary target/${{ matrix.target }}/release/ultimatepr-station --arch ${{ matrix.arch }} --tag "$RELEASE_TAG" --licenses target/server-licenses
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - name: Build Docker image and verify executable
+        run: |
+          mkdir -p target/docker-context
+          tar -xzf "target/release-assets/UPR-Station-$RELEASE_TAG-linux-${{ matrix.arch }}.tar.gz" -C target/docker-context
+          docker buildx build --platform '${{ matrix.platform }}' --load -f target/docker-context/deploy/docker/Dockerfile.runtime -t "upr-station:$RELEASE_TAG-${{ matrix.arch }}" target/docker-context
+          docker run --rm --platform '${{ matrix.platform }}' "upr-station:$RELEASE_TAG-${{ matrix.arch }}" --help
+          docker run -d --name release-smoke --platform '${{ matrix.platform }}' -p 127.0.0.1::8080 "upr-station:$RELEASE_TAG-${{ matrix.arch }}"
+          address=$(docker port release-smoke 8080/tcp)
+          healthy=false
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 2 "http://$address/healthz" | grep -qx ok; then healthy=true; break; fi
+            sleep 1
+          done
+          if [ "$healthy" != true ]; then docker logs release-smoke; exit 1; fi
+          docker rm -f -v release-smoke
+          docker save "upr-station:$RELEASE_TAG-${{ matrix.arch }}" | gzip > "target/release-assets/UPR-Station-$RELEASE_TAG-docker-${{ matrix.arch }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: server-${{ matrix.arch }}
+          path: target/release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: [checks, desktop, server]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          path: target/release-assets
+          merge-multiple: true
+      - run: python3 scripts/emit-installer.py target/release-assets/install-server.sh
+      - run: python3 scripts/finalize-release.py "$RELEASE_TAG" target/release-assets
+      - name: Upload complete release (never replace an existing tag)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then echo 'Release already exists; refusing overwrite'; exit 1; fi
+          gh release create "$RELEASE_TAG" --repo "$REPOSITORY" --target "$COMMIT" --draft --prerelease --title "UPR Terminal / UPR Station $RELEASE_TAG" --notes-file target/release-assets/RELEASE-NOTES.md target/release-assets/*
+          if [ "$PUBLISH" = true ]; then gh release edit "$RELEASE_TAG" --repo "$REPOSITORY" --draft=false; fi

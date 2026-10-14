@@ -2,6 +2,12 @@
 
 ## Zmiany robocze po 0.1.3-prealpha.1 (bez nowej paczki)
 
+- Nazwy produktów: UPR Terminal (desktop) i UPR Station (serwer).
+  Tytuły okien, zasobnik, pasek boczny i stopka odpowiadają wariantowi;
+  instalator oraz skróty desktopu noszą nazwę UPR Terminal.
+  Identyfikator Tauri, plik wykonywalny, ścieżki danych i klucz autostartu
+  Windows pozostają bez zmian. Instalator obsługuje poprzedni katalog
+  UltimatePR Station; rzeczywista aktualizacja wymaga jeszcze testu na Windows.
 - Dźwięki zdarzeń działają niezależnie od centrum powiadomień i dymków.
   Panel WWW odczytuje osobną, ograniczoną do 100 wpisów kolejkę sygnałów.
   Kilka zdarzeń w jednym odświeżeniu daje jeden sygnał o największej wybranej

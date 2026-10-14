@@ -1,0 +1,16 @@
+FROM alpine:3.22
+RUN apk add --no-cache ca-certificates \
+    && addgroup -S -g 10001 station && adduser -S -u 10001 -G station station \
+    && mkdir -p /var/lib/ultimatepr && chown station:station /var/lib/ultimatepr
+COPY --chmod=0755 ultimatepr-station /usr/local/bin/ultimatepr-station
+COPY LICENSE /usr/share/licenses/upr-station/LICENSE
+COPY licenses/ /usr/share/licenses/upr-station/third-party/
+COPY --chown=10001:10001 deploy/alpine/station.conf.example /var/lib/ultimatepr/station.conf
+COPY --chown=10001:10001 deploy/docker/web.conf.example /var/lib/ultimatepr/web.conf
+USER station
+WORKDIR /var/lib/ultimatepr
+EXPOSE 8080
+VOLUME ["/var/lib/ultimatepr"]
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=6 CMD wget -q -O - http://127.0.0.1:8080/healthz || exit 1
+ENTRYPOINT ["/usr/local/bin/ultimatepr-station"]
+CMD ["--bind", "0.0.0.0:8080", "--config", "/var/lib/ultimatepr/station.conf", "--web-config", "/var/lib/ultimatepr/web.conf"]

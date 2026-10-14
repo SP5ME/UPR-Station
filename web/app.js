@@ -161,6 +161,23 @@ function playNotificationSound(count){
     if(context.state==='suspended')context.resume().then(schedule).catch(()=>{});else schedule();
   }catch{}
 }
+function syncProductIdentity(){
+  const desktop=Boolean(window.__UPR_DESKTOP__)||state.webDetails?.runtime==='desktop';
+  const variant=desktop?'Terminal':'Station',name=`UPR ${variant}`;
+  document.title=name;
+  const brand=document.querySelector('.sidebar .brand');
+  brand?.setAttribute('aria-label',name);
+  const family=document.querySelector('.brand-name'),product=document.querySelector('.brand-project');
+  if(family)family.textContent='UPR';
+  if(product)product.textContent=variant;
+  for(const selector of ['.sidebar .build','footer > span:first-child']){
+    const element=document.querySelector(selector);
+    const text=element&&[...element.childNodes].find(child=>child.nodeType===3);
+    if(text)text.textContent=selector.startsWith('footer')?` ${name.toUpperCase()}`:`${name} `;
+  }
+  const myname=$('settings-myname');if(myname)myname.placeholder=name;
+}
+syncProductIdentity();
 function notificationTime(item){const time=Number(item?.time||0);return time?new Date(time*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';}
 function notificationIsError(item){return ['disconnection','critical'].includes(item?.kind)||(item?.kind==='tnc'&&/utrata|błąd|error/i.test(item?.title||''));}
 const sessionStatusTranslations={
@@ -218,7 +235,7 @@ async function request(path,{body,raw,query,method='POST'}={}){
   if(response.status===401){const dialog=$('token-dialog');if(dialog&&!dialog.open)dialog.showModal();throw Error('Zaloguj się, aby otworzyć stację.');}
   if(!response.ok){const text=await response.text();let msg=text;try{msg=JSON.parse(text).error||text;}catch{}throw Error(msg);}
   const result=response.headers.get('content-type')?.includes('application/json')?await response.json():await response.text();
-  if(path==='web/details'&&result&&typeof result==='object')state.webDetails=result;
+  if(path==='web/details'&&result&&typeof result==='object'){state.webDetails=result;syncProductIdentity();}
   return result;
 }
 async function syncBuildVersion(){

@@ -21,6 +21,6 @@ fi
 
 cd /opt/ultimatepr-station/current
 exec /opt/ultimatepr-station/current/ultimatepr-station \
-    --bind 0.0.0.0:8080 \
+    --bind 127.0.0.1:8080 \
     --config /etc/ultimatepr/station.conf \
     --web-config /etc/ultimatepr/web.conf

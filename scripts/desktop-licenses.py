@@ -3,16 +3,22 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import argparse
 
 root = Path(__file__).resolve().parents[1]
 host = next(line.split(": ", 1)[1] for line in subprocess.check_output(["rustc", "-vV"], text=True).splitlines() if line.startswith("host: "))
+parser = argparse.ArgumentParser()
+parser.add_argument('--manifest', default='desktop/Cargo.toml')
+parser.add_argument('--target', default=host)
+parser.add_argument('--output', default='desktop/target/legal')
+args = parser.parse_args()
 metadata = json.loads(subprocess.check_output([
     "cargo", "metadata", "--format-version", "1", "--locked", "--offline",
-    "--manifest-path", str(root / "desktop/Cargo.toml"), "--filter-platform", host,
+    "--manifest-path", str(root / args.manifest), "--filter-platform", args.target,
 ], text=True, encoding="utf-8"))
-destination = root / "desktop/target/legal"
+destination = root / args.output
 destination.mkdir(parents=True, exist_ok=True)
-lines = ["# Dependency notices", "", f"Target: {host}", "", "Generated from desktop/Cargo.lock. See each crate directory for its supplied license texts.", ""]
+lines = ["# Dependency notices", "", f"Target: {args.target}", "", f"Generated from {args.manifest} and its lockfile. See each crate directory for license texts.", ""]
 missing = []
 for package in sorted(metadata["packages"], key=lambda p: (p["name"], p["version"])):
     key = f'{package["name"]}-{package["version"]}'

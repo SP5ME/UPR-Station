@@ -1,6 +1,10 @@
 //! Platform autostart registration. Paths are always absolute and quoted.
 use std::path::Path;
-const NAME: &str = "UltimatePR Station";
+#[cfg(target_os = "linux")]
+const NAME: &str = "UPR Terminal";
+// Preserve the existing Windows registration key across the display-name change.
+#[cfg(windows)]
+const RUN_VALUE: &str = "UltimatePR Station";
 
 #[cfg(windows)]
 fn command(exe: &Path, config: &Path, web: &Path) -> Result<String, String> {
@@ -34,10 +38,10 @@ pub fn set(enabled: bool, config: &Path, web: &Path) -> Result<(), String> {
     if enabled {
         let exe = std::env::current_exe().map_err(|e| e.to_string())?;
         registry
-            .set_value(NAME, &command(&exe, config, web)?)
+            .set_value(RUN_VALUE, &command(&exe, config, web)?)
             .map_err(|e| e.to_string())
     } else {
-        match registry.delete_value(NAME) {
+        match registry.delete_value(RUN_VALUE) {
             Ok(()) => Ok(()),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
             Err(e) => Err(e.to_string()),

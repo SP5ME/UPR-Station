@@ -23,7 +23,7 @@ $buildArgs = @{}
 if ($Offline) { $buildArgs.Offline = $true }
 if ($CliScript) { $buildArgs.CliScript = $CliScript }
 
-Write-Host 'Budowanie instalatora UltimatePR Station...' -ForegroundColor Cyan
+Write-Host 'Budowanie instalatora UPR Terminal...' -ForegroundColor Cyan
 & $buildScript @buildArgs
 if ($LASTEXITCODE -ne 0) {
     throw 'Installer build failed.'

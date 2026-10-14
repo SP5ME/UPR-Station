@@ -32,6 +32,10 @@ jobs:
           node tests/mheard-routes.cjs
           node tests/notification-audio.cjs
           node tests/notification-sounds.cjs
+          node tests/product-identity.cjs
+          bash tests/server-installer.sh
+          python tests/release-download.py
+          python tests/server-package.py
       - name: HTTP and KISS acceptance test
         shell: bash
         run: |

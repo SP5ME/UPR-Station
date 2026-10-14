@@ -8,11 +8,12 @@ roboczym zawierającym dane, stare paczki i prywatne notatki.
 ## Stan
 
 - Źródła i testy zachowane; katalogi wynikowe i dane operatora pominięte.
-- CI przygotowane do testów Windows/Linux, bez publikowania artefaktów i wydań.
+- CI sprawdza Windows/Linux. Osobny, ręcznie uruchamiany „Build release”
+  buduje paczki Desktop/Server i publikuje draft albo pre-release po sukcesie wszystkich zadań.
 - Początkowa kopia została przygotowana bez historii Git. Stan po pierwszym
   wysłaniu sprawdzaj przez git status i git remote -v.
-- Docelowe nazwy Desktop/Server opisano w README; widoczne nazwy aplikacji
-  i wewnętrzne identyfikatory nadal wymagają osobnej, kompatybilnej migracji.
+- Produkty: UPR Terminal (desktop) i UPR Station (serwer). Nazwy widoczne
+  rozdzielono; wewnętrzne identyfikatory i ścieżki danych zachowano.
 
 ## Blokady publicznego wydania
 
@@ -21,13 +22,13 @@ roboczym zawierającym dane, stare paczki i prywatne notatki.
 - [ ] Obowiązki MPL i źródła komponentów sprawdzone dla faktycznych paczek.
 - [ ] Licencje i pochodzenie ikon/logo potwierdzone przez opiekuna.
 - [ ] Test aktualizacji istniejących instalacji oraz świeżej instalacji.
-- [ ] Nazwy widoczne Desktop/Server ujednolicone bez utraty konfiguracji.
+- [ ] Przejście starego instalatora UltimatePR Station do UPR Terminal sprawdzone na Windows.
 - [ ] CI wykonane i sprawdzone na GitHub (lokalne testy tego nie potwierdzają).
 
 Do czasu zamknięcia listy zalecane jest repozytorium prywatne.
-Nie skonfigurowano automatycznego publikowania Releases ani podpisywania.
-Po zamknięciu audytu można dodać osobny workflow tworzący draft wydania
-Desktop/Server z instalatorem, paczką Alpine, instrukcjami i SHA-256.
+Push sam nie publikuje Releases. Ręczny workflow wymaga unikalnego tagu
+i świadomego wyboru publikacji; zawsze oznacza wydanie jako pre-release.
+Nie skonfigurowano podpisywania. Dopóki audyt jest otwarty, zachowaj repozytorium prywatne.
 
 ## Przed pierwszym wysłaniem
 
