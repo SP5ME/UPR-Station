@@ -147,7 +147,6 @@ fn handle_menu(app: &tauri::AppHandle, id: &str) {
     let mut prefs = state.preferences.lock().unwrap();
     let old = prefs.clone();
     let value = match id {
-        "autostart" => &mut prefs.autostart,
         "connections" => &mut prefs.connections,
         "mail" => &mut prefs.mail,
         "files" => &mut prefs.files,
@@ -170,26 +169,7 @@ fn handle_menu(app: &tauri::AppHandle, id: &str) {
     };
     *value = !*value;
     let checked = *value;
-    let result = (|| {
-        if id == "autostart" {
-            autostart::set(
-                prefs.autostart,
-                &state.options.config,
-                &state.options.web_config,
-            )?;
-        }
-        if let Err(e) = prefs.save(&state.options.data.join("desktop.conf")) {
-            if id == "autostart" {
-                let _ = autostart::set(
-                    old.autostart,
-                    &state.options.config,
-                    &state.options.web_config,
-                );
-            }
-            return Err(e);
-        }
-        Ok::<_, String>(())
-    })();
+    let result = prefs.save(&state.options.data.join("desktop.conf"));
     let applied = if let Err(e) = result {
         *prefs = old;
         drop(prefs);
@@ -202,6 +182,26 @@ fn handle_menu(app: &tauri::AppHandle, id: &str) {
     if let Some(item) = state.checks.lock().unwrap().get(id) {
         let _ = item.set_checked(applied);
     }
+}
+fn desktop_autostart(state: &Desktop, enabled: Option<bool>) -> Result<(bool, bool), String> {
+    let mut prefs = state.preferences.lock().unwrap();
+    if let Some(enabled) = enabled {
+        if state.options.demo {
+            return Err("Autostart jest niedostępny w trybie demo".into());
+        }
+        if enabled != prefs.autostart {
+            autostart::set(enabled, &state.options.config, &state.options.web_config)?;
+            let mut updated = prefs.clone();
+            updated.autostart = enabled;
+            if let Err(error) = updated.save(&state.options.data.join("desktop.conf")) {
+                autostart::set(prefs.autostart, &state.options.config, &state.options.web_config)
+                    .map_err(|rollback| format!("{error}; autostart rollback: {rollback}"))?;
+                return Err(error);
+            }
+            *prefs = updated;
+        }
+    }
+    Ok((prefs.autostart, !state.options.demo))
 }
 fn notifications(
     app: tauri::AppHandle,
@@ -249,6 +249,9 @@ fn notifications(
                         play_notification_sound(notification.sound);
                     }
                     StationEvent::Sound(count) => play_notification_sound(count),
+                    StationEvent::Autostart { enabled, reply } => {
+                        let _ = reply.try_send(desktop_autostart(&state, enabled));
+                    }
                 }
             }
             thread::sleep(Duration::from_millis(100));
@@ -304,14 +307,13 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
     *state.runtime.lock().unwrap() = Some(station);
     let prefs = state.preferences.lock().unwrap().clone();
     prefs.save(&state.options.data.join("desktop.conf"))?;
-    // Do not modify autostart registration on ordinary launch. Only a user menu action does so.
+    // Do not modify autostart registration on ordinary launch. Only an explicit settings action does so.
     let open = MenuItem::with_id(app, "open", "Otwórz", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Zakończ", true, None::<&str>)?;
     let data = MenuItem::with_id(app, "data", "Katalog danych", true, None::<&str>)?;
     let help = MenuItem::with_id(app, "help", "Instrukcja offline", true, None::<&str>)?;
     let mut checks = state.checks.lock().unwrap();
     for (id, title, checked) in [
-        ("autostart", "Start po zalogowaniu", prefs.autostart),
         ("dnd", "Nie przeszkadzać", false),
     ] {
         checks.insert(
@@ -320,7 +322,7 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
                 app,
                 id,
                 title,
-                id != "autostart" || !state.options.demo,
+                true,
                 checked,
                 None::<&str>,
             )?,
@@ -328,7 +330,6 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
     }
     let items: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = vec![
         &open,
-        &checks["autostart"],
         &data,
         &help,
         &quit,

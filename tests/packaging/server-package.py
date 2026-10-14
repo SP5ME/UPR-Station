@@ -6,7 +6,7 @@ import sys
 import tarfile
 import tempfile
 import zipfile
-root=Path(__file__).resolve().parents[1]
+root=Path(__file__).resolve().parents[2]
 with tempfile.TemporaryDirectory() as directory:
     temp=Path(directory)
     binary=temp/'binary'

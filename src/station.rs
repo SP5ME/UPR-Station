@@ -86,6 +86,67 @@ mod configuration_tests {
     }
 
     #[test]
+    fn telegram_is_server_only_without_erasing_desktop_configuration() {
+        let root = crate::test_temp_dir("telegram-runtime-boundary");
+        fs::create_dir_all(&root).unwrap();
+        let text = "callsign=TEST-1\ntelegram_enabled=true\ntelegram_chat_id=12345\nnotification_outgoing_connection_telegram=true\n";
+        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
+        let mut server = Station::from_text(root.join("server.conf"), text.into(), None, None, "server").unwrap();
+        server.set_telegram_sender(Some(sender.clone()));
+        server.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
+        assert!(matches!(receiver.try_recv(), Ok(telegram::Command::Send(_))));
+
+        let mut desktop = Station::from_text(root.join("desktop.conf"), text.into(), None, None, "desktop").unwrap();
+        let token = desktop.telegram_token_path();
+        fs::write(&token, "existing-private-token").unwrap();
+        desktop.set_telegram_sender(Some(sender));
+        desktop.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
+        assert!(receiver.try_recv().is_err());
+        for action in ["telegram/status", "telegram/token", "telegram/select", "telegram/discover", "telegram/test"] {
+            assert!(desktop.command(request(action, "")).err().unwrap().contains("UPR Station"));
+        }
+        desktop.command(request("config/save", &format!("{text}myname=Updated\n"))).unwrap();
+        assert!(desktop.config.telegram_enabled);
+        assert_eq!(desktop.config.telegram_chat_id, "12345");
+        assert!(desktop.config.notifications.outgoing_connection.telegram);
+        assert_eq!(fs::read_to_string(token).unwrap(), "existing-private-token");
+        drop(desktop);
+        drop(server);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn autostart_requests_are_desktop_only_and_use_native_host_reply() {
+        let root = crate::test_temp_dir("autostart-runtime-boundary");
+        fs::create_dir_all(&root).unwrap();
+        let mut station = Station::from_text(root.join("station.conf"), "callsign=TEST-1\n".into(), None, None, "server").unwrap();
+        assert!(station.command(request("desktop/autostart", "")).err().unwrap().contains("UPR Terminal"));
+        station.runtime = "desktop";
+        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
+        station.set_events(Some(sender));
+        let invalid = Request { action: "desktop/autostart".into(), fields: HashMap::from([("enabled".into(), "yes".into())]), body: vec![] };
+        assert!(station.command(invalid).err().unwrap().contains("Invalid autostart"));
+        let host = std::thread::spawn(move || {
+            for expected in [None, Some(true)] {
+                match receiver.recv_timeout(Duration::from_secs(2)).unwrap() {
+                    StationEvent::Autostart { enabled, reply } => {
+                        assert_eq!(enabled, expected);
+                        reply.send(Ok((enabled.unwrap_or(false), true))).unwrap();
+                    }
+                    _ => panic!("Expected native preferences request"),
+                }
+            }
+        });
+        let reply = station.command(request("desktop/autostart", "")).unwrap();
+        assert_eq!(String::from_utf8(reply.body).unwrap(), "{\"enabled\":false,\"available\":true}");
+        let reply = station.command(Request { action: "desktop/autostart".into(), fields: HashMap::from([("enabled".into(), "true".into())]), body: vec![] }).unwrap();
+        assert_eq!(String::from_utf8(reply.body).unwrap(), "{\"enabled\":true,\"available\":true}");
+        host.join().unwrap();
+        drop(station);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn notification_sound_is_independent_bounded_and_not_duplicated_on_desktop() {
         let root = crate::test_temp_dir("station-independent-sound");
         fs::create_dir_all(&root).unwrap();
@@ -110,6 +171,7 @@ mod configuration_tests {
             match &events[0] {
                 StationEvent::Notification(n) => { assert!(native); assert_eq!(n.sound, 2); }
                 StationEvent::Sound(count) => { assert!(!native); assert_eq!(*count, 2); }
+                StationEvent::Autostart { .. } => panic!("Unexpected preferences request"),
             }
         }
         station.event_sender = None;
@@ -306,7 +368,7 @@ impl Station {
         &mut self,
         sender: Option<std::sync::mpsc::SyncSender<telegram::Command>>,
     ) {
-        self.telegram_sender = sender;
+        self.telegram_sender = if self.runtime == "desktop" { None } else { sender };
     }
     pub fn notify_application_started(&mut self) {
         self.notify(
@@ -1078,7 +1140,31 @@ impl Station {
         if self.stopping {
             return Err("Station is shutting down".into());
         }
+        if self.runtime == "desktop" && r.action.starts_with("telegram/") {
+            return Err("Telegram jest dostępny tylko w UPR Station".into());
+        }
         match r.action.as_str() {
+            "desktop/autostart" => {
+                if self.runtime != "desktop" {
+                    return Err("Autostart jest dostępny tylko w UPR Terminal".into());
+                }
+                let enabled = match get("enabled") {
+                    "" => None,
+                    "true" => Some(true),
+                    "false" => Some(false),
+                    _ => return Err("Invalid autostart setting".into()),
+                };
+                let sender = self.event_sender.as_ref().ok_or("Desktop host unavailable")?;
+                let (reply, receiver) = std::sync::mpsc::sync_channel(1);
+                sender.try_send(StationEvent::Autostart { enabled, reply })
+                    .map_err(|_| "Desktop preferences queue is busy")?;
+                let (enabled, available) = receiver.recv_timeout(Duration::from_secs(5))
+                    .map_err(|_| "Desktop host did not respond")??;
+                return Ok(Reply::json(json::object([
+                    ("enabled", enabled.to_string()),
+                    ("available", available.to_string()),
+                ])));
+            }
             "connect" => {
                 if self.config.call.is_none() {
                     return Err("Configure your callsign first".into());

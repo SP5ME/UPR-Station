@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Detection and argument tests only: never install packages or touch a service.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 export UPR_INSTALLER_LIBRARY=1
 source deploy/server/install-server.sh
 fixture=$(mktemp -d)

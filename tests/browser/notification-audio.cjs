@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const source=fs.readFileSync(path.join(__dirname,'../web/app.js'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'../../web/app.js'),'utf8');
 const start=source.indexOf('let notificationAudioContext=null;');
 const end=source.indexOf('function syncProductIdentity',start);
 assert(start>=0&&end>start);

@@ -282,12 +282,17 @@ pub fn start(
     });
     let snapshot = Arc::new(RwLock::new(station.snapshot()));
     let (tx, rx) = mpsc::sync_channel::<http::Envelope>(8);
-    let (telegram_sender, telegram_worker) =
-        crate::telegram::spawn_worker(stop.clone(), path.with_file_name("telegram.log"));
+    let (telegram_sender, telegram_worker) = if desktop {
+        (None, None)
+    } else {
+        let (sender, worker) =
+            crate::telegram::spawn_worker(stop.clone(), path.with_file_name("telegram.log"));
+        (Some(sender), Some(worker))
+    };
     let runtime_stop = stop.clone();
     let runtime_snapshot = snapshot.clone();
     station.set_events(events);
-    station.set_telegram_sender(Some(telegram_sender));
+    station.set_telegram_sender(telegram_sender);
     station.notify_application_started();
     let runtime = thread::spawn(move || {
         let _stop_on_exit = StopOnDrop(runtime_stop.clone());
@@ -364,7 +369,9 @@ pub fn start(
         if let Some(worker) = demo_thread {
             let _ = worker.join();
         }
-        let _ = telegram_worker.join();
+        if let Some(worker) = telegram_worker {
+            let _ = worker.join();
+        }
         runtime_result.map_err(|_| "Station runtime panicked".to_owned())?;
         result.map_err(|e| e.to_string())
     });

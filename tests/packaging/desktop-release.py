@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 
-root=Path(__file__).resolve().parents[1]
+root=Path(__file__).resolve().parents[2]
 with tempfile.TemporaryDirectory() as directory:
     stage=Path(directory)
     (stage/'scripts').mkdir()

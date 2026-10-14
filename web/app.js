@@ -96,7 +96,8 @@ function focusSettingsError(exception){
     else if(/interface|interfejs/i.test(message))field=document.querySelector('#interface-forms .if-name');
   }
   let section=field?.closest('.form-section');
-  if(!section&&/notification|powiadom|telegram/i.test(message))section=document.querySelector('.form-section[data-settings-key="application"]');
+  if(!section&&/notification|powiadom|telegram/i.test(message))section=document.querySelector('.form-section[data-settings-key="notifications"]');
+  if(!section&&/autostart|desktop host|desktop preferences/i.test(message))section=document.querySelector('.form-section[data-settings-key="application"]');
   if(!section&&/WWW|web|bind|token|presence|obecność|heartbeat/i.test(message))section=document.querySelector('.form-section[data-settings-key="web"]');
   if(section&&typeof settingsTabItems==='function'&&typeof selectSettingsTab==='function'){
     const index=settingsTabItems().findIndex(item=>Array.isArray(item.element)?item.element.includes(section):item.element===section);
@@ -555,7 +556,7 @@ const settingsSectionHelp=[['Podstawowe dane stacji i język interfejsu.','Stati
 function settingsLanguage(){return state.language==='pl'?'pl':'en';}
 function setHelpDot(label,text){if(!label)return;let dot=label.querySelector(':scope > .help-dot');if(!dot){dot=node('button','help-dot');dot.type='button';dot.append(svgIcon('help-circle-outline'));dot.addEventListener('mousedown',event=>event.preventDefault());dot.addEventListener('click',event=>event.preventDefault());label.append(dot);}else if(!dot.querySelector('.icon')){dot.append(svgIcon('help-circle-outline'));}dot.dataset.help=text;dot.setAttribute('aria-label',text);dot.title=text;label.dataset.help=text;label.removeAttribute('title');}
 function decorateSettingsControls(){const lang=settingsLanguage();Object.entries(settingsHelp).forEach(([id,text])=>{const label=$(id)?.closest('label');if(label)setHelpDot(label,text[lang==='pl'?0:1]);});document.querySelectorAll('#interface-forms > .interface-form label').forEach(label=>{const control=label.querySelector('input,select');if(!control)return;const text={'if-name':['Nazwa używana przez komendy /ports i konfigurację.','Name used by /ports commands and configuration.'],'if-description':['Opis interfejsu widoczny w panelu.','Interface description shown in the panel.'],'if-transport':['Wybierz TCP dla sieci lub Serial dla urządzenia szeregowego.','Choose TCP for network or Serial for a serial device.'],'if-endpoint':['Adres host:port albo ścieżka urządzenia szeregowego.','Host:port address or serial device path.'],'if-baud':['Prędkość portu szeregowego.','Serial port speed.'],'if-port':['Numer portu KISS używany przez TNC.','KISS port number used by the TNC.'],'if-priority':['Niższa wartość oznacza wyższy priorytet.','Lower value means higher priority.'],'if-path':['Opcjonalna ścieżka digipeater dla beaconu.','Optional digipeater path for the beacon.']}[control.className||control.id];if(text)setHelpDot(label,text[lang==='pl'?0:1]);});}
-function decorateSettingsSections(){const form=document.querySelector('.settings-form');if(!form)return;[...form.querySelectorAll('.form-section')].forEach((section,index)=>{section.dataset.settingsIndex=index;let help=section.querySelector(':scope > .section-help');if(!help){help=node('p','section-help');section.querySelector(':scope > h3')?.after(help);}const text=settingsSectionHelp[index];if(text)help.textContent=text[settingsLanguage()==='pl'?0:1];});const side=document.querySelector('#view-settings .settings-side')||document.querySelector('#view-settings .settings-grid>div');side?.classList.add('settings-side');decorateSettingsControls();}
+function decorateSettingsSections(){const form=document.querySelector('.settings-form');if(!form)return;[...form.querySelectorAll('.form-section')].forEach((section,index)=>{section.dataset.settingsIndex=index;let help=section.querySelector(':scope > .section-help');if(!help){help=node('p','section-help');section.querySelector(':scope > h3')?.after(help);}const key=section.dataset.settingsKey;const copy=['notifications','application'].includes(key)?helpDescriptions[key]?.[settingsLanguage()]:null;const text=settingsSectionHelp[index];if(copy)help.textContent=copy.summary;else if(text)help.textContent=text[settingsLanguage()==='pl'?0:1];});const side=document.querySelector('#view-settings .settings-side')||document.querySelector('#view-settings .settings-grid>div');side?.classList.add('settings-side');decorateSettingsControls();}
  function ensureWebSettings(){if($('settings-web-bind'))return;const form=document.querySelector('.settings-form .panel-content');if(!form)return;const section=node('div','form-section');section.dataset.settingsKey='application';section.innerHTML='<h3>WWW</h3><p class="section-help">Adres panelu, dostęp operatora, obecność oraz ustawienia wspólne dla aplikacji desktopowej i serwera.</p><div class="form-grid"><label>Adres nasłuchu WWW<input id="settings-web-bind" placeholder="127.0.0.1:8080"></label><label>Plik tokenu operatora<input id="settings-web-token-file" placeholder="operator.token"></label><label><input id="settings-web-auth" type="checkbox"> Wymagaj logowania operatora</label><label>Obecność operatora<select id="settings-web-presence"><option value="auto">Auto</option><option value="always">Zawsze dostępny</option><option value="dnd">Nie przeszkadzać</option></select></label><label>Profil nieobecności<select id="settings-web-profile"><option value="1">1 — operator dostępny</option><option value="2">2 — informuj i komendy</option><option value="3">3 — poinformuj i rozłącz</option><option value="4">4 — stacja zamknięta</option></select></label><label>Limit heartbeat (s)<input id="settings-web-timeout" type="number" min="15" max="3600" step="5"></label></div><div class="check-grid"><label><input id="settings-statistics" type="checkbox"> Zbieranie statystyk stacji</label><label><input id="settings-presence-bar" type="checkbox"> Wyświetl pasek obecności operatora</label></div><p id="settings-web-warning" class="notice" hidden>Logowanie jest wyłączone, a panel nasłuchuje poza adresem lokalnym.</p>';const actions=form.querySelector(':scope > .actions');form.insertBefore(section,actions||null);}function collapseApplicationSettings(application){
   if(!application||application.dataset.settingsGroupsReady==='true')return;
   const serverGrid=$('settings-web-bind')?.closest('.form-grid');
@@ -611,6 +612,7 @@ function decorateSettingsSections(){const form=document.querySelector('.settings
   group('Dostęp operatora',item=>item.matches('.access-panel'));
   group('Telegram',item=>item.matches('.telegram-settings'));
   group('Powiadomienia',item=>item.matches('.notification-settings'));
+  group('Uruchamianie',item=>item.matches('.desktop-settings'));
   application.dataset.settingsGroupsReady='true';
 }function organizeSettingsSections(){const form=document.querySelector('.settings-form');if(!form||form.dataset.sectionsOrganized==='true')return;const sections=[...form.querySelectorAll(':scope > .panel-content > .form-section')];const find=id=>$(id)?.closest('.form-section');const identity=find('settings-callsign'),interfaces=find('interface-forms'),ax25=find('settings-t1'),services=find('settings-welcome'),web=find('settings-web-bind'),application=web;if(!identity||!interfaces||!ax25||!services)return;form.dataset.sectionsOrganized='true';const mark=(section,key,title)=>{section.dataset.settingsKey=key;const heading=section.querySelector(':scope > h3');if(heading)heading.textContent=title;};mark(identity,'station','Stacja');mark(interfaces,'interfaces','Interfejsy TNC');mark(ax25,'ax25','AX.25 i ruch');if(web)mark(web,'application','Aplikacja i WWW');const panelContent=form.querySelector(':scope > .panel-content');const actions=form.querySelector(':scope > .panel-content > .actions');const section=(key,title,kind='form-grid')=>{const value=node('div','form-section');value.dataset.settingsKey=key;value.innerHTML=`<h3>${title}</h3><p class="section-help"></p><div class="${kind}"></div>`;panelContent.insertBefore(value,actions||null);return value;};const messages=section('messages','Komunikaty i komendy','check-grid'),beacon=section('beacon','Beacon','check-grid'),mailbox=section('mailbox','MailBox','check-grid'),yapp=section('yapp','YAPP','check-grid');const telegram=services.querySelector('.telegram-settings'),notifications=services.querySelector('.notification-settings');const formGrid=key=>{const target=key.querySelector('.form-grid');if(target)return target;const value=node('div','form-grid');key.append(value);return value;};const move=(id,target)=>{const value=$(id)?.closest('label');if(value)target.append(value);};['settings-welcome','settings-goodbye','settings-remote'].forEach(id=>move(id,messages));['settings-beacon'].forEach(id=>move(id,beacon));['settings-mailbox'].forEach(id=>move(id,mailbox));['settings-yapp','settings-yapp-auto','settings-yapp-location'].forEach(id=>move(id,yapp));['settings-beacon-seconds','settings-beacon-to'].forEach(id=>move(id,formGrid(beacon)));move('settings-mailbox-call',formGrid(mailbox));move('settings-yapp-dir',formGrid(yapp));const max=node('label','','Limit plików YAPP');const maxInput=node('input');maxInput.id='settings-yapp-max-files';maxInput.type='number';maxInput.min='1';maxInput.max='100000';maxInput.value='1000';max.append(maxInput);formGrid(yapp).append(max);const cleanup=node('label');cleanup.innerHTML='<input id="settings-yapp-cleanup" type="checkbox"> Automatycznie usuwaj najstarsze pliki po osiągnięciu limitu';yapp.append(cleanup);const side=form.querySelector(':scope > .panel-content > .settings-side');const templates=side?.querySelector('#template-select')?.closest('.panel');const access=side?.querySelector('#logout')?.closest('.panel');if(templates)messages.append(templates);if(access&&application)application.append(access);if(telegram&&application)application.append(telegram);if(notifications&&application)application.append(notifications);if(side&&!side.querySelector('.panel'))side.remove();services.remove();collapseApplicationSettings(application);const oldGrids=services.querySelectorAll('.form-grid,.check-grid');oldGrids.forEach(grid=>{if(!grid.children.length)grid.remove();});}
 function applySettingsFullWidth(){const form=document.querySelector('.settings-form');const grid=document.querySelector('#view-settings .settings-grid');if(!form||!grid)return;grid.style.display='block';form.style.width='100%';form.querySelector(':scope > .panel-content > .settings-side')?.setAttribute('hidden','');}
@@ -809,7 +811,9 @@ function normalizeNotificationLabels(){
   if(!section)return;
   ensureNotificationVolumeControl(section);
   const description=section.querySelector(':scope > .hint');
-  if(description)description.textContent=state.language==='en'?'Choose channels for each event. System notifications work in the desktop app; sound works in the desktop app and in the browser after audio is unlocked; statuses are also available in the web panel.':'Wybierz kanały dla każdego zdarzenia. Dymki działają w aplikacji desktopowej, dźwięk działa w aplikacji desktopowej i po odblokowaniu audio w przeglądarce, a statusy są dostępne także w panelu WWW.';
+  if(description)description.textContent=settingsDesktopRuntime()
+    ?(state.language==='en'?'Choose notification center, system notifications and sound for each event.':'Wybierz centrum powiadomień, dymki systemowe i dźwięk dla każdego zdarzenia.')
+    :(state.language==='en'?'Choose notification center, Telegram and sound for each event. Browser audio requires audio to be unlocked.':'Wybierz centrum powiadomień, Telegram i dźwięk dla każdego zdarzenia. Dźwięk w przeglądarce wymaga odblokowania audio.');
   const heading=section.querySelector(':scope > h3');
   if(heading&&!heading.querySelector('.notification-test-hint')){
     const hint=node('span','hint-inline',' (kliknięcie nazwy kanału wysyła test)');
@@ -983,39 +987,55 @@ function splitApplicationAndWebSettings(){
   const help=web.querySelector(':scope > .section-help');
   if(help)help.textContent='Panel WWW, dostęp operatora i ustawienia serwera.';
 
-  const application=node('div','form-section');
-  application.dataset.settingsKey='application';
-  application.innerHTML='<h3>Aplikacja</h3><p class="section-help">Powiadomienia, dźwięki i Telegram.</p>';
-  web.parentElement.insertBefore(application,web);
+  const notifications=node('div','form-section');
+  notifications.dataset.settingsKey='notifications';
+  notifications.innerHTML='<h3>Powiadomienia</h3><p class="section-help"></p>';
+  web.parentElement.insertBefore(notifications,web);
 
   [...web.querySelectorAll(':scope > .settings-collapsible')].forEach(card=>{
-    if(card.querySelector('.telegram-settings,.notification-settings'))application.append(card);
+    if(card.querySelector('.telegram-settings,.notification-settings'))notifications.append(card);
+  });
+  const application=node('div','form-section');
+  application.dataset.settingsKey='application';
+  application.hidden=true;
+  application.innerHTML='<h3>Aplikacja</h3><p class="section-help"></p><div class="desktop-settings"><label><input id="settings-desktop-autostart" type="checkbox" disabled> <span id="settings-desktop-autostart-label">Uruchamiaj UPR Terminal po zalogowaniu</span></label><p class="hint" id="settings-desktop-autostart-hint">Zmiana zapisywana automatycznie.</p></div>';
+  web.parentElement.insertBefore(application,web);
+  collapseApplicationSettings(application);
+  $('settings-desktop-autostart').onchange=()=>guard(async()=>{
+    const control=$('settings-desktop-autostart'),previous=!control.checked;
+    control.disabled=true;
+    try{const result=await request('desktop/autostart',{body:{enabled:String(control.checked)}});control.checked=result.enabled;}
+    catch(exception){control.checked=previous;throw exception;}
+    finally{control.disabled=false;}
   });
   const messages=form.querySelector('.form-section[data-settings-key="messages"]');
   const template=messages?.querySelector('#template-select')?.closest('.panel');
   if(template&&messages)messages.append(template);
   collapseTemplateSettings(messages);
-  application.dataset.settingsGroupsReady='true';
+  notifications.dataset.settingsGroupsReady='true';
   form.dataset.applicationWebSplit='true';
 }
 
 function settingsTabItemsSeparated(){
   const form=document.querySelector('.settings-form');
   if(!form)return[];
-  const labels={station:['settings.station','Stacja'],interfaces:['settings.interfaces','Interfejsy TNC'],beacon:['settings.beacon','Beacon'],mailbox:['settings.mailbox','MailBox'],messages:['settings.messages','Komunikaty i komendy'],yapp:['settings.yapp','YAPP'],ax25:['settings.ax25','AX.25 i ruch'],application:['settings.application','Aplikacja'],web:['settings.web','WWW']};
-  const order=['station','interfaces','beacon','mailbox','messages','yapp','ax25','application','web'];
+  const labels={station:['settings.station','Stacja'],interfaces:['settings.interfaces','Interfejsy TNC'],beacon:['settings.beacon','Beacon'],mailbox:['settings.mailbox','MailBox'],messages:['settings.messages','Komunikaty i komendy'],yapp:['settings.yapp','YAPP'],ax25:['settings.ax25','AX.25 i ruch'],notifications:['settings.notifications','Powiadomienia'],application:['settings.application','Aplikacja'],web:['settings.web','WWW']};
+  const order=['station','interfaces','beacon','mailbox','messages','yapp','ax25','notifications','application','web'];
   const sections=[...form.querySelectorAll('.form-section[data-settings-key]')];
   return order.map(type=>{
     const element=sections.find(section=>section.dataset.settingsKey===type);
     if(!element)return null;
-    if(type==='web'&&(state.webDetails?.runtime==='desktop'||state.webDetails?.webPanel===false))return null;
+    if(type==='application'&&!settingsDesktopRuntime())return null;
+    if(type==='web'&&(settingsDesktopRuntime()||state.webDetails?.webPanel===false))return null;
     const [key,fallback]=labels[type];
-    return {element,key,fallback,section:true};
+    return {element,key,fallback,section:type!=='application'};
   }).filter(Boolean);
 }
 
 settingsTabItems=settingsTabItemsSeparated;
-helpDescriptions.application={pl:{title:'Aplikacja',summary:'Powiadomienia, dźwięki i Telegram.',items:['Centrum powiadomień pokazuje zdarzenia na górnym pasku aplikacji.','Dymek oznacza systemowe powiadomienie desktopowe.','Dźwięk zależy od środowiska: system desktopowy albo przeglądarka.']},en:{title:'Application',summary:'Notifications, sounds and Telegram.',items:['The notification center shows events in the application header.','System notification means a desktop notification.','Sound depends on the environment: desktop system or browser.']}};
+staticTranslations['Uruchamianie']='Startup';
+helpDescriptions.notifications={pl:{title:'Powiadomienia',summary:'Kanały i dźwięki powiadomień.',items:['UPR Terminal udostępnia dymki systemowe.','UPR Station udostępnia Telegram i dźwięk w przeglądarce.']},en:{title:'Notifications',summary:'Notification channels and sounds.',items:['UPR Terminal provides system notifications.','UPR Station provides Telegram and browser audio.']}};
+helpDescriptions.application={pl:{title:'Aplikacja',summary:'Ustawienia UPR Terminal.',items:['Autostart uruchamia terminal po zalogowaniu do systemu.','Zmiana autostartu jest zapisywana automatycznie, bez restartu.']},en:{title:'Application',summary:'UPR Terminal settings.',items:['Autostart launches the terminal after signing in to the system.','Autostart changes are saved automatically, without restarting.']}};
 helpDescriptions.web={pl:{title:'WWW',summary:'Panel WWW, dostęp operatora i ustawienia serwera.',items:['Desktop korzysta z lokalnego, dynamicznie wybranego portu.','Wariant server używa skonfigurowanego adresu, domyślnie portu 8080.','Ustawienia obecności i heartbeat dotyczą komunikacji panelu z backendem.']},en:{title:'Web',summary:'Web panel, operator access and server settings.',items:['Desktop uses a local dynamically selected port.','The server variant uses the configured address, port 8080 by default.','Presence and heartbeat settings control panel-to-backend communication.']}};
 helpDescriptions.mqtt={pl:{title:'MQTT',summary:'Bezpieczna publikacja statusu stacji do brokera MQTT.',items:['MQTT nie wymaga bota — potrzebny jest broker, np. Mosquitto lub broker Home Assistant.','Włącz MQTT dopiero po wpisaniu adresu brokera oraz opcjonalnych danych użytkownika.','Przycisk „Wyślij Home Assistant Discovery” publikuje konfigurację encji jednorazowo; po zmianie prefiksu lub znaku stacji użyj go ponownie.','Aplikacja publikuje tylko status aplikacji, TNC i MHeard; nie odbiera poleceń MQTT.']},en:{title:'MQTT',summary:'Secure publication of station status to an MQTT broker.',items:['MQTT does not use a bot — it requires a broker such as Mosquitto or a Home Assistant broker.','Enable MQTT after entering the broker address and optional credentials.','The “Send Home Assistant Discovery” button publishes entity configuration once; use it again after changing the prefix or station callsign.','The application publishes only application status, TNC and MHeard; it does not accept MQTT commands.']}};
 splitApplicationAndWebSettings();
@@ -1030,9 +1050,33 @@ saveWebConfiguration=async function(){const result=await saveWebConfigurationBas
 function syncSettingsRuntime(){
   const form=document.querySelector('.settings-form');
   const runtime=state.webDetails?.runtime;
+  syncNotificationChannels();
   if(!form||!runtime||form.dataset.settingsRuntime===runtime)return;
   form.dataset.settingsRuntime=runtime;
   ensureSettingsTabs(true);
+}
+function settingsDesktopRuntime(){return Boolean(window.__UPR_DESKTOP__)||state.webDetails?.runtime==='desktop';}
+function syncNotificationChannels(){
+  const desktop=settingsDesktopRuntime();
+  document.querySelectorAll('.notification-table tr').forEach(row=>{
+    if(row.children[2])row.children[2].hidden=!desktop;
+    if(row.children[3])row.children[3].hidden=desktop;
+  });
+  document.querySelector('.telegram-settings')?.closest('.settings-collapsible')?.toggleAttribute('hidden',desktop);
+  const heading=document.querySelector('.form-section[data-settings-key="notifications"] > h3');
+  if(heading)heading.textContent=state.catalog['settings.notifications']||(state.language==='en'?'Notifications':'Powiadomienia');
+  const label=$('settings-desktop-autostart-label'),hint=$('settings-desktop-autostart-hint');
+  if(label)label.textContent=state.language==='en'?'Launch UPR Terminal after signing in':'Uruchamiaj UPR Terminal po zalogowaniu';
+  if(hint)hint.textContent=state.language==='en'?'Saved automatically. Unavailable in demo mode.':'Zmiana zapisywana automatycznie. Niedostępne w trybie demo.';
+}
+async function loadDesktopApplicationSettings(){
+  if(!settingsDesktopRuntime())return;
+  const control=$('settings-desktop-autostart');
+  if(!control)return;
+  control.disabled=true;
+  const result=await request('desktop/autostart');
+  control.checked=result.enabled;
+  control.disabled=!result.available;
 }
 setInterval(syncSettingsRuntime,500);
 
@@ -1079,7 +1123,7 @@ setInterval(syncSettingsRuntime,500);
     }));
   };
   const oldLoadSettings=loadSettings;
-  loadSettings=async function(){ensureNotificationRows();return oldLoadSettings();};
+  loadSettings=async function(){ensureNotificationRows();await oldLoadSettings();syncNotificationChannels();await loadDesktopApplicationSettings();};
   document.addEventListener('DOMContentLoaded',ensureNotificationRows);
 })();
 

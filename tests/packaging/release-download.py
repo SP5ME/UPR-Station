@@ -9,7 +9,7 @@ import tempfile
 from unittest.mock import patch
 import urllib.request
 
-script=Path(__file__).resolve().parents[1]/'scripts/download-release.py'
+script=Path(__file__).resolve().parents[2]/'scripts/download-release.py'
 name='UPR-Station-vtest-linux-x86_64.tar.gz'
 payload=b'isolated-package-test'
 digest=hashlib.sha256(payload).hexdigest()

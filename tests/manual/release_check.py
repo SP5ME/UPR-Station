@@ -4,7 +4,7 @@ import sys
 
 
 def main() -> int:
-    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).parents[1]
+    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).parents[2]
     package = root / "release" / "ultimatepr-station-win-x64"
     required = [
         package / "ultimatepr-station.exe",

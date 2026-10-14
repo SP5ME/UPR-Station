@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Offline checks of the updater lifecycle; no real processes or services touched.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 source <(sed -n '/^station_pids() {/,/^mkdir -p /p' deploy/alpine/ultimatepr-update | sed '$d')
 
 SERVICE=ultimatepr-station

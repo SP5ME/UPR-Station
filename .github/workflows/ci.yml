@@ -29,15 +29,16 @@ jobs:
         shell: bash
         run: |
           node --check web/app.js
-          node tests/mheard-routes.cjs
-          node tests/notification-audio.cjs
-          node tests/notification-sounds.cjs
-          node tests/product-identity.cjs
-          bash tests/server-installer.sh
-          python tests/release-download.py
-          python tests/server-package.py
-          python tests/desktop-release.py
-          python tests/installer-hooks.py
+          node tests/browser/mheard-routes.cjs
+          node tests/browser/notification-audio.cjs
+          node tests/browser/notification-sounds.cjs
+          node tests/browser/product-identity.cjs
+          node tests/browser/settings-variants.cjs
+          bash tests/installers/server-installer.sh
+          python tests/packaging/release-download.py
+          python tests/packaging/server-package.py
+          python tests/packaging/desktop-release.py
+          python tests/packaging/installer-hooks.py
       - name: HTTP and KISS acceptance test
         shell: bash
         run: |

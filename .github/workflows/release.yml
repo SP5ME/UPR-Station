@@ -33,15 +33,16 @@ jobs:
       - run: cargo +stable build --locked --bin ultimatepr-station
       - run: python3 tests/e2e.py target/debug/ultimatepr-station
       - run: |
-          node tests/mheard-routes.cjs
-          node tests/notification-audio.cjs
-          node tests/notification-sounds.cjs
-          node tests/product-identity.cjs
-          bash tests/server-installer.sh
-          python3 tests/release-download.py
-          python3 tests/server-package.py
-          python3 tests/desktop-release.py
-          python3 tests/installer-hooks.py
+          node tests/browser/mheard-routes.cjs
+          node tests/browser/notification-audio.cjs
+          node tests/browser/notification-sounds.cjs
+          node tests/browser/product-identity.cjs
+          node tests/browser/settings-variants.cjs
+          bash tests/installers/server-installer.sh
+          python3 tests/packaging/release-download.py
+          python3 tests/packaging/server-package.py
+          python3 tests/packaging/desktop-release.py
+          python3 tests/packaging/installer-hooks.py
 
   desktop:
     needs: checks
@@ -78,7 +79,7 @@ jobs:
         run: |
           $installer = Get-ChildItem desktop/target/release/bundle/nsis/*-setup.exe
           if (@($installer).Count -ne 1) { throw 'Expected one installer' }
-          ./tests/windows-installer.ps1 -Installer $installer.FullName
+          ./tests/installers/windows-installer.ps1 -Installer $installer.FullName
       - name: Collect desktop installer
         shell: bash
         run: python scripts/collect-desktop-release.py "$RUNNER_OS" "$RELEASE_TAG" target/release-assets

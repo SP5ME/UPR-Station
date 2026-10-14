@@ -272,11 +272,15 @@ pub struct Notification {
     pub sound: u8,
 }
 
-/// Native observers receive only bounded, detailed notification events.
-#[derive(Clone, Debug, PartialEq, Eq)]
+/// Bounded events and preference requests handled by the native desktop host.
+#[derive(Clone, Debug)]
 pub enum StationEvent {
     Notification(Notification),
     Sound(u8),
+    Autostart {
+        enabled: Option<bool>,
+        reply: std::sync::mpsc::SyncSender<Result<(bool, bool), String>>,
+    },
 }
 
 #[cfg(test)]

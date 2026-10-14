@@ -17,6 +17,15 @@ Wydanie testowe pre-alfa. Wersja aplikacji pozostaje 0.1.3-prealpha.1.
 - Raspberry Pi OS: ARM64 dla systemu 64-bitowego, ARMv7 dla 32-bitowego; ARMv6 nie jest obsługiwany.
 - Docker: osobny obraz zapisany w tar.gz dla każdej architektury; bez skryptów Proxmox.
 
+## Zmiany w tym wydaniu
+
+- Osobna zakładka Powiadomienia: dymki systemowe w UPR Terminal, Telegram w UPR Station.
+- Zakładka Aplikacja tylko w UPR Terminal; autostart przeniesiony z menu do ustawień.
+- Autostart zapisuje się automatycznie, bez restartu. Telegram na desktopie jest nieaktywny,
+  ale jego konfiguracja i plik tokenu pozostają zachowane.
+- Instalator Windows zawiera poprawkę katalogu zapisu przy migracji starszej instalacji.
+- Uporządkowane testy źródłowe i workflow; bez prywatnych danych i wyników testów w repozytorium.
+
 ## Instalacja serwera jednym poleceniem po pobraniu install-server.sh
 
 `sudo sh install-server.sh --version {tag}`

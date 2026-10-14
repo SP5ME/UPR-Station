@@ -1,6 +1,6 @@
-﻿param([string]$Exe = 'desktop\target\debug\ultimatepr-station-desktop.exe')
+param([string]$Exe = 'desktop\target\debug\ultimatepr-station-desktop.exe')
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
+$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $root
 if (Get-Process -Name 'ultimatepr-station-desktop' -ErrorAction SilentlyContinue) { throw 'Close the desktop app before running its isolated smoke test.' }
 Add-Type @'
@@ -49,7 +49,7 @@ try {
         try { $pages = Invoke-RestMethod http://127.0.0.1:19222/json/list -TimeoutSec 1 } catch { continue }
         if ($pages | Where-Object { $_.url -like 'http://127.0.0.1:*' }) { break }
     }
-    node tests/desktop-smoke.mjs 19222
+    node tests/manual/desktop-smoke.mjs 19222
     if ($LASTEXITCODE -ne 0) { throw 'WebView smoke test failed.' }
     $app.Refresh()
     $window = [DesktopSmokeNative]::FindMain($app.Id)

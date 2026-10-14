@@ -28,6 +28,7 @@
   "settings.application_web": "Aplikacja i WWW",
   "settings.web": "WWW",
   "settings.application": "Aplikacja",
+  "settings.notifications": "Powiadomienia",
   "settings.interfaces": "Interfejsy TNC",
   "settings.ax25": "AX.25 i ruch",
   "settings.services": "Usługi",

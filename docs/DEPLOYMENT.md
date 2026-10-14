@@ -90,7 +90,12 @@ w konfiguracji, URL ani logu. Panel korzysta z niego automatycznie.
    dwóch stacji na tych samych danych lub tym samym fizycznym TNC.
 
 Aktualizuj po zakończeniu aplikacji i wykonaniu kopii danych. Instalator nie
-powinien usuwać danych operatora. Przed odinstalowaniem wyłącz autostart.
+powinien usuwać danych operatora. Przed odinstalowaniem wyłącz autostart
+w **Ustawienia → Aplikacja**. Ta zakładka dotyczy wyłącznie UPR Terminal;
+autostart zapisuje się automatycznie, bez restartu i bez przycisku zapisu stacji.
+Zakładka **Powiadomienia** jest wspólna: Terminal udostępnia dymki systemowe,
+a Station — Telegram. Konfiguracja i token Telegrama pozostają zachowane
+w danych desktopu, ale klient i endpointy Telegrama są w nim nieaktywne.
 Przy powrocie zachowaj osobno bieżące dane, zainstaluj poprzednią wersję i
 odtwórz jej kopię do pustego katalogu. Nie mieszaj plików różnych kopii.
 

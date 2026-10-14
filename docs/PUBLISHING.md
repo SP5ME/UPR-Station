@@ -1,9 +1,9 @@
 # Przygotowanie publikacji UPR Terminal
 
-Ten katalog to kontrolowana kopia publikacyjna, nie zsynchronizowane repozytorium.
-Późniejsze zmiany w oryginale nie trafiają tu automatycznie. Przed wysłaniem
-porównaj zmiany, zamiast publikować starszą kopię. Nie inicjalizuj Gita w katalogu
-roboczym zawierającym dane, stare paczki i prywatne notatki.
+Repozytorium zawiera źródła aplikacji, testy, dokumentację i skrypty budowania.
+Powstało z kontrolowanej kopii publikacyjnej; zmiany w katalogach roboczych poza
+tym repozytorium nie trafiają tu automatycznie. Nie inicjalizuj drugiego Gita
+w katalogu zawierającym dane operatora, stare paczki i prywatne notatki.
 
 ## Stan
 
@@ -30,7 +30,7 @@ Push sam nie publikuje Releases. Ręczny workflow wymaga unikalnego tagu
 i świadomego wyboru publikacji; zawsze oznacza wydanie jako pre-release.
 Nie skonfigurowano podpisywania. Dopóki audyt jest otwarty, zachowaj repozytorium prywatne.
 
-## Przed pierwszym wysłaniem
+## Przed wysłaniem zmian
 
 Uruchom w głównym katalogu TEJ kopii:
 
@@ -43,16 +43,16 @@ Skaner jest kontrolą pomocniczą, nie gwarancją braku sekretów. Obejrzyj cał
 zestaw plików; ustawienia kont GitHub i audyt praw wymagają osobnej kontroli.
 Nie dołączaj wygenerowanych katalogów target/ i release/.
 
-Utwórz na GitHub repozytorium UPR-Terminal, początkowo prywatne i puste
-(bez automatycznego README/licencji). Włącz 2FA, secret scanning/push protection
+Zachowaj prywatność repozytorium do zakończenia audytu. Włącz 2FA, secret scanning/push protection
 w zakresie dostępnym dla konta, prywatne zgłaszanie podatności i po zaliczeniu CI
 ochronę main z wymaganymi kontrolami. Nie dodawaj sekretów do workflow testowego.
 
-Poniższe polecenia są instrukcją; nie zostały wykonane podczas przygotowania:
+Obejrzyj pełny zakres zmian i indeks przed commitem:
 
 ```sh
-git init -b main
-git add -- .
+git status --short
+git diff --check
+git diff --stat
 git diff --cached --stat
 git diff --cached --check
 git ls-files
@@ -65,13 +65,19 @@ Poniższe polecenie nie powinno zwrócić żadnego pliku:
 git ls-files -- data backups release target .local-notes github-ready
 ```
 
-Dopiero po ręcznej akceptacji utwórz commit i dodaj adres własnego repozytorium.
-Nie używaj git add -f. Nie wykonuj force push. Nie kopiuj prawdziwego adresu
-repozytorium ani poświadczeń do skryptów. Push wykonasz osobno, na własne polecenie.
+Dopiero po sprawdzeniu wybierz konkretne pliki do commita. Nie używaj git add -f
+ani force push. Nie zapisuj poświadczeń w skryptach. Push i publikację wykonuj
+wyłącznie w zakresie zaakceptowanym przez opiekuna repozytorium.
 
 ## Zakres CI
 
 CI testuje źródła, JavaScript, lokalne HTTP/KISS i desktop na Windows.
 Nie potwierdza działania radia, aktualizacji OpenRC na Proxmox ani instalatora
-na czystym komputerze. Historyczne testy ręczne/desktop-smoke i release_check.py
+na komputerze operatora. Workflow wydania dodatkowo sprawdza instalator Windows
+na tymczasowym runnerze, w tym migrację starego katalogu i zachowanie konfiguracji.
+Historyczne testy w `tests/manual/`
 nie należą do automatycznego zestawu CI; mają własne wymagania i starsze formaty paczek.
+
+Zwykłe Actions to „Source checks” i „Build release”. Jednorazowe workflow
+uzupełnienia AppImage i instalatora fix1 usunięto po wykonaniu; ich źródła
+pozostają w historii Git. Załączniki istniejących wydań nie są przez to zmieniane.

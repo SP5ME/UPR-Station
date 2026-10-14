@@ -1,4 +1,4 @@
-// CDP is enabled only by the Windows smoke-test harness, against an isolated demo.
+// CDP is enabled only by the manual Windows smoke-test harness, against an isolated demo.
 import assert from 'node:assert/strict';
 import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';

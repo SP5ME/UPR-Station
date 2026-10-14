@@ -1,7 +1,7 @@
 """Guard against changing INSTDIR after Tauri has selected OUTDIR."""
 from pathlib import Path
 import re
-root=Path(__file__).resolve().parents[1]
+root=Path(__file__).resolve().parents[2]
 hooks=(root/'desktop/installer-hooks.nsh').read_text(encoding='utf-8')
 preinstall=hooks.split('!macro NSIS_HOOK_PREINSTALL',1)[1].split('!macroend',1)[0]
 assert 'StrCpy $INSTDIR $R0' in preinstall

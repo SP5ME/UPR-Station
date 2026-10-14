@@ -6,7 +6,7 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or -not $en
     throw 'Installer integration tests may run only on an ephemeral GitHub Windows runner.'
 }
 $Installer=(Resolve-Path -LiteralPath $Installer).Path
-$repo=Split-Path -Parent $PSScriptRoot
+$repo=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $default=Join-Path $env:LOCALAPPDATA 'UPR Terminal'
 $legacy=Join-Path $env:LOCALAPPDATA 'UltimatePR Station'
 $data=Join-Path $env:APPDATA 'UltimatePR Station'

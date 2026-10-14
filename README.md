@@ -33,14 +33,19 @@ Zależności są zablokowane w Cargo.lock.
 ```sh
 cargo test --locked --tests
 cargo build --locked --bin ultimatepr-station
-node tests/mheard-routes.cjs
-node tests/notification-audio.cjs
-node tests/notification-sounds.cjs
+node tests/browser/mheard-routes.cjs
+node tests/browser/notification-audio.cjs
+node tests/browser/notification-sounds.cjs
 python tests/e2e.py target/debug/ultimatepr-station
 ```
 
 Na Windows ostatni argument ma rozszerzenie `.exe`. Testy używają izolowanych
 katalogów pod target/, bez konfiguracji operatora i bez prawdziwego radia.
+
+Układ testów i pełny zestaw poleceń opisano w [tests/README.md](tests/README.md).
+Kod aplikacji znajduje się w `src/`, desktop w `desktop/`, interfejs w `web/`,
+budowanie w `scripts/`, a instalacja usług w `deploy/`. Gotowe paczki należą do
+Releases, nie do katalogów źródłowych.
 
 - [Budowanie instalatorów](scripts/README.md)
 - [Instalacja serwera jednym poleceniem: Alpine/Linux/Raspberry Pi OS/Docker](docs/SERVER-INSTALL.md)

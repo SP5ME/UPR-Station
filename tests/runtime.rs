@@ -167,6 +167,9 @@ fn desktop_runtime_reports_desktop_profile() {
     let web_details = post_request(station.address, "/api/web/details", &auth);
     assert!(web_details.contains("\"runtime\":\"desktop\""));
     assert!(web_details.contains("\"webPanel\":true"));
+    let telegram = post_request(station.address, "/api/telegram/status", &auth);
+    assert!(telegram.starts_with("HTTP/1.1 400"));
+    assert!(telegram.contains("UPR Station"));
     station.request_stop();
     station.wait().unwrap();
 }
