@@ -77,12 +77,18 @@ if(-not(Test-Path -LiteralPath $oldKey)){throw 'Custom installation removed unre
 foreach($link in $links[2..3]){if(-not(Test-Path -LiteralPath $link)){throw 'Custom installation removed unrelated legacy shortcut'}}
 Write-Output 'PASS: custom directory with spaces is not redirected to legacy installation.'
 Uninstall-Test $custom
+# Reproduce the user's interrupted setup: files remain in the new name's directory.
+New-Item -ItemType Directory -Path $default -Force | Out-Null
+$partialBinary=Join-Path $default 'ultimatepr-station-desktop.exe'
+[IO.File]::WriteAllText($partialBinary,'interrupted setup fixture')
+$partialHash=(Get-FileHash -LiteralPath $partialBinary).Hash
 Run-Setup $default
 Assert-Install $legacy
 if(Test-Path -LiteralPath $oldKey){throw 'Legacy uninstall registration remained after migration'}
 foreach($link in $links[2..3]){if(Test-Path -LiteralPath $link){throw 'Legacy shortcut remained after migration'}}
-if(Test-Path -LiteralPath (Join-Path $default 'ultimatepr-station-desktop.exe')){throw 'Migration split files between old and new directories'}
-Write-Output 'PASS: legacy migration keeps executable, documentation, licenses and new shortcuts together.'
+if((Get-FileHash -LiteralPath $partialBinary).Hash -ne $partialHash){throw 'Migration still extracted executable into the interrupted installation directory'}
+if(Test-Path -LiteralPath (Join-Path $default 'docs\ARCHITECTURE.md')){throw 'Migration split documentation between old and new directories'}
+Write-Output 'PASS: legacy migration and interrupted setup recovery keep active files and shortcuts together; existing leftovers are not deleted.'
 Run-Setup $legacy
 Assert-Install $legacy
 Write-Output 'PASS: repeat installation in the migrated directory; configuration preserved.'
