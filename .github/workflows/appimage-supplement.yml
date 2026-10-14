@@ -26,8 +26,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           python3 -c 'import os,re; assert re.fullmatch(r"v[0-9][A-Za-z0-9._-]{0,99}",os.environ["RELEASE_TAG"])'
-          test "$(gh repo view --json visibility --jq .visibility)" = PRIVATE
-          gh release view "$RELEASE_TAG" --json isDraft,isPrerelease,assets > /tmp/upr-release.json
+          test "$(gh repo view "$GH_REPO" --json visibility --jq .visibility)" = PRIVATE
+          gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json isDraft,isPrerelease,assets > /tmp/upr-release.json
           python3 - <<'PY'
           import json,os
           release=json.load(open('/tmp/upr-release.json'))
