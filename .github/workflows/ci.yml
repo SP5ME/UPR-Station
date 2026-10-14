@@ -36,6 +36,7 @@ jobs:
           bash tests/server-installer.sh
           python tests/release-download.py
           python tests/server-package.py
+          python tests/desktop-release.py
       - name: HTTP and KISS acceptance test
         shell: bash
         run: |

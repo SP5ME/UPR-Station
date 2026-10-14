@@ -51,7 +51,7 @@ katalogów pod target/, bez konfiguracji operatora i bez prawdziwego radia.
 - [Współpraca](CONTRIBUTING.md) i [bezpieczeństwo](SECURITY.md)
 
 Paczki testowe publikuj osobno w Releases, nie w historii kodu.
-Ręcznie uruchamiany workflow „Build release” buduje Windows NSIS, Linux DEB,
+Ręcznie uruchamiany workflow „Build release” buduje Windows NSIS, Linux DEB i AppImage,
 serwer Linux/Alpine i obrazy Docker dla x86-64/ARM64/ARMv7. Publikacja następuje
 dopiero po przejściu wszystkich zadań; domyślnie powstaje draft.
 Do aktualizacji Server przez stronę służy ZIP Alpine, nie wspólny ZIP testera.

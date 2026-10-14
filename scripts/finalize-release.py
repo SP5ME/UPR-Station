@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 tag,directory=sys.argv[1:]
 root=Path(directory)
-required=[f'UPR-Terminal-{tag}-windows-x86_64-setup.exe',f'UPR-Terminal-{tag}-linux-x86_64.deb','install-server.sh']
+required=[f'UPR-Terminal-{tag}-windows-x86_64-setup.exe',f'UPR-Terminal-{tag}-linux-x86_64.deb',f'UPR-Terminal-{tag}-linux-x86_64.AppImage','install-server.sh']
 required += [f'UPR-Station-{tag}-{kind}-{arch}.{extension}' for arch in ['x86_64','aarch64','armv7'] for kind,extension in [('linux','tar.gz'),('alpine','zip'),('docker','tar.gz')]]
 for name in required:
     if not (root/name).is_file() or not (root/name).stat().st_size: raise SystemExit('Missing release asset: '+name)
@@ -11,7 +11,7 @@ notes=f'''# UPR Terminal / UPR Station — {tag}
 
 Wydanie testowe pre-alfa. Wersja aplikacji pozostaje 0.1.3-prealpha.1.
 
-- UPR Terminal: Windows x86-64 (NSIS) oraz Linux x86-64 (DEB, Debian/Ubuntu).
+- UPR Terminal: Windows x86-64 (NSIS) oraz Linux x86-64 (DEB i AppImage).
 - UPR Station: statyczne binarki Linux/musl dla x86-64, ARM64 i ARMv7.
 - Alpine: ZIP odpowiedniej architektury do panelu aktualizacji.
 - Raspberry Pi OS: ARM64 dla systemu 64-bitowego, ARMv7 dla 32-bitowego; ARMv6 nie jest obsługiwany.
@@ -28,6 +28,8 @@ Prywatne repozytorium wymaga GITHUB_TOKEN z prawem odczytu zawartości;
 przekaż go przez środowisko, nie zapisuj w plikach. Po aktualizacji Ctrl+F5.
 
 Linux desktop wymaga WebKitGTK 4.1; nie jest to pakiet dla wszystkich dystrybucji.
+AppImage: nadaj uprawnienie wykonywania przez `chmod +x PLIK.AppImage`.
+Paczki Linux są budowane na Ubuntu 22.04; AppImage nie gwarantuje zgodności ze starszym glibc.
 Instalator Windows nie jest podpisany certyfikatem wydawcy.
 CI kompiluje i sprawdza uruchomienie binarek; nie zastępuje testu radia,
 pełnej instalacji na Raspberry Pi ani aktualizacji istniejącego komputera.

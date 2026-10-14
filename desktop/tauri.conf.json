@@ -16,7 +16,8 @@
     "active": true,
     "targets": [
       "nsis",
-      "deb"
+      "deb",
+      "appimage"
     ],
     "icon": [
       "../ultimatepr-station-icon.ico",

@@ -40,6 +40,7 @@ jobs:
           bash tests/server-installer.sh
           python3 tests/release-download.py
           python3 tests/server-package.py
+          python3 tests/desktop-release.py
 
   desktop:
     needs: checks
@@ -67,7 +68,9 @@ jobs:
         run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri build --bundles nsis --no-sign -- --locked
       - if: runner.os == 'Linux'
         working-directory: desktop
-        run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri build --bundles deb -- --locked
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri build --bundles deb,appimage -- --locked
       - name: Collect desktop installer
         shell: bash
         run: python scripts/collect-desktop-release.py "$RUNNER_OS" "$RELEASE_TAG" target/release-assets
