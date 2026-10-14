@@ -6,6 +6,8 @@ fail() { printf '%s\n' "ERROR: $*" >&2; exit 1; }
 detect_platform() {
     release=${1:-/etc/os-release}
     machine=${2:-$(uname -m)}
+    # Raspbian calls both ARMv6 and ARMv7 userlands armhf; check the CPU first.
+    case "$machine" in armv6*) fail 'ARMv6 CPUs are not supported.' ;; esac
     bits=${3:-$(getconf LONG_BIT 2>/dev/null || printf '64')}
     os_id=$(awk -F= '$1=="ID" {gsub(/["\047]/,"",$2); print $2; exit}' "$release")
     os_like=$(awk -F= '$1=="ID_LIKE" {gsub(/["\047]/,"",$2); print $2; exit}' "$release")
@@ -100,7 +102,7 @@ with tarfile.open(sys.argv[1], 'r:gz') as archive:
         target.chmod(0o755 if item.mode&0o111 else 0o644)
 PY
     [ -x "$PKG/ultimatepr-station" ] || fail 'Binary missing from verified package.'
-    if [ -f /var/lib/ultimatepr/update/status.txt ] && grep -q '^state=running$' /var/lib/ultimatepr/update/status.txt; then fail 'Another update is running.'; fi
+    if [ -f /var/lib/ultimatepr/update/status.txt ] && grep -Eq '^state=(running|validating|building|stopping|starting)$' /var/lib/ultimatepr/update/status.txt; then fail 'Another update is running.'; fi
     if [ "$INIT" = openrc ]; then
         if [ -L /opt/ultimatepr-station/current ]; then
             # Use the existing supervised lifecycle and rollback rather than starting a second process.
@@ -118,10 +120,11 @@ PY
             sh "$PKG/deploy/alpine/install-server-linux.sh" "$PKG/ultimatepr-station"
         fi
         cp -R "$PKG/licenses" /opt/ultimatepr-station/current/
-        cp "$PKG/LICENSE" /opt/ultimatepr-station/current/LICENSE
+        cp "$PKG/LICENSE" "$PKG/PACKAGE-MANIFEST.txt" /opt/ultimatepr-station/current/
         return
     fi
     command -v systemctl >/dev/null 2>&1 || fail 'systemd unavailable; no service changes made.'
+    systemctl show --property=Version --value >/dev/null 2>&1 || fail 'systemd is not running; no service changes made.'
     if [ ! -L /opt/ultimatepr-station/current ] && systemctl cat ultimatepr-station >/dev/null 2>&1; then
         fail 'Unmanaged existing service detected. Migrate its configuration manually before installation.'
     fi
