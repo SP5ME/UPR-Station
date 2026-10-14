@@ -56,17 +56,18 @@ jobs:
       - run: rustup update stable --no-self-update
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libdbus-1-dev patchelf
-      - run: cargo install tauri-cli --version 2.11.5 --locked
+      # Official prebuilt CLI avoids rebuilding the release tool on every runner.
+      - run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri --version
       - run: cargo fetch --locked --manifest-path desktop/Cargo.toml
       - run: python scripts/desktop-licenses.py
       - run: python -c "from pathlib import Path; assert not Path('desktop/target/legal/MISSING-LICENSE-TEXTS.txt').exists()"
       - run: cargo test --locked --manifest-path desktop/Cargo.toml
       - if: runner.os == 'Windows'
         working-directory: desktop
-        run: cargo tauri build --bundles nsis --no-sign -- --locked
+        run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri build --bundles nsis --no-sign -- --locked
       - if: runner.os == 'Linux'
         working-directory: desktop
-        run: cargo tauri build --bundles deb -- --locked
+        run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri build --bundles deb -- --locked
       - name: Collect desktop installer
         shell: bash
         run: python scripts/collect-desktop-release.py "$RUNNER_OS" "$RELEASE_TAG" target/release-assets

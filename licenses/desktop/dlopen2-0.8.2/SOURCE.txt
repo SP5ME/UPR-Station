@@ -1,0 +1,4 @@
+Upstream license for dlopen2-0.8.2.
+https://raw.githubusercontent.com/OpenByteDev/dlopen2/cc80e4a0a90d499b677fdf7743699b4b3a43a989/LICENSE
+Commit identified by the distributed crate's .cargo_vcs_info.json.
+MIT license selected where the crate offers Apache-2.0 OR MIT.

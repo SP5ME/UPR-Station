@@ -1,0 +1,4 @@
+Upstream license for libappindicator-sys-0.9.0.
+https://raw.githubusercontent.com/tauri-apps/libappindicator-rs/eafd1e3682a1247f595410266091e9684021cb6f/LICENSE-MIT
+Commit identified by the distributed crate's .cargo_vcs_info.json.
+MIT license selected where the crate offers Apache-2.0 OR MIT.
