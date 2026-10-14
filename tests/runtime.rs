@@ -3,6 +3,7 @@ use std::{
     io::{Read, Write},
     net::TcpStream,
     path::PathBuf,
+    sync::atomic::{AtomicU64, Ordering},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use ultimatepr::runtime::{self, RuntimeOptions};
@@ -10,20 +11,29 @@ use ultimatepr::runtime::{self, RuntimeOptions};
 struct Temporary(PathBuf);
 impl Temporary {
     fn new() -> Self {
+        // Windows timestamps can be equal for tests starting on different threads.
+        static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(0);
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("target")
             .join("test-tmp")
             .join(format!(
-            "station-runtime-{}-{}",
+            "station-runtime-{}-{}-{}",
             std::process::id(),
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_nanos()
+                .as_nanos(),
+            NEXT_DIRECTORY.fetch_add(1, Ordering::Relaxed)
         ));
         fs::create_dir_all(&path).unwrap();
         Self(path)
     }
+}
+#[test]
+fn temporary_directories_are_distinct() {
+    let first = Temporary::new();
+    let second = Temporary::new();
+    assert_ne!(first.0, second.0);
 }
 impl Drop for Temporary {
     fn drop(&mut self) {
