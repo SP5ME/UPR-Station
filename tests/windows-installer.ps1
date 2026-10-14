@@ -24,6 +24,14 @@ New-Item -ItemType Directory -Path $data | Out-Null
 $sentinel=Join-Path $data 'station.conf'
 [IO.File]::WriteAllText($sentinel,"# installer preservation fixture`ncallsign=N0CALL`n",[Text.UTF8Encoding]::new($false))
 $sentinelHash=(Get-FileHash -LiteralPath $sentinel).Hash
+# Tauri bundles a patched copy, then restores the build output (tauri-bundler bundle.rs).
+# Compare against precisely that one documented NSIS marker replacement, not arbitrary differences.
+$expectedBytes=[IO.File]::ReadAllBytes((Join-Path $repo 'desktop\target\release\ultimatepr-station-desktop.exe'))
+$marker='__TAURI_BUNDLE_TYPE_VAR_UNK'
+$markerIndex=[Text.Encoding]::Latin1.GetString($expectedBytes).IndexOf($marker,[StringComparison]::Ordinal)
+if($markerIndex -lt 0){throw 'Expected Tauri bundle marker is missing; review bundler compatibility'}
+[Array]::Copy([Text.Encoding]::ASCII.GetBytes('__TAURI_BUNDLE_TYPE_VAR_NSS'),0,$expectedBytes,$markerIndex,$marker.Length)
+$expectedBinaryHash=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($expectedBytes))
 function Assert-Data {
     if((Get-FileHash -LiteralPath $sentinel).Hash -ne $sentinelHash){throw 'Operator configuration changed'}
 }
@@ -42,8 +50,7 @@ function Assert-Install([string]$Target) {
     }
     $expected=(Get-FileHash -LiteralPath (Join-Path $repo 'docs\ARCHITECTURE.md')).Hash
     if((Get-FileHash -LiteralPath (Join-Path $Target 'docs\ARCHITECTURE.md')).Hash -ne $expected){throw 'Installed documentation differs from package source'}
-    $expectedBinary=(Get-FileHash -LiteralPath (Join-Path $repo 'desktop\target\release\ultimatepr-station-desktop.exe')).Hash
-    if((Get-FileHash -LiteralPath (Join-Path $Target 'ultimatepr-station-desktop.exe')).Hash -ne $expectedBinary){throw 'Wrong installed executable'}
+    if((Get-FileHash -LiteralPath (Join-Path $Target 'ultimatepr-station-desktop.exe')).Hash -ne $expectedBinaryHash){throw 'Wrong installed executable'}
     $location=(Get-ItemProperty -LiteralPath $newKey).InstallLocation.Trim('"')
     if($location -ne $Target){throw "Uninstall location differs: $location"}
     foreach($link in $links[0..1]){
