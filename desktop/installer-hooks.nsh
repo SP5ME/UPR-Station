@@ -14,6 +14,8 @@
         StrCpy $INSTDIR $R0
     ${EndIf}
   ${EndIf}
+  ; Tauri sets OUTDIR before this hook. Keep extraction in the selected/migrated directory.
+  SetOutPath "$INSTDIR"
   Pop $R1
   Pop $R0
 !macroend

@@ -41,6 +41,7 @@ jobs:
           python3 tests/release-download.py
           python3 tests/server-package.py
           python3 tests/desktop-release.py
+          python3 tests/installer-hooks.py
 
   desktop:
     needs: checks
@@ -71,6 +72,13 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
         run: npm exec --yes --package=@tauri-apps/cli@2.11.5 -- tauri build --bundles deb,appimage -- --locked
+      - name: Test Windows installation and legacy migration
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem desktop/target/release/bundle/nsis/*-setup.exe
+          if (@($installer).Count -ne 1) { throw 'Expected one installer' }
+          ./tests/windows-installer.ps1 -Installer $installer.FullName
       - name: Collect desktop installer
         shell: bash
         run: python scripts/collect-desktop-release.py "$RUNNER_OS" "$RELEASE_TAG" target/release-assets
