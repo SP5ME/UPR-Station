@@ -1,0 +1,9 @@
+Station: {mycall}
+Operator: {myname}
+Packet radio terminal. Remote commands (send one as a complete line):
+/help or /h - show command help
+/info or /i - show station information
+/ports - list all interface numbers, names, descriptions and status (/port also works)
+/mh - latest 10 stations heard on all interfaces
+/mh NAME or /mh NUMBER - latest 10 stations heard on that interface
+Use /ports to find an interface name or number.

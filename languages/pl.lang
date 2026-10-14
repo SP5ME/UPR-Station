@@ -1,0 +1,569 @@
+# English source<TAB>Polish translation. Numbered placeholders must be preserved.
+Connected	Połączono
+Connecting	Łączenie
+Disconnecting	Rozłączanie
+Disconnected	Rozłączono
+Disconnected by peer	Rozłączono przez stację zdalną
+Disconnected/refused (DM)	Rozłączono / odmowa połączenia (DM)
+Connected (SABM; sequence state reset)	Połączono (SABM; wyzerowano numerację ramek)
+Connected (modulo 128)	Połączono (modulo 128)
+Connecting (modulo 8; XID follows UA)	Łączenie (modulo 8; XID po UA)
+Connected in modulo 8; negotiating AX.25 parameters (XID)	Połączono w modulo 8; uzgadnianie parametrów AX.25 (XID)
+XID selected modulo 128; sending SABME	XID wybrał modulo 128; wysyłanie SABME
+XID selected modulo 8; connected	XID wybrał modulo 8; połączono
+XID rejected; connected in modulo 8	Odmowa XID; połączono w modulo 8
+SABME rejected; retrying with SABM in modulo 8	Odmowa SABME; ponawiam SABM w modulo 8
+XID timeout; connected in modulo 8	Koniec czasu XID; połączono w modulo 8
+Invalid XID response; connected in modulo 8	Nieprawidłowa odpowiedź XID; połączono w modulo 8
+Non-text PID received; payload not displayed	Odebrano nietekstowy PID; dane nie są wyświetlane
+Retry limit reached; session closed, unsent data discarded	Limit ponowień; sesja zamknięta, niewysłane dane odrzucone
+TCP lost; session and queued data cleared	Utrata TCP; sesja i kolejka danych zostały usunięte
+Invalid N(R); resetting link, queued data discarded	Błędne N(R); reset łącza, dane w kolejce odrzucone
+FRMR received; resetting link, queued data discarded	Odebrano FRMR; reset łącza, dane w kolejce odrzucone
+Session slot is occupied/invalid	Numer sesji jest zajęty lub nieprawidłowy
+Invalid destination/path	Nieprawidłowy adres lub ścieżka
+This station already has a session	Sesja z tą stacją już istnieje
+All eight sessions are occupied	Wszystkie osiem sesji jest zajętych
+Session with {0} already exists. Switched to session {1}.	Sesja z {0} już istnieje. Przełączono na sesję {1}.
+No session	Brak sesji
+Session is not connected	Sesja nie jest połączona
+TX queue full (16 KiB); wait for acknowledgements	Kolejka TX pełna (16 KiB); poczekaj na potwierdzenia
+Call must be 1-6 letters/digits with optional SSID 0-15	Znak: 1–6 liter/cyfr i opcjonalnie SSID 0–15
+Invalid SSID	Nieprawidłowy SSID
+Invalid language code	Nieprawidłowy kod języka
+F2 Connect | F7 Station setup | F1 Help	F2 Połącz | F7 Ustawienia stacji | F1 Pomoc
+Disconnect all sessions before reconnecting TNC	Rozłącz wszystkie sesje przed ponownym połączeniem TCP
+TNC: TCP connected	TNC: połączono przez TCP
+TCP: {0}; reconnecting automatically	TCP: {0}; trwa automatyczne ponawianie
+Session {0}: {1}	Sesja {0}: {1}
+RX invalid: {0}	Błędna ramka RX: {0}
+Disconnect active sessions before saving settings	Przed zapisem ustawień rozłącz aktywne sesje
+//port                         Show the configured TNC interface	//port                         Pokaż skonfigurowany interfejs TNC
+TNC {0} {1} KISS {2}	TNC {0}: {1}, kanał KISS {2}
+TNC interface setup	Ustawienia interfejsu TNC
+Configured TNC ports	Skonfigurowane porty TNC
+Add TNC interface...	Dodaj interfejs TNC...
+A: add | Enter/F8: edit | D: remove | Space: enable/disable	A: dodaj | Enter/F8: edytuj | D: usuń | Spacja: włącz/wyłącz
+F2: save settings | Esc: cancel	F2: zapisz ustawienia | Esc: anuluj
+TCP host:port	Host:port TCP
+Name	Nazwa
+Priority	Priorytet
+Enabled	Włączony
+Tab/Up/Down: move between fields	Tab/Góra/Dół: przełączaj pola
+F2: apply to settings | Esc: cancel	F2: zastosuj w ustawieniach | Esc: anuluj
+At least one TNC interface is required	Wymagany jest co najmniej jeden interfejs TNC
+Beacon sent on beacon-enabled interfaces	Beacon wysłany przez interfejsy z włączonym beaconem
+No beacon-enabled interface is connected	Brak połączonego interfejsu z włączonym beaconem
+Per-interface beacon settings	Ustawienia beaconu dla każdego interfejsu
+Arrows/Tab: select | Enter: beacon on/off	Strzałki/Tab: wybór | Enter: beacon wł./wył.
+Type digi path | F2: save | F8: edit template	Wpisz trasę digi | F2: zapisz | F8: edytuj szablon
+Enter: toggle | Type: digi path | F2: save | F8: template | Esc: cancel	Enter: przełącz | wpisz trasę digi | F2: zapisz | F8: szablon | Esc: anuluj
+Periodic beacon	Beacon okresowy
+beacon_interfaces contains an unknown interface	beacon_interfaces zawiera nieznany interfejs
+beacon_interfaces contains a duplicate interface	beacon_interfaces zawiera powtórzony interfejs
+//help                         Show this help	//help                         Pokaż tę pomoc
+//h                            Alias for //help	//h                            Skrót polecenia //help
+//connect CALL [via DIGI DIGI]  Connect to CALL; optional digipeater path	//connect ZNAK [via DIGI DIGI]  Połącz ze znakiem; ścieżka via jest opcjonalna
+//c CALL [via DIGI DIGI]        Alias for //connect	//c ZNAK [via DIGI DIGI]        Skrót polecenia //connect
+//session 1..8                 Select session for text input	//session 1..8                 Wybierz sesję do pisania
+//sessions                     Show session states and queued TX bytes	//sessions                     Pokaż stany sesji i bajty w kolejce TX
+//disconnect                   Disconnect selected session or cancel attempt	//disconnect                   Rozłącz sesję lub anuluj trwającą próbę
+//d                            Alias for //disconnect	//d                            Skrót polecenia //disconnect
+//monitor on|off               Enable or pause RX/TX frame monitoring	//monitor on|off               Włącz lub wstrzymaj monitor ramek RX/TX
+//accept on|off                Allow or refuse incoming connections	//accept on|off                Włącz lub wyłącz przyjmowanie połączeń
+//tnc                          Show TCP status or retry pending connection	//tnc                          Pokaż status TCP lub ponów oczekujące połączenie
+//mheard                       List heard stations	//mheard                       Pokaż odebrane stacje
+//quit                         Disconnect sessions and exit	//quit                         Rozłącz sesje i zakończ program
+Plain text + Enter sends a line ending in CR. // starts local commands.	Zwykły tekst + Enter wysyła linię zakończoną CR. // oznacza komendy lokalne.
+Received text is labelled with its session number, e.g. [RX 1].	Tekst odebrany ma numer sesji, np. [RX 1].
+SESSIONS AND CONNECTIONS	SESJE I POŁĄCZENIA
+MONITOR PREVIEW	PODGLĄD MONITORA
+STATIONS, MAILBOX AND FILE TRANSFER	STACJE, MAILBOX I PRZESYŁANIE PLIKÓW
+SETTINGS	USTAWIENIA
+LOCAL COMMANDS (typed in the input field)	KOMENDY LOKALNE (wpisywane w polu nadawania)
+Tab / Shift+Tab  Select next / previous session	Tab / Shift+Tab  Następna/poprzednia sesja
+//preview off  Hide the monitor preview	//preview off  Ukryj podgląd monitora
+//preview on  Show the monitor preview	//preview on  Pokaż podgląd monitora
+Frame capture keeps running while the preview is hidden	Monitor nadal zbiera ramki po ukryciu podglądu
+Monitor preview hidden | type //preview on to show	Podgląd monitora ukryty | wpisz //preview on, aby pokazać
+Monitor preview | newest entries at top	Podgląd monitora | najnowsze u góry
+Frame capture is always on; use //preview on|off to show or hide the preview	Przechwytywanie ramek działa cały czas; użyj //preview on|off, aby pokazać lub ukryć podgląd
+F1  Open this help	F1  Otwórz tę pomoc
+F2  Connect using a callsign and optional interface/path	F2  Połącz ze znakiem, interfejsem i ścieżką
+F3  Disconnect or cancel the current connection attempt	F3  Rozłącz lub anuluj próbę połączenia
+F4  Send beacon now	F4  Wyślij beacon teraz
+F5  Open MHeard station list	F5  Otwórz listę stacji MHeard
+MailBox remote commands: H help, L list, R ID read, S send, Q disconnect	Polecenia MailBox przez radio: H pomoc, L lista, R ID odczyt, S wyślij, Q rozłącz
+F7  Open monitor history; arrows scroll; Space freezes/unfreezes	F7  Otwórz historię monitora; strzałki przewijają, Spacja zatrzymuje/wznawia
+F8  Open settings	F8  Otwórz ustawienia
+F9  About	F9  O programie
+F8 AX.25 tab: enable/disable the AX.25 digipeater	F8 → zakładka AX.25: włącz/wyłącz digipeater AX.25
+The optional local MailBox has its own callsign-SSID and accepts up to two simultaneous AX.25 connections, separately from the terminal sessions.	Opcjonalny lokalny MailBox ma własny znak-SSID i przyjmuje do dwóch jednoczesnych połączeń AX.25, niezależnie od sesji terminala.
+F10  Exit after disconnecting sessions	F10  Wyjdź po rozłączeniu sesji
+Tab  Select next session	Tab  Wybierz następną sesję
+Shift+Tab  Select previous session	Shift+Tab  Wybierz poprzednią sesję
+Up/Down  Move selection in lists	Góra/Dół  Zmień wybór na liście
+PgUp/PgDn  Scroll chat history or change settings tab	PgUp/PgDn  Przewijaj rozmowę lub zmień zakładkę ustawień
+Enter  Send text or confirm selection	Enter  Wyślij tekst lub zatwierdź wybór
+Ctrl+U  Clear the input field	Ctrl+U  Wyczyść pole wpisywania
+Ctrl+L  Clear current session chat history	Ctrl+L  Wyczyść historię rozmowy bieżącej sesji
+//help  Show this help	//help  Pokaż tę pomoc
+//h  Alias for //help	//h  Skrót polecenia //help
+//connect CALL [via DIGI...]  Connect; choose interface automatically	//connect ZNAK [via DIGI...]  Połącz; interfejs dobierze się automatycznie
+//connect PORT CALL [via DIGI...]  Connect through named interface	//connect PORT ZNAK [via DIGI...]  Połącz przez nazwany interfejs
+//c CALL [via DIGI...]  Alias for //connect	//c ZNAK [via DIGI...]  Skrót polecenia //connect
+//c PORT CALL [via DIGI...]  Alias with explicit interface	//c PORT ZNAK [via DIGI...]  Skrót z wyborem interfejsu
+//disconnect  Disconnect or cancel current connection attempt	//disconnect  Rozłącz lub anuluj próbę połączenia
+//d  Alias for //disconnect	//d  Skrót polecenia //disconnect
+//sessions  Show session states and queued bytes	//sessions  Pokaż stan sesji i dane w kolejce
+//port  List TNC interfaces and connection states	//port  Pokaż interfejsy TNC i ich stany
+//port NAME  Set default interface for new connections	//port NAZWA  Ustaw domyślny interfejs dla nowych połączeń
+//mheard  Open MHeard; Enter connects using that interface	//mheard  Otwórz MHeard; Enter łączy przez wybrany interfejs
+//accept on|off  Enable or refuse incoming connections	//accept on|off  Przyjmuj lub odrzucaj połączenia przychodzące
+//tnc  Request reconnect for enabled interfaces	//tnc  Ponów połączenie z włączonymi interfejsami
+//quit  Disconnect sessions and exit	//quit  Rozłącz sesje i wyjdź
+/text  Send text beginning with / to the connected station	/tekst  Wyślij tekst zaczynający się od / do stacji
+Esc: close | Arrows/PgUp/PgDn: scroll	Esc: zamknij | Strzałki/PgUp/PgDn: przewijaj
+Call       Interface      P  Frames       UTC   Age      To / Path	Znak       Interfejs      P  Ramki       UTC   Wiek     Do / Trasa
+reconnect	ponawianie
+No enabled TNC interfaces	Brak włączonych interfejsów TNC
+Status:	Status:
+Incoming connection from	Połączenie przychodzące od
+Enter your callsign-SSID	Wpisz własny znak-SSID
+TNC address must be host:port (TCP port 1-65535)	Adres TNC: host:port (port TCP 1–65535)
+Cannot create configuration temporary file: {0}	Nie można utworzyć pliku tymczasowego konfiguracji: {0}
+Cannot save configuration: {0}	Nie można zapisać konfiguracji: {0}
+Settings saved. TNC reconnects automatically.	Zapisano ustawienia. TNC połączy się automatycznie.
+TCP offline; reconnecting automatically	Brak TCP; trwa automatyczne ponawianie połączenia
+Enter CALL [via DIGI DIGI]	Wpisz ZNAK [via DIGI DIGI]
+Use CALL via DIGI DIGI	Użyj: ZNAK via DIGI DIGI
+Disconnecting sessions...	Rozłączanie sesji...
+Use //session 1..8	Użyj //session 1..8
+Use //preview on|off	Użyj //preview on|off
+Use //accept on|off	Użyj //accept on|off
+Tab / Shift+Tab selects a session; * means unread activity	Tab / Shift+Tab wybiera sesję; * oznacza nową aktywność
+Unknown local command; F1 or //help for help.	Nieznana komenda lokalna; pomoc: F1 lub //help.
+Monitor capture {0}	Przechwytywanie monitora: {0}
+ON	WŁ
+OFF	WYŁ
+PAUSED	PAUZA
+FREE	WOLNA
+free	wolna
+UltimatePR - enlarge terminal to 72 x 24	UltimatePR - powiększ okno do 72 x 24
+F10 then Enter exits; sessions still run	F10 i Enter: wyjście; sesje nadal działają
+Session {0}  {1}  {2}	Sesja {0}  {1}  {2}
+Transmit / Enter to send	Nadawanie / Enter wysyła
+TCP: {0}  {1}  P:{2} | RX accept:{3} | Buffer:{4} B	TCP: {0}  {1}  P:{2} | Odbiór:{3} | Bufor:{4} B
+Connect	Połącz
+Station setup	Ustawienia stacji
+About	O programie
+UltimatePR Terminal {0}	UltimatePR Terminal {0}
+Created by UltimatePR.	Twórca: zespół UltimatePR.
+A lightweight packet-radio terminal for connected-mode AX.25 operation. It is built for operator-to-station conversations and is not an APRS client.	Lekki terminal packet radio do pracy w trybie połączeniowym AX.25. Służy do rozmów między stacjami i nie jest klientem APRS.
+The application communicates with TNCs over KISS TCP or a serial port. This keeps the terminal independent of a particular modem and allows compatible hardware and software TNCs, including Dire Wolf.	Aplikacja komunikuje się z TNC przez KISS TCP lub port szeregowy. Dzięki temu może współpracować ze zgodnymi urządzeniami oraz programowymi TNC, w tym Dire Wolf.
+You can use up to eight connected sessions at once, watch received and transmitted frames, and review stations in MHeard. With multiple interfaces, connections can use a selected port or fall back to the configured priority order.	Możesz prowadzić do ośmiu sesji jednocześnie, obserwować ramki nadawane i odbierane oraz przeglądać usłyszane stacje w MHeard. Przy wielu interfejsach połączenie może użyć wskazanego portu albo portu wynikającego z ustawionego priorytetu.
+AX.25 parameter negotiation uses XID after SABM/UA and selects modulo 8 or modulo 128 according to the peer's response.	Negocjacja parametrów AX.25 używa XID po SABM/UA i wybiera modulo 8 lub modulo 128 zależnie od odpowiedzi korespondenta.
+Optional station messages, remote information commands, periodic beacons and digipeating support everyday packet-radio use. Beacon routing can be configured separately for each interface.	W codziennej pracy pomagają opcjonalne wiadomości stacji, zdalne polecenia informacyjne, okresowe beacony i funkcja digipeatera. Trasę digi dla beaconu można ustawić osobno dla każdego interfejsu.
+The interface currently includes English and Polish. Translation catalogs are stored outside the program code so additional languages can be added independently.	Interfejs jest obecnie dostępny po angielsku i polsku. Tłumaczenia są przechowywane w osobnych katalogach, co ułatwia dodawanie kolejnych języków.
+UltimatePR Terminal is a prototype. Its KISS transport, AX.25 link handling and terminal interface are split into modules; the project documentation describes current behavior and known limits.	UltimatePR Terminal jest prototypem. Obsługa KISS, łącza AX.25 i interfejs terminalowy są podzielone na moduły, a dokumentacja projektu opisuje aktualne działanie i znane ograniczenia.
+Esc/F9: close | Up/Down: scroll | PgUp/PgDn: page	Esc/F9: zamknij | Góra/Dół: przewijanie | PgUp/PgDn: strona
+Keyboard help	Pomoc klawiatury
+Exit terminal	Zakończ program
+Destination: CALL-SSID [via DIGI DIGI]	Adres: ZNAK-SSID [via DIGI DIGI]
+Enter: connect   Esc: cancel	Enter: połącz   Esc: anuluj
+Callsign-SSID	Znak-SSID
+TNC host:port	TNC host:port
+Connection type	Typ połączenia
+TCP/IP	TCP/IP
+Serial	Port szeregowy
+COM device	Urządzenie COM
+Serial baud rate	Prędkość portu szeregowego
+No COM devices found	Nie znaleziono urządzeń COM
+Cannot list COM devices	Nie można wyświetlić urządzeń COM
+Serial interface must be serial:COMx@baud	Port szeregowy musi mieć format serial:COMx@baud
+Serial device must be a COM port name such as COM3	Wybierz nazwę portu COM, na przykład COM3
+Serial baud rate must be a supported number	Prędkość portu musi być liczbą z listy
+Serial baud rate must be 1200-115200 from the supported list	Wybierz prędkość portu z dostępnej listy 1200–115200 Bd
+A serial COM device can only be assigned to one TNC interface	Jeden port COM można przypisać tylko do jednego interfejsu TNC
+Enter: choose type/COM/On-Off | Tab/Arrows: fields	Enter: wybierz typ/COM/wł.-wył. | Tab/strzałki: pola
+Select connection option	Wybór opcji połączenia
+Select interface language	Wybierz język interfejsu
+Installed language catalogs appear in the selector.	Lista pokazuje dostępne tłumaczenia interfejsu.
+Up/Down: select | Enter: use | Esc: cancel	Góra/Dół: wybierz | Enter: zatwierdź | Esc: anuluj
+KISS channel	Kanał KISS
+T1 ms	T1 ms
+T3 ms	T3 ms
+Retries	Ponowienia
+Packet bytes	Bajtów w pakiecie
+Accept incoming	Przyjmuj połączenia
+Language	Język
+The terminal emulator controls its own font settings.	Rozmiar czcionki ustawia się w emulatorze terminala.
+Tab: next field  Ctrl+U: clear  Enter: save  Esc: cancel	Tab: następne pole  Ctrl+U: wyczyść  Enter: zapisz  Esc: anuluj
+Save applies the current On/Off selection.	Zapis automatycznie wznawia TCP. Przyjmowanie: true/false
+Language code (en/pl or a catalog code); Enter saves	Język: en/pl lub kod pliku tłumaczeń; Enter zapisuje
+F2  Connect selected slot    F3  Disconnect selected slot	F2  Połącz (wolna/istniejąca sesja)   F3  Rozłącz sesję
+F4 Send BCN  F5 MHeard  F6 Monitor  F7 Settings	F4 Wyślij BCN  F5 MHeard  F6 Monitor  F7 Opcje
+TNC reconnects automatically (1 s). F10: Exit	TNC łączy się automatycznie (1 s). F10: Wyjście
+Tab / Shift+Tab: switch between the eight sessions	Tab / Shift+Tab: przełączanie ośmiu sesji
+An asterisk on a tab means unread data or status	Gwiazdka na zakładce oznacza nowe dane lub zmianę stanu
+PgUp/PgDn: session history	PgUp/PgDn: historia sesji
+Left/Right/Home/End, Backspace/Delete: edit input	Lewo/Prawo/Home/End, Backspace/Delete: edycja tekstu
+Ctrl+U: clear field          Enter: send text + CR	Ctrl+U: wyczyść pole         Enter: wyślij tekst + CR
+Each session keeps its own draft and bounded history	Każda sesja ma osobny szkic i ograniczoną historię
+//connect CALL via DIGI, //session N, //disconnect, //tnc	//connect ZNAK via DIGI, //session N, //disconnect, //tnc
+//accept on|off, //monitor on|off, //quit also work	Działają też //accept on|off, //monitor on|off i //quit
+/text goes to the remote station; //help opens local help	/tekst trafia do korespondenta; //help otwiera pomoc programu
+Settings are saved to the selected configuration file	Ustawienia są zapisywane w wybranym pliku konfiguracji
+Disconnect all sessions and close terminal?	Rozłączyć wszystkie sesje i zamknąć program?
+Enter / Y: exit     Esc / N: return	Enter / Y: wyjdź     Esc / N: wróć
+Starting terminal...	Uruchamianie terminala...
+Your callsign-SSID: 	Twój znak-SSID: 
+[TNC] TCP connected	[TNC] Połączono przez TCP
+[TCP] {0}; reconnecting automatically	[TCP] {0}; trwa automatyczne ponawianie
+Selected session {0}	Wybrano sesję {0}
+Usage: //session 1..8	Użycie: //session 1..8
+Usage: //connect CALL [via DIGI DIGI]	Użycie: //connect ZNAK [via DIGI DIGI]
+Disconnect active sessions first	Najpierw rozłącz aktywne sesje
+Unknown command; //help	Nieznane polecenie; //help
+Terminal closed.	Terminal zamknięty.
+Input line exceeds 4096 bytes	Linia wejściowa przekracza 4096 bajtów
+Input must be UTF-8	Dane wejściowe muszą być w UTF-8
+//help                         Commands (local commands start with //)	//help                         Pomoc (polecenia lokalne zaczynają się od //)
+//connect CALL [via DIGI DIGI]  Connect in selected slot	//connect ZNAK [via DIGI DIGI]  Połącz w wolnej lub istniejącej sesji
+//session 1..8                 Select slot for outgoing text	//session 1..8                 Wybierz sesję do nadawania
+//sessions                     List all sessions and buffered bytes	//sessions                     Lista sesji i bajtów w buforach
+//disconnect                   Disconnect selected session	//disconnect                   Rozłącz wybraną sesję
+//monitor on|off                Show decoded RX/TX frames	//monitor on|off                Pokaż ramki RX/TX
+//accept on|off                 Allow incoming connections	//accept on|off                 Przyjmuj nowe połączenia
+//tnc                          Connect/reconnect TCP (no active sessions)	//tnc                          Połącz/ponów TCP (bez aktywnych sesji)
+//quit                         Graceful disconnect, then exit	//quit                         Rozłącz sesje i zakończ program
+Text + Enter sends a line ending in CR. // starts local commands.	Tekst + Enter wysyła linię zakończoną CR. // oznacza komendy lokalne.
+Received text from all sessions is labelled [RX n].	Tekst odebrany ze wszystkich sesji ma oznaczenie [RX n].
+kiss_port must be 0-15	kiss_port musi mieścić się w zakresie 0–15
+retries must be 1-30	retries musi mieścić się w zakresie 1–30
+paclen must be 1-256	paclen musi mieścić się w zakresie 1–256
+accept_incoming must be true/false	accept_incoming musi mieć wartość true/false
+Timers: t1_ms 1000-120000; t3_ms >= t1_ms and <= 3600000	Timery: t1_ms 1000–120000; t3_ms od t1_ms do 3600000
+Duplicate config key: {0}	Powtórzony klucz konfiguracji: {0}
+Unknown config key: {0}	Nieznany klucz konfiguracji: {0}
+Invalid number for {0}	Nieprawidłowa liczba dla {0}
+Config line {0}: expected key=value	Linia konfiguracji {0}: wymagane klucz=wartość
+Language not found: {0}	Nie znaleziono języka: {0}
+Unknown translation key: {0}	Nieznany klucz tłumaczenia: {0}
+Translation placeholders differ: {0}	Niezgodne pola tłumaczenia: {0}
+Duplicate translation key: {0}	Powtórzony klucz tłumaczenia: {0}
+TNC closed TCP	TNC zamknęło TCP
+TNC write returned zero	Zapis do TNC zwrócił zero bajtów
+TNC TX queue exceeded 64 KiB	Kolejka TCP do TNC przekroczyła 64 KiB
+Interactive terminals use the full-screen UI.	W konsoli interaktywnej używany jest interfejs pełnoekranowy.
+Invalid address length	Nieprawidłowa długość adresu
+Invalid address encoding	Nieprawidłowe kodowanie adresu
+Invalid call	Nieprawidłowy znak
+Missing address/control	Brak adresu/pola sterującego
+Missing PID	Brak PID
+Information field too long	Zbyt długie pole informacji
+Supervisory frame with information	Ramka nadzorcza z polem informacji
+Usage: //monitor on|off	Użycie: //monitor on|off
+Usage: //accept on|off	Użycie: //accept on|off
+MHeard - received stations	MHeard - odebrane stacje
+No stations received yet	Nie odebrano jeszcze żadnej stacji
+Call	Znak
+Frames	Ramki
+Age	Wiek
+To / Path	Do / Trasa
+Age(s)	Wiek(s)
+To	Do
+Path:	Trasa:
+Path: none	Trasa: brak
+Stations: {0}/256 | Latest first | RAM only	Stacje: {0}/256 | Ostatnie na górze | Tylko RAM
+Up/Down PgUp/PgDn: scroll | Esc/Enter: close	Góra/Dół PgUp/PgDn: przewijaj | Esc/Enter: zamknij
+//mheard                       List received stations	//mheard                       Lista odebranych stacji
+Reconnect	Reconnect
+TCP: {0}; retry in 1 s	TCP: {0}; ponowienie za 1 s
+[TCP] Reconnect: {0}; retry in 1 s	[TCP] Reconnect: {0}; ponowienie za 1 s
+
+Station	Stacja
+TNC	TNC
+AX.25	AX.25
+Digipeating	Powtarzanie ramek
+Messages	Wiadomości
+Beacon	Beacon
+Interface	Interfejs
+Application	Aplikacja
+Operator name	Imię operatora
+Welcome enabled	Powitanie włączone
+Goodbye enabled	Pożegnanie włączone
+Remote commands	Komendy zdalne
+Beacon enabled	Beacon włączony
+Interval minutes	Interwał minut
+Destination	Adresat
+Digipeaters	Digipeatery
+Message template	Szablon wiadomości
+Template saved	Zapisano szablon
+Session is closing	Sesja jest zamykana
+PgUp/PgDn: tabs | Tab: field | Ctrl+U: clear	PgUp/PgDn: zakładki | Tab: pole | Ctrl+U: wyczyść
+Enter: save all settings | Esc: cancel	Enter: zapisz ustawienia | Esc: anuluj
+Arrows: select | PgUp/PgDn: tab | Esc: cancel	Strzałki: wybór | PgUp/PgDn: zakładka | Esc: anuluj
+Tab: next field | Ctrl+U: clear	Tab: następne pole | Ctrl+U: wyczyść
+Enter: save settings	Enter: zapisz ustawienia
+F8: edit template for the selected row	F8: edytuj szablon wybranego wiersza
+Remote commands row opens the info template	Wiersz komend zdalnych otwiera szablon info
+Enter on service fields opens the On/Off selector.	Włączone: true/false. Zapis uruchamia TCP ponownie.
+F2: save template | Enter: newline | Esc: cancel	F2: zapisz szablon | Enter: nowa linia | Esc: anuluj
+Templates are in Messages and Beacon tabs	Szablony są w zakładkach Wiadomości i Beacon
+Template exceeds 4096 bytes	Szablon przekracza 4096 bajtów
+Template contains unsupported control characters	Szablon zawiera niedozwolone znaki sterujące
+Unclosed template variable	Niezamknięta zmienna szablonu
+Unsupported template variable: {0}	Nieobsługiwana zmienna szablonu: {0}
+Automatic message not queued: {0}	Nie dodano wiadomości automatycznej do kolejki: {0}
+Sending goodbye before disconnect (up to 10 s)	Wysyłanie pożegnania przed rozłączeniem (do 10 s)
+Beacon skipped: expanded text exceeds 256 bytes	Pominięto beacon: tekst po podstawieniu przekracza 256 bajtów
+Beacon interval must be 10-1440 minutes	Interwał beacon musi wynosić 10–1440 minut
+Beacon path allows at most 8 digipeaters	Trasa beacon dopuszcza najwyżej 8 digipeaterów
+Destination: CALL [via DIGI DIGI]	Adresat: ZNAK [via DIGI DIGI]
+welcome_enabled must be true/false	welcome_enabled musi mieć wartość true/false
+goodbye_enabled must be true/false	goodbye_enabled musi mieć wartość true/false
+remote_commands must be true/false	remote_commands musi mieć wartość true/false
+beacon_enabled must be true/false	beacon_enabled musi mieć wartość true/false
+Operator name must be at most 80 bytes	Imię operatora może mieć najwyżej 80 bajtów
+TCP offline; beacon not sent	TCP rozłączone; beacon nie został wysłany
+Beacon sent to TNC	Beacon wysłany do TNC
+Invalid beacon interval in minutes	Nieprawidłowy interwał beacon w minutach
+Monitor history	Historia monitora
+FROZEN - reception continues	ZAMROŻONY - odbiór trwa
+LIVE	NA ŻYWO
+Newest entries at top	Najnowsze wpisy u góry
+Space: freeze/live | Arrows/PgUp/PgDn | End: live | Esc: close	Spacja: zatrzymaj/wznów | Strzałki/PgUp/PgDn | End: na żywo | Esc: zamknij
+Enter/F2: connect | Arrows/PgUp/PgDn | R: refresh | Esc: close	Enter/F2: połącz | Strzałki/PgUp/PgDn | R: odśwież | Esc: zamknij
+Call       P  Frames       UTC   Age(s)  To / Path	Znak       P   Ramki       UTC  Wiek(s)  Do / Trasa
+Connection cancellation requested	Żądanie anulowania połączenia
+F1  Help	F1  Pomoc
+F2  Connect selected slot	F2  Połącz wybraną sesję
+F3  Disconnect or cancel connection attempt	F3  Rozłącz lub anuluj próbę połączenia
+F5  MHeard list	F5  Lista MHeard
+F6  Monitor history	F6  Historia monitora
+F7  Settings	F7  Ustawienia
+F10 Exit	F10 Wyjście
+Tab  Next session	Tab  Następna sesja
+Shift+Tab  Previous session	Shift+Tab  Poprzednia sesja
+Up/Down  Move or scroll	Góra/Dół  Przesuń lub przewijaj
+PgUp/PgDn  Scroll history or change settings tab	PgUp/PgDn  Przewijaj historię lub zmień zakładkę
+Enter  Send text or confirm	Enter  Wyślij tekst lub zatwierdź
+Ctrl+U  Clear input	Ctrl+U  Wyczyść pole
+//help, //h  Local help	//help, //h  Pomoc programu
+//connect [PORT] CALL  Connect	//connect [PORT] ZNAK  Połącz
+//disconnect  Disconnect selected session	//disconnect  Rozłącz wybraną sesję
+//session N  Select session 1..8	//session N  Wybierz sesję 1..8
+//mheard  Open MHeard list	//mheard  Otwórz listę MHeard
+//tnc, //port  Reconnect / select TNC	//tnc, //port  Ponów / wybierz TNC
+//quit  Exit after disconnecting	//quit  Wyjdź po rozłączeniu
+/text  Send text to the remote station	/tekst  Wyślij tekst do korespondenta
+Settings save to the selected configuration file	Ustawienia zapisują się do wybranego pliku
+First-run setup	Konfiguracja przy pierwszym uruchomieniu
+Configure station and first TNC interface.	Skonfiguruj stację i pierwszy interfejs TNC.
+Station callsign	Znak stacji
+Operator name (optional)	Imię operatora (opcjonalnie)
+Interface name	Nazwa interfejsu
+Interface description	Opis interfejsu
+Tab/Up/Down: fields | Enter/F2: save and connect | Esc: exit	Tab/Góra/Dół: pola | Enter/F2: zapisz i połącz | Esc: wyjście
+Operator name and interface description are optional.	Imię operatora i opis interfejsu są opcjonalne.
+Tab/Up/Down: fields | Enter/F2: save | Esc: exit	Tab/Góra/Dół: pola | Enter/F2: zapisz | Esc: wyjście
+F8: import backup | Name and description are optional.	F8: import kopii | Imię i opis są opcjonalne.
+Configuration backup	Kopia konfiguracji
+Export configuration	Eksport konfiguracji
+Import configuration	Import konfiguracji
+File path	Ścieżka pliku
+Import validates the file before replacing the active config.	Import sprawdza plik przed zastąpieniem aktywnej konfiguracji.
+Message templates and extra languages stay in separate folders.	Szablony wiadomości i dodatkowe języki pozostają w osobnych folderach.
+Tab: export/import | Enter/F2: run | Esc: cancel	Tab: eksport/import | Enter/F2: wykonaj | Esc: anuluj
+Tab: next field | Ctrl+U: clear | Enter: save | F8: config backup	Tab: następne pole | Ctrl+U: wyczyść | Enter: zapisz | F8: kopia konfiguracji
+Enter/F2: import backup | Esc: cancel	Enter/F2: import kopii | Esc: anuluj
+Clear configuration	Wyczyść konfigurację
+F9: clear configuration	F9: wyczyść konfigurację
+Tab: next field | Ctrl+U: clear | Enter: save	Tab: następne pole | Ctrl+U: wyczyść | Enter: zapisz
+Clear active config and reopen setup?	Na pewno usunąć konfigurację i uruchomić kreator?
+Enter/Y: clear configuration | Esc/N: cancel	Enter/T: wyczyść konfigurację | Esc/N: anuluj
+Configuration exported	Wyeksportowano konfigurację
+Configuration imported	Zaimportowano konfigurację
+Enter a configuration file path	Wpisz ścieżkę do pliku konfiguracji
+Backup file already exists	Plik kopii już istnieje
+Backup must include a station callsign	Kopia musi zawierać znak stacji
+Backup must include an enabled TNC interface	Kopia musi zawierać włączony interfejs TNC
+Choose a backup file different from the active configuration	Wybierz plik kopii inny niż aktywna konfiguracja
+Disconnect active sessions before importing configuration	Przed importem rozłącz aktywne sesje
+Cannot create backup directory: {0}	Nie można utworzyć folderu kopii: {0}
+Cannot read config: {0}	Nie można odczytać konfiguracji: {0}
+Cannot create backup: {0}	Nie można utworzyć kopii: {0}
+Cannot write backup: {0}	Nie można zapisać kopii: {0}
+Cannot read backup: {0}	Nie można odczytać kopii: {0}
+Cannot import configuration: {0}	Nie można zaimportować konfiguracji: {0}
+Any key closes this help	Dowolny klawisz zamyka pomoc
+Session history cleared	Wyczyszczono historię bieżącej sesji
+Sessions Tab/Shift+Tab | Hist Ctrl+Up/Dn PgUp/Dn | Input Ctrl+U | Chat Ctrl+L | YAPP Ctrl+Y | F10	Sesje Tab/Shift+Tab | Hist Ctrl+↑/↓ PgUp/Dn | Wpis Ctrl+U | Czat Ctrl+L | YAPP Ctrl+Y: wyślij | F10
+Settings changed. Restart application now?	Zmieniono ustawienia. Uruchomić aplikację ponownie?
+Enter / Y: restart     Esc / N: later	Enter / Y: uruchom ponownie     Esc / N: później
+Restart postponed	Restart odłożony
+Enter / R: restart and apply changes	Enter / R: uruchom ponownie i zastosuj zmiany
+D: disconnect all sessions and close	D: rozłącz sesje i zamknij aplikację
+Q: close immediately without disconnecting	Q: zamknij natychmiast bez rozłączania
+Esc / N: cancel and keep running	Esc / N: anuluj i pozostaw aplikację otwartą
+TNC reconnect requested	Zlecono ponowne łączenie TNC
+TNC interfaces	Interfejsy TNC
+One interface per line: interface_NAME=host:port,kiss_port,priority,enabled	Jeden interfejs w wierszu: interface_NAZWA=host:port,kanał_KISS,priorytet,włączony
+Example: interface_VHF=127.0.0.1:8001,0,10,true	Przykład: interface_VHF=127.0.0.1:8001,0,10,true
+F2: apply list | Enter: new line | Esc: cancel	F2: zastosuj listę | Enter: nowy wiersz | Esc: anuluj
+F2 apply list	F2 zastosuj listę
+F8: manage named TNC interfaces	F8: zarządzaj nazwanymi interfejsami TNC
+At most 10 interfaces are supported	Obsługiwanych jest maksymalnie 10 interfejsów
+Interface name must be 1-16 ASCII letters, digits or _	Nazwa interfejsu: 1–16 znaków ASCII, cyfr lub _
+Interface value must be endpoint,kiss_port[,priority[,enabled[,description]]]	Wartość: adres,port_KISS[,priorytet[,włączony[,opis]]]
+KISS port must be 0-15	Port KISS musi być z zakresu 0–15
+Interface priority must be 0-255	Priorytet interfejsu musi być z zakresu 0–255
+Interface enabled must be true/false	Wartość enabled musi być true/false
+Interface endpoint must be host:port	Adres interfejsu musi mieć postać host:port
+Interface description must be at most 60 characters	Opis interfejsu może mieć maksymalnie 60 znaków
+Interface description cannot contain #	Opis interfejsu nie może zawierać znaku #
+Operator name cannot contain #	Imię operatora nie może zawierać znaku #
+Interface name is required	Nazwa interfejsu jest wymagana
+New interface names must be at most 10 characters	Nowa nazwa interfejsu może mieć maksymalnie 10 znaków
+Name (max 10)	Nazwa (maks. 10)
+Description	Opis
+At most 10 TNC interfaces are supported	Obsługiwanych jest maksymalnie 10 interfejsów TNC
+Order breaks MHeard ties and sets the fallback port	Kolejność rozstrzyga remisy MHeard i ustala port zapasowy
+Ctrl+Up/Down: reorder | A: add | Enter/F8: edit	Ctrl+Góra/Dół: kolejność | A: dodaj | Enter/F8: edytuj
+Ctrl+Up/Down: move | A: add | Enter/F8: edit	Ctrl+Góra/Dół: zmień kolejność | A: dodaj | Enter/F8: edytuj
+D: remove | Space: enable/disable | F2: save | Esc: cancel	D: usuń | Spacja: włącz/wyłącz | F2: zapisz | Esc: anuluj
+D: delete | Space: enable/disable | F2: save	D: usuń | Spacja: włącz/wyłącz | F2: zapisz
+An empty digi path sends the beacon directly	Pusta trasa digi wysyła beacon bezpośrednio
+Enter: toggle | Type: digi path	Enter: przełącz | wpisz trasę digi
+F2: save | F8: template	F2: zapisz | F8: szablon
+Interface names must be unique	Nazwy interfejsów muszą być unikalne
+Selected TNC interface is disabled	Wybrany interfejs TNC jest wyłączony
+Selected TNC interface is offline; reconnect is in progress	Wybrany interfejs TNC jest rozłączony; trwa ponawianie połączenia
+Unknown TNC interface	Nieznany interfejs TNC
+Default interface: {0}	Domyślny interfejs: {0}
+TNC interfaces: {0}	Interfejsy TNC: {0}
+TNC {0}: connected	TNC {0}: połączono
+TNC {0}: {1}; reconnecting automatically	TNC {0}: {1}; automatyczne ponawianie połączenia
+Export configuration backup	Eksportuj kopię konfiguracji
+Import configuration backup	Importuj kopię konfiguracji
+Clear configuration and reopen setup	Wyczyść konfigurację i otwórz kreator
+Enter: activate | F2: save | F8: export | F9: clear config	Enter: uruchom | F2: zapisz | F8: eksport | F9: wyczyść konfigurację
+F2: save settings | F8: export backup | F9: clear config	F2: zapisz ustawienia | F8: eksport kopii | F9: wyczyść konfigurację
+F8: configuration backup - export or import	F8: kopia konfiguracji - eksport lub import
+F9: clear configuration - remove file and reopen setup	F9: wyczyść konfigurację - usuń plik i wróć do kreatora
+Select an action above and press Enter.	Wybierz powyższą opcję i naciśnij Enter.
+Choose a configuration backup in the file dialog.	Wybierz kopię konfiguracji w oknie plików.
+Choose where to save the configuration backup.	Wybierz miejsce zapisu kopii konfiguracji.
+The terminal remains active while the dialog is open.	Terminal działa dalej, gdy okno wyboru pliku jest otwarte.
+Esc: close	Esc: zamknij
+# Lokalny MailBox
+On	Włączone
+Off	Wyłączone
+Select service state	Wybierz stan usługi
+Up/Down: select | Enter: apply | Esc: cancel	Góra/Dół: wybór | Enter: zastosuj | Esc: anuluj
+Enter on service fields: choose On/Off	Enter na polu usługi: wybierz Włączone/Wyłączone
+Enter: choose On/Off | Tab: next field	Enter: Włączone/Wyłączone | Tab: następne pole
+Enter: choose On/Off or toggle | Type: digi path	Enter: Włączone/Wyłączone lub przełącz | Wpisz: trasa digi
+Enter on Enabled: choose On/Off	Enter na polu Włączone: wybierz stan
+Tab/Up/Down: fields | Enter on Enabled: choose On/Off	Tab/Góra/Dół: pola | Enter na Włączone: wybór stanu
+F6 MailBox 	F6 MailBox 
+F6 MailBox [{0}] 	F6 MailBox [{0}] 
+MailBox	MailBox
+Select message type	Select message type
+Message type	Typ wiadomości
+Personal	Osobista
+Bulletin	Biuletyn
+Traffic	Radiogram
+Type is a label; forwarding is not implemented	Typ jest etykietą; przekazywanie nie jest obsługiwane
+Tab: next field | Enter: choose type/next line | F2: save | Esc: cancel	Tab: następne pole | Enter: wybierz typ/nowy wiersz | F2: zapisz | Esc: anuluj
+Delete MailBox message	Usuń wiadomość MailBox
+Delete MailBox message #{0}?	Usunąć wiadomość MailBox #{0}?
+Enter/Y: delete | Esc/N: cancel	Enter/Y: usuń | Esc/N: anuluj
+Enter: read | N: new | R: reply | D: delete | Up/Down: select | Esc: close	Enter: odczytaj | N: nowa | R: odpowiedz | D: usuń | Góra/Dół: wybór | Esc: zamknij
+D  Delete the selected MailBox message after confirmation	D  Usuń zaznaczoną wiadomość MailBox po potwierdzeniu
+MailBox message deleted	Usunięto wiadomość MailBox
+Cannot delete MailBox message	Nie można usunąć wiadomości MailBox
+ID	ID
+From	Od
+Type	Typ
+UTC	UTC
+State	Stan
+Subject	Temat
+Local MailBox	Lokalny MailBox
+MailBox enabled	MailBox włączony
+MailBox callsign-SSID	Znak MailBox-SSID
+AX.25 autonegotiation (XID)	Autonegocjacja AX.25 (XID)
+New MailBox message from {0}	Nowa wiadomość MailBox od {0}
+MailBox message #{0} saved	Zapisano wiadomość MailBox #{0}
+MailBox uses a separate callsign-SSID and its own two connection slots.	MailBox używa osobnego znaku-SSID i własnych dwóch sesji.
+MailBox beacons reuse the station's enabled interfaces and digi paths.	Beacon MailBoxa korzysta z tych samych włączonych interfejsów i ścieżek digi co stacja.
+MailBox storage is kept beside the configuration in mailbox/.	Wiadomości MailBox są przechowywane obok konfiguracji w katalogu mailbox/.
+MailBox is disabled. Configure it in F8 > MailBox.	MailBox jest wyłączony. Skonfiguruj go w F8 > MailBox.
+F6  Open monitor history; Space freezes/unfreezes	F6  Otwórz monitor; Spacja zamraża/wznawia widok
+F1 Help  F2 Connect  F3 Disc  F4 Send BCN  F5 MHeard F6 Monitor F7 Setup F9 About	F1 Pomoc  F2 Połącz  F3 Rozłącz  F4 Wyślij BCN  F5 MHeard F6 MailBox F7 Monitor F8 Opcje F9 O programie
+F1 Help  F2 Connect  F3 Disc  F4 Send BCN  F5 MHeard  	F1 Pomoc  F2 Połącz  F3 Rozłącz  F4 Wyślij BCN  F5 MHeard  
+F7 Monitor  F8 Setup  F9 About	F7 Monitor  F8 Opcje  F9 O programie
+When both slots are busy, new AX.25 connections are refused with DM.	Gdy obie sesje są zajęte, nowe połączenia AX.25 są odrzucane ramką DM.
+ID       From        To          Type     UTC       State Subject	ID       Od          Do          Typ      UTC       Stan Temat
+To callsign-SSID	Znak odbiorcy-SSID
+Message body (up to 8192 bytes):	Treść wiadomości (do 8192 bajtów):
+R: reply | Esc: back to list	R: odpowiedz | Esc: wróć do listy
+Enabled MailBox requires mailbox_callsign	Włączony MailBox wymaga pola mailbox_callsign
+MailBox callsign must differ from station callsign	Znak MailBox musi różnić się od znaku stacji
+Enabled MailBox requires a callsign	Włączony MailBox wymaga znaku
+F2: Save full monitor to TXT	F2: Zapisz cały monitor do TXT
+Monitor export saved: {0}	Zrzut monitora zapisano: {0}
+Monitor export failed: {0}	Nie udało się zapisać zrzutu monitora: {0}
+Monitor history: F2 saves the full capture as TXT in Downloads	Historia monitora: F2 zapisuje pełny zapis jako TXT w folderze Pobrane
+Automatic receiving	Automatyczny odbiór
+Ask where to save	Pytaj, gdzie zapisać
+Download directory	Folder pobierania
+Classic YAPP 1.1 file transfers run inside AX.25 sessions.	Transfer klasycznego YAPP 1.1 odbywa się w sesji AX.25.
+YAPP-C and transfer resume are not enabled.	YAPP-C i wznawianie transferu nie są obsługiwane.
+Automatic receiving is off by default.	Automatyczny odbiór jest domyślnie wyłączony.
+Completed files do not overwrite existing files.	Zakończony transfer nie nadpisuje istniejących plików.
+Arrows: select | PgUp/PgDn: tab | Enter: On/Off	Strzałki: wybór | PgUp/PgDn: zakładka | Enter: Wł./Wył.
+Tab: next field | Ctrl+U: clear path | F2: save	Tab: następne pole | Ctrl+U: wyczyść ścieżkę | F2: zapisz
+Ctrl+Y: send a file in the selected connected session	Ctrl+Y: wyślij plik w wybranej połączonej sesji
+Accept an incoming YAPP file on session {0}?	Zaakceptować plik YAPP w sesji {0}?
+The sender will provide a filename and size.	Nadawca poda nazwę i rozmiar pliku.
+Y / Enter: accept | N / Esc: refuse	Y / Enter: akceptuj | N / Esc: odrzuć
+Choose a destination in the system save dialog.	Wybierz miejsce w systemowym oknie zapisu.
+Choose a file in the system open dialog.	Wybierz plik w systemowym oknie otwierania.
+The active AX.25 session stays selected.	Aktywna sesja AX.25 pozostaje wybrana.
+Ctrl+Y  Send a file with YAPP in the selected connected session	Ctrl+Y  Wyślij plik YAPP w wybranej połączonej sesji
+Configuration changed. Restart and apply now?	Zmieniono konfigurację. Uruchomić ponownie i zastosować zmiany?
+Enter/R: restart | D: disconnect and close | Q: close now	Enter/R: uruchom ponownie | D: rozłącz i zamknij | Q: zamknij teraz
+Esc/N: cancel and keep running	Esc/N: anuluj i pozostaw program uruchomiony
+Disconnect active sessions	Rozłącz aktywne sesje
+Active sessions will be disconnected before continuing.	Aktywne sesje zostaną rozłączone przed kontynuacją.
+Enter/Y: disconnect and continue | Esc/N: cancel	Enter/T: rozłącz i kontynuuj | Esc/N: anuluj
+Disconnect all active sessions and close the application?	Rozłączyć wszystkie aktywne sesje i zamknąć program?
+Enter/Y: disconnect and close | Esc/N: cancel	Enter/T: rozłącz i zamknij | Esc/N: anuluj
+Monitor history - newest entries at top	Historia monitora - najnowsze wpisy u góry
+F6  Open local MailBox; unread count remains until read	F6  Otwórz lokalny MailBox; licznik nowych zostaje do odczytu
+F7  Open monitor history	F7  Otwórz historię monitora
+    Arrows scroll; Space freezes or resumes the view	    Strzałki przewijają; Spacja zatrzymuje lub wznawia widok
+Monitor history: F2 saves a full TXT capture to Downloads	Historia monitora: F2 zapisuje pełny zrzut TXT w Pobranych
+MailBox over radio: H help, L list, R ID read, S send	MailBox przez radio: H pomoc, L lista, R ID odczyt, S wyślij
+    Q disconnect	    Q rozłącz
+//connect CALL [via DIGI...]  Connect automatically	//connect ZNAK [via DIGI...]  Połącz automatycznie
+    Optional: //connect PORT CALL [via DIGI...]	    Opcjonalnie: //connect PORT ZNAK [via DIGI...]
+//c CALL [via DIGI...]  Short form of //connect	//c ZNAK [via DIGI...]  Skrót polecenia //connect
+//c PORT CALL [via DIGI...]  Connect using that interface	//c PORT ZNAK [via DIGI...]  Połącz przez ten interfejs
+//disconnect  Disconnect or cancel a connection attempt	//disconnect  Rozłącz lub anuluj próbę połączenia
+//port  List TNC interfaces and their states	//port  Pokaż interfejsy TNC i ich stany
+//mheard  Open MHeard; Enter connects via selected interface	//mheard  Otwórz MHeard; Enter łączy przez wybrany interfejs
+//tnc  Retry connections for enabled interfaces	//tnc  Ponów połączenia włączonych interfejsów
+/text  Send a slash command to the connected station	/tekst  Wyślij komendę zaczynającą się od / do stacji
+Ctrl+Y  Send a YAPP file in the selected session	Ctrl+Y  Wyślij plik YAPP w wybranej sesji
+PgUp/Dn or Ctrl+Arrows  History / settings tabs	PgUp/Dn lub Ctrl+strzałki: historia/zakładki
+Arrows: select | PgUp/Dn or Ctrl+Left/Right: tab	Strzałki: wybór | PgUp/Dn lub Ctrl+lewo/prawo: zakładka
+Up/Down or Tab/Shift+Tab  Move through lists	Strzałki lub Tab/Shift+Tab  Nawigacja po listach
+    Arrows/Tab scroll; Space freezes/resumes	    Strzałki/Tab przewijają; Spacja zatrzymuje/wznawia
+Arrows/Tab: scroll | PgUp/PgDn: page | Space: freeze | Esc: close	Strzałki/Tab przewijaj | PgUp/PgDn strona | Spacja stop | Esc
+Enter: read | N: new | R: reply | D: delete | Arrows/Tab: select | Esc: close	Enter czytaj | N nowa | R odp. | D usuń | Strzałki/Tab wybór | Esc
+Enter/F2: connect | Arrows/Tab: select | PgUp/PgDn: page | R: refresh	Enter/F2 połącz | Strzałki/Tab wybór | PgUp/PgDn strona | R odśwież
+Esc: close | Arrows/Tab: scroll | PgUp/PgDn: page	Esc: zamknij | Strzałki/Tab przewijaj | PgUp/PgDn strona
+Esc/F9: close | Arrows/Tab: scroll | PgUp/PgDn: page	Esc/F9 zamknij | Strzałki/Tab przewijaj | PgUp/PgDn strona

@@ -1,0 +1,21 @@
+[Unit]
+Description=UltimatePR Station web server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ultimatepr
+Group=ultimatepr
+WorkingDirectory=/var/lib/ultimatepr
+ExecStart=/usr/local/bin/ultimatepr-station --bind 127.0.0.1:8080 --config /var/lib/ultimatepr/station.conf --web-config /var/lib/ultimatepr/web.conf
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/ultimatepr
+
+[Install]
+WantedBy=multi-user.target

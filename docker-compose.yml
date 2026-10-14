@@ -1,0 +1,18 @@
+services:
+  ultimatepr-station:
+    build: .
+    image: ultimatepr-station:local
+    restart: unless-stopped
+    stop_grace_period: 20s
+    ports:
+      - "8080:8080"
+    environment:
+      STATION_TOKEN: ${STATION_TOKEN:?set STATION_TOKEN to at least 24 printable characters}
+    volumes:
+      - ultimatepr-data:/var/lib/ultimatepr
+    # Uncomment on Linux/Raspberry Pi when using a USB TNC:
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+
+volumes:
+  ultimatepr-data:

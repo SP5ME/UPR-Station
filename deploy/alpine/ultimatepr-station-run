@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+# OpenRC starts this wrapper as the dedicated service account.  Keep the
+# runtime environment explicit so startup does not depend on the environment
+# inherited by supervise-daemon.
+export HOME="/home/ultimatepr"
+export USER="ultimatepr"
+export LOGNAME="ultimatepr"
+export UPR_UPDATE_DIR="/var/lib/ultimatepr/update"
+export UPR_UPDATE_HELPER="/usr/local/libexec/ultimatepr-update"
+
+if [ "$(id -u)" -eq 0 ]; then
+    install -d -o ultimatepr -g ultimatepr -m 0750 /var/lib/ultimatepr/update
+    exec su -s /bin/sh -c '/usr/local/libexec/ultimatepr-station-run --service-user' ultimatepr
+fi
+
+if [ "${1:-}" = "--service-user" ]; then
+    shift
+fi
+
+cd /opt/ultimatepr-station/current
+exec /opt/ultimatepr-station/current/ultimatepr-station \
+    --bind 0.0.0.0:8080 \
+    --config /etc/ultimatepr/station.conf \
+    --web-config /etc/ultimatepr/web.conf

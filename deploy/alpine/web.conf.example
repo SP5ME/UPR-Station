@@ -1,0 +1,6 @@
+bind=0.0.0.0:8080
+auth_enabled=true
+heartbeat_timeout=90
+presence_mode=auto
+absence_profile=2
+statistics_enabled=false

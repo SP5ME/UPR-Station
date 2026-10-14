@@ -1,0 +1,220 @@
+#!/bin/sh
+set -eu
+
+[ "$(id -u)" -eq 0 ] || { echo "Aktualizacja wymaga uprawnień root." >&2; exit 1; }
+[ "${1:-}" = "--install" ] || { echo "Użycie: $0 --install ZIP STATUS_DIR" >&2; exit 2; }
+PACKAGE=${2:?Brak paczki ZIP}
+STATUS_DIR=${3:?Brak katalogu statusu}
+INSTALL_ROOT=/opt/ultimatepr-station
+RELEASES="$INSTALL_ROOT/releases"
+CURRENT="$INSTALL_ROOT/current"
+SERVICE=ultimatepr-station
+STAGE=$(mktemp -d /var/tmp/ultimatepr-update.XXXXXX)
+OLD_TARGET="$STAGE/old-target"
+cleanup() { rm -rf "$STAGE"; }
+trap cleanup EXIT
+
+status() { printf 'state=%s\nversion=%s\nlog=%s\n' "$1" "${2:-}" "$3" > "$STATUS_DIR/status.txt"; }
+fail() { status failed "" "$1"; exit 1; }
+
+# OpenRC may leave an older supervise-daemon child behind after an interrupted
+# update.  That process still owns station.conf and makes the next instance
+# exit with "Another Station is using this configuration".  Only processes
+# named ultimatepr-station are considered; the update helper itself is never
+# matched.  Prefer TERM and use KILL only when the stale process refuses to
+# exit, then wait until no instance remains before starting the new release.
+station_pids() {
+    pids=$(pidof ultimatepr-station 2>/dev/null || true)
+    if [ -z "$pids" ]; then
+        # BusyBox pidof can miss a process whose executable is reached through
+        # the current symlink.  The command line is controlled by the service
+        # and the --bind marker avoids matching this diagnostic shell itself.
+        pids=$(ps -o pid,args 2>/dev/null | awk '$0 ~ /ultimatepr-station --bind/ {print $1}')
+    fi
+    printf '%s\n' "$pids"
+}
+
+stop_station_processes() {
+    rc-service "$SERVICE" stop >/dev/null 2>&1 || true
+    # Clear a stale OpenRC started state left by an interrupted supervisor.
+    rc-service "$SERVICE" zap >/dev/null 2>&1 || true
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        pids=$(station_pids)
+        [ -n "$pids" ] || return 0
+        kill -TERM $pids 2>/dev/null || true
+        sleep 1
+    done
+    pids=$(station_pids)
+    [ -z "$pids" ] || kill -KILL $pids 2>/dev/null || true
+    for _ in 1 2 3 4 5; do
+        [ -z "$(station_pids)" ] && return 0
+        sleep 1
+    done
+    [ -z "$(station_pids)" ] || return 1
+}
+
+current_binary() {
+    readlink -f "$CURRENT/ultimatepr-station" 2>/dev/null || true
+}
+
+current_process_running() {
+    expected=$(current_binary)
+    [ -n "$expected" ] || return 1
+    pids=$(station_pids)
+    [ -n "$pids" ] || return 1
+    for pid in $pids; do
+        actual=$(readlink -f "/proc/$pid/exe" 2>/dev/null || true)
+        [ "$actual" = "$expected" ] && return 0
+    done
+    return 1
+}
+
+wait_for_current_process() {
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
+        current_process_running && return 0
+        sleep 1
+    done
+    return 1
+}
+
+wait_for_health() {
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
+        if wget -q -O - http://127.0.0.1:8080/healthz >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+
+start_and_wait() {
+    rc-service "$SERVICE" zap >/dev/null 2>&1 || true
+    rc-service "$SERVICE" start || return 1
+    wait_for_health || return 1
+    wait_for_current_process
+}
+
+mkdir -p "$STATUS_DIR" "$RELEASES"
+if id ultimatepr >/dev/null 2>&1; then
+    chown ultimatepr:ultimatepr "$STATUS_DIR" 2>/dev/null || true
+    chmod 0750 "$STATUS_DIR" 2>/dev/null || true
+fi
+status validating "" "Sprawdzanie paczki aktualizacji…"
+command -v unzip >/dev/null 2>&1 || fail "Brak programu unzip na Alpine."
+[ -f "$PACKAGE" ] || fail "Brak przesłanej paczki."
+PACKAGE_SHA=$(sha256sum "$PACKAGE" | awk '{print $1}')
+
+while IFS= read -r entry; do
+    case "$entry" in
+        /*|../*|*/../*|*"/.."|..|*'\000'*) fail "Niebezpieczna ścieżka w ZIP: $entry" ;;
+    esac
+done <<EOF
+$(unzip -Z1 "$PACKAGE")
+EOF
+
+UNZIP_LOG="$STAGE/unzip.log"
+if ! unzip -q "$PACKAGE" -d "$STAGE" >"$UNZIP_LOG" 2>&1; then
+    DETAIL=$(tr '\n' ' ' < "$UNZIP_LOG")
+    fail "Nie można rozpakować paczki${DETAIL:+: $DETAIL}"
+fi
+ROOT="$STAGE"
+[ -f "$ROOT/Cargo.toml" ] || ROOT=$(find "$STAGE" -mindepth 1 -maxdepth 2 -name Cargo.toml -print -quit | sed 's#/Cargo.toml$##')
+[ -n "$ROOT" ] && [ -d "$ROOT" ] || fail "Paczka nie zawiera źródeł ani binarki UltimatePR Station."
+MANIFEST="$ROOT/PACKAGE-MANIFEST.txt"
+[ -f "$MANIFEST" ] || MANIFEST="$ROOT/UPDATE-MANIFEST.txt"
+[ -f "$MANIFEST" ] || fail "Brak manifestu paczki aktualizacji."
+VARIANT=$(awk -F= '$1=="variant" {gsub(/[ "\r]/,"",$2); print $2; exit}' "$MANIFEST")
+case "$VARIANT" in
+    linux-headless-server-alpine-musl|linux-headless-server-alpine-musl-source) ;;
+    *) fail "Nieobsługiwany wariant paczki: ${VARIANT:-brak}" ;;
+esac
+
+VERSION=$(awk -F= '$1=="version" {gsub(/[ "\r]/,"",$2); print $2; exit}' "$MANIFEST" 2>/dev/null || true)
+[ -n "$VERSION" ] || VERSION=$(date -u +%Y%m%d-%H%M%S)
+
+if [ -f "$ROOT/Cargo.toml" ] && [ -f "$ROOT/src/main.rs" ]; then
+    status building "$VERSION" "Kompilowanie źródeł Alpine/musl…"
+    command -v cargo >/dev/null 2>&1 || fail "Brak Cargo do kompilacji paczki źródłowej."
+    (cd "$ROOT" && cargo build --release --locked --bin ultimatepr-station) || fail "Kompilacja nie powiodła się."
+    BINARY="$ROOT/target/release/ultimatepr-station"
+else
+    BINARY=$(find "$ROOT" -type f -name ultimatepr-station -perm -u+x -print -quit)
+    [ -n "$BINARY" ] || fail "Paczka nie zawiera wykonywalnej binarki Alpine."
+fi
+[ -x "$BINARY" ] || fail "Binarka nie jest wykonywalna."
+EXPECTED_SHA=$(awk -F= '$1=="binary_sha256" {gsub(/[ "\r]/,"",$2); print $2; exit}' "$MANIFEST")
+if [ -n "$EXPECTED_SHA" ]; then
+    ACTUAL_SHA=$(sha256sum "$BINARY" | awk '{print $1}')
+    [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ] || fail "Suma SHA-256 binarki nie zgadza się z manifestem."
+fi
+
+status stopping "$VERSION" "Zatrzymywanie usługi…"
+stop_station_processes || fail "Nie można zatrzymać poprzedniej instancji UltimatePR Station."
+if [ -L "$CURRENT" ]; then readlink "$CURRENT" > "$OLD_TARGET"; fi
+RELEASE="$RELEASES/$VERSION-$PACKAGE_SHA"
+rm -rf "$RELEASE"
+mkdir -p "$RELEASE"
+install -m 0755 "$BINARY" "$RELEASE/ultimatepr-station"
+# BusyBox mv may follow a destination symlink to a directory instead of
+# replacing the link.  Remove only the controlled `current` link first, then
+# install the new link so the service cannot keep pointing at `initial`.
+rm -f "$CURRENT"
+ln -s "$RELEASE" "$CURRENT"
+
+# The service must use the controlled launcher before the first start of the
+# new release.  Installing it after the health check would leave an older,
+# broken OpenRC installation active during this update.
+if [ -f "$ROOT/deploy/alpine/ultimatepr-station-run" ]; then
+    install -m 0755 "$ROOT/deploy/alpine/ultimatepr-station-run" /usr/local/libexec/ultimatepr-station-run
+fi
+if [ -f "$ROOT/deploy/alpine/ultimatepr-station.initd" ]; then
+    install -m 0755 "$ROOT/deploy/alpine/ultimatepr-station.initd" /etc/init.d/ultimatepr-station
+fi
+
+status starting "$VERSION" "Uruchamianie nowej wersji…"
+if ! start_and_wait; then
+    # A supervisor can report a successful start while an old child is still
+    # unwinding. Clean it once and retry before declaring the release broken.
+    stop_station_processes || true
+    if start_and_wait; then
+        :
+    else
+        status rolled-back "$VERSION" "Nowa wersja nie wystartowała. Przywracanie poprzedniej wersji…"
+        stop_station_processes || fail "Nie można zatrzymać nowej instancji przed przywróceniem poprzedniej wersji."
+        rm -f "$CURRENT"
+        if [ -s "$OLD_TARGET" ]; then ln -s "$(cat "$OLD_TARGET")" "$CURRENT"; fi
+        if ! start_and_wait; then
+            # Do not leave a supervise-daemon child behind when the restored
+            # release also fails its health check.  Such a child can keep the
+            # configuration lock while the service is reported as stopped.
+            stop_station_processes || true
+        fi
+        exit 1
+    fi
+fi
+
+if ! wait_for_health; then
+    status rolled-back "$VERSION" "Kontrola panelu WWW nie powiodła się. Przywracanie poprzedniej wersji…"
+    stop_station_processes || true
+    rm -f "$CURRENT"
+    if [ -s "$OLD_TARGET" ]; then ln -s "$(cat "$OLD_TARGET")" "$CURRENT"; fi
+    if ! start_and_wait; then
+        # The rollback path must be as strict as the forward path: a failed
+        # health check must not leave an orphan process listening nowhere.
+        stop_station_processes || true
+    fi
+    exit 1
+fi
+# Update the maintenance files only after the new application passed health.
+# This lets an older helper perform one safe self-update without replacing the
+# currently working helper before the new service is verified.
+if [ -f "$ROOT/deploy/alpine/ultimatepr-update" ]; then
+    install -m 0755 "$ROOT/deploy/alpine/ultimatepr-update" /usr/local/libexec/ultimatepr-update
+fi
+cp -f "$MANIFEST" "$RELEASE/PACKAGE-MANIFEST.txt"
+status completed "$VERSION" "Aktualizacja zakończona pomyślnie. Usługa działa w tle. Odśwież kartę przeglądarki przez Ctrl+F5 lub Ctrl+Shift+R (Windows/Linux), aby wczytać nową wersję panelu. SHA-256 ZIP: $PACKAGE_SHA"
+
+# Do not reboot the Alpine LXC here.  The application update is complete after
+# the OpenRC service passed health check.  Rebooting from inside a Proxmox LXC
+# is host/configuration dependent and can leave the container stopped even
+# though the release itself was installed correctly.

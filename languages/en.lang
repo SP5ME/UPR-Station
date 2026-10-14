@@ -1,0 +1,569 @@
+# English baseline and translation template. UTF-8; source<TAB>translation.
+Connected	Connected
+Connecting	Connecting
+Disconnecting	Disconnecting
+Disconnected	Disconnected
+Disconnected by peer	Disconnected by peer
+Disconnected/refused (DM)	Disconnected/refused (DM)
+Connected (SABM; sequence state reset)	Connected (SABM; sequence state reset)
+Connected (modulo 128)	Connected (modulo 128)
+Connecting (modulo 8; XID follows UA)	Connecting (modulo 8; XID follows UA)
+Connected in modulo 8; negotiating AX.25 parameters (XID)	Connected in modulo 8; negotiating AX.25 parameters (XID)
+XID selected modulo 128; sending SABME	XID selected modulo 128; sending SABME
+XID selected modulo 8; connected	XID selected modulo 8; connected
+XID rejected; connected in modulo 8	XID rejected; connected in modulo 8
+SABME rejected; retrying with SABM in modulo 8	SABME rejected; retrying with SABM in modulo 8
+XID timeout; connected in modulo 8	XID timeout; connected in modulo 8
+Invalid XID response; connected in modulo 8	Invalid XID response; connected in modulo 8
+Non-text PID received; payload not displayed	Non-text PID received; payload not displayed
+Retry limit reached; session closed, unsent data discarded	Retry limit reached; session closed, unsent data discarded
+TCP lost; session and queued data cleared	TCP lost; session and queued data cleared
+Invalid N(R); resetting link, queued data discarded	Invalid N(R); resetting link, queued data discarded
+FRMR received; resetting link, queued data discarded	FRMR received; resetting link, queued data discarded
+Session slot is occupied/invalid	Session slot is occupied/invalid
+Invalid destination/path	Invalid destination/path
+This station already has a session	This station already has a session
+All eight sessions are occupied	All eight sessions are occupied
+Session with {0} already exists. Switched to session {1}.	Session with {0} already exists. Switched to session {1}.
+No session	No session
+Session is not connected	Session is not connected
+TX queue full (16 KiB); wait for acknowledgements	TX queue full (16 KiB); wait for acknowledgements
+Call must be 1-6 letters/digits with optional SSID 0-15	Call must be 1-6 letters/digits with optional SSID 0-15
+Invalid SSID	Invalid SSID
+Invalid language code	Invalid language code
+F2 Connect | F7 Station setup | F1 Help	F2 Connect | F7 Station setup | F1 Help
+Disconnect all sessions before reconnecting TNC	Disconnect all sessions before reconnecting TNC
+TNC: TCP connected	TNC: TCP connected
+TCP: {0}; reconnecting automatically	TCP: {0}; reconnecting automatically
+Session {0}: {1}	Session {0}: {1}
+RX invalid: {0}	RX invalid: {0}
+Disconnect active sessions before saving settings	Disconnect active sessions before saving settings
+//port                         Show the configured TNC interface	//port                         Show the configured TNC interface
+TNC {0} {1} KISS {2}	TNC {0} {1} KISS {2}
+TNC interface setup	TNC interface setup
+Configured TNC ports	Configured TNC ports
+Add TNC interface...	Add TNC interface...
+A: add | Enter/F8: edit | D: remove | Space: enable/disable	A: add | Enter/F8: edit | D: remove | Space: enable/disable
+F2: save settings | Esc: cancel	F2: save settings | Esc: cancel
+TCP host:port	TCP host:port
+Name	Name
+Priority	Priority
+Enabled	Enabled
+Tab/Up/Down: move between fields	Tab/Up/Down: move between fields
+F2: apply to settings | Esc: cancel	F2: apply to settings | Esc: cancel
+At least one TNC interface is required	At least one TNC interface is required
+Beacon sent on beacon-enabled interfaces	Beacon sent on beacon-enabled interfaces
+No beacon-enabled interface is connected	No beacon-enabled interface is connected
+Per-interface beacon settings	Per-interface beacon settings
+Arrows/Tab: select | Enter: beacon on/off	Arrows/Tab: select | Enter: beacon on/off
+Type digi path | F2: save | F8: edit template	Type digi path | F2: save | F8: edit template
+Enter: toggle | Type: digi path | F2: save | F8: template | Esc: cancel	Enter: toggle | Type: digi path | F2: save | F8: template | Esc: cancel
+Periodic beacon	Periodic beacon
+beacon_interfaces contains an unknown interface	beacon_interfaces contains an unknown interface
+beacon_interfaces contains a duplicate interface	beacon_interfaces contains a duplicate interface
+//help                         Show this help	//help                         Show this help
+//h                            Alias for //help	//h                            Alias for //help
+//connect CALL [via DIGI DIGI]  Connect to CALL; optional digipeater path	//connect CALL [via DIGI DIGI]  Connect to CALL; optional digipeater path
+//c CALL [via DIGI DIGI]        Alias for //connect	//c CALL [via DIGI DIGI]        Alias for //connect
+//session 1..8                 Select session for text input	//session 1..8                 Select session for text input
+//sessions                     Show session states and queued TX bytes	//sessions                     Show session states and queued TX bytes
+//disconnect                   Disconnect selected session or cancel attempt	//disconnect                   Disconnect selected session or cancel attempt
+//d                            Alias for //disconnect	//d                            Alias for //disconnect
+//monitor on|off               Enable or pause RX/TX frame monitoring	//monitor on|off               Enable or pause RX/TX frame monitoring
+//accept on|off                Allow or refuse incoming connections	//accept on|off                Allow or refuse incoming connections
+//tnc                          Show TCP status or retry pending connection	//tnc                          Show TCP status or retry pending connection
+//mheard                       List heard stations	//mheard                       List heard stations
+//quit                         Disconnect sessions and exit	//quit                         Disconnect sessions and exit
+Plain text + Enter sends a line ending in CR. // starts local commands.	Plain text + Enter sends a line ending in CR. // starts local commands.
+Received text is labelled with its session number, e.g. [RX 1].	Received text is labelled with its session number, e.g. [RX 1].
+SESSIONS AND CONNECTIONS	SESSIONS AND CONNECTIONS
+MONITOR PREVIEW	MONITOR PREVIEW
+STATIONS, MAILBOX AND FILE TRANSFER	STATIONS, MAILBOX AND FILE TRANSFER
+SETTINGS	SETTINGS
+LOCAL COMMANDS (typed in the input field)	LOCAL COMMANDS (typed in the input field)
+Tab / Shift+Tab  Select next / previous session	Tab / Shift+Tab  Select next / previous session
+//preview off  Hide the monitor preview	//preview off  Hide the monitor preview
+//preview on  Show the monitor preview	//preview on  Show the monitor preview
+Frame capture keeps running while the preview is hidden	Frame capture keeps running while the preview is hidden
+Monitor preview hidden | type //preview on to show	Monitor preview hidden | type //preview on to show
+Monitor preview | newest entries at top	Monitor preview | newest entries at top
+Frame capture is always on; use //preview on|off to show or hide the preview	Frame capture is always on; use //preview on|off to show or hide the preview
+F1  Open this help	F1  Open this help
+F2  Connect using a callsign and optional interface/path	F2  Connect using a callsign and optional interface/path
+F3  Disconnect or cancel the current connection attempt	F3  Disconnect or cancel the current connection attempt
+F4  Send beacon now	F4  Send beacon now
+F5  Open MHeard station list	F5  Open MHeard station list
+MailBox remote commands: H help, L list, R ID read, S send, Q disconnect	MailBox remote commands: H help, L list, R ID read, S send, Q disconnect
+F7  Open monitor history; arrows scroll; Space freezes/unfreezes	F7  Open monitor history; arrows scroll; Space freezes/unfreezes
+F8  Open settings	F8  Open settings
+F9  About	F9  About
+F8 AX.25 tab: enable/disable the AX.25 digipeater	F8 AX.25 tab: enable/disable the AX.25 digipeater
+The optional local MailBox has its own callsign-SSID and accepts up to two simultaneous AX.25 connections, separately from the terminal sessions.	The optional local MailBox has its own callsign-SSID and accepts up to two simultaneous AX.25 connections, separately from the terminal sessions.
+F10  Exit after disconnecting sessions	F10  Exit after disconnecting sessions
+Tab  Select next session	Tab  Select next session
+Shift+Tab  Select previous session	Shift+Tab  Select previous session
+Up/Down  Move selection in lists	Up/Down  Move selection in lists
+PgUp/PgDn  Scroll chat history or change settings tab	PgUp/PgDn  Scroll chat history or change settings tab
+Enter  Send text or confirm selection	Enter  Send text or confirm selection
+Ctrl+U  Clear the input field	Ctrl+U  Clear the input field
+Ctrl+L  Clear current session chat history	Ctrl+L  Clear current session chat history
+//help  Show this help	//help  Show this help
+//h  Alias for //help	//h  Alias for //help
+//connect CALL [via DIGI...]  Connect; choose interface automatically	//connect CALL [via DIGI...]  Connect; choose interface automatically
+//connect PORT CALL [via DIGI...]  Connect through named interface	//connect PORT CALL [via DIGI...]  Connect through named interface
+//c CALL [via DIGI...]  Alias for //connect	//c CALL [via DIGI...]  Alias for //connect
+//c PORT CALL [via DIGI...]  Alias with explicit interface	//c PORT CALL [via DIGI...]  Alias with explicit interface
+//disconnect  Disconnect or cancel current connection attempt	//disconnect  Disconnect or cancel current connection attempt
+//d  Alias for //disconnect	//d  Alias for //disconnect
+//sessions  Show session states and queued bytes	//sessions  Show session states and queued bytes
+//port  List TNC interfaces and connection states	//port  List TNC interfaces and connection states
+//port NAME  Set default interface for new connections	//port NAME  Set default interface for new connections
+//mheard  Open MHeard; Enter connects using that interface	//mheard  Open MHeard; Enter connects using that interface
+//accept on|off  Enable or refuse incoming connections	//accept on|off  Enable or refuse incoming connections
+//tnc  Request reconnect for enabled interfaces	//tnc  Request reconnect for enabled interfaces
+//quit  Disconnect sessions and exit	//quit  Disconnect sessions and exit
+/text  Send text beginning with / to the connected station	/text  Send text beginning with / to the connected station
+Esc: close | Arrows/PgUp/PgDn: scroll	Esc: close | Arrows/PgUp/PgDn: scroll
+Call       Interface      P  Frames       UTC   Age      To / Path	Call       Interface      P  Frames       UTC   Age      To / Path
+reconnect	reconnect
+No enabled TNC interfaces	No enabled TNC interfaces
+Status:	Status:
+Incoming connection from	Incoming connection from
+Enter your callsign-SSID	Enter your callsign-SSID
+TNC address must be host:port (TCP port 1-65535)	TNC address must be host:port (TCP port 1-65535)
+Cannot create configuration temporary file: {0}	Cannot create configuration temporary file: {0}
+Cannot save configuration: {0}	Cannot save configuration: {0}
+Settings saved. TNC reconnects automatically.	Settings saved. TNC reconnects automatically.
+TCP offline; reconnecting automatically	TCP offline; reconnecting automatically
+Enter CALL [via DIGI DIGI]	Enter CALL [via DIGI DIGI]
+Use CALL via DIGI DIGI	Use CALL via DIGI DIGI
+Disconnecting sessions...	Disconnecting sessions...
+Use //session 1..8	Use //session 1..8
+Use //preview on|off	Use //preview on|off
+Use //accept on|off	Use //accept on|off
+Tab / Shift+Tab selects a session; * means unread activity	Tab / Shift+Tab selects a session; * means unread activity
+Unknown local command; F1 or //help for help.	Unknown local command; F1 or //help for help.
+Monitor capture {0}	Monitor capture {0}
+ON	ON
+OFF	OFF
+PAUSED	PAUSED
+FREE	FREE
+free	free
+UltimatePR - enlarge terminal to 72 x 24	UltimatePR - enlarge terminal to 72 x 24
+F10 then Enter exits; sessions still run	F10 then Enter exits; sessions still run
+Session {0}  {1}  {2}	Session {0}  {1}  {2}
+Transmit / Enter to send	Transmit / Enter to send
+TCP: {0}  {1}  P:{2} | RX accept:{3} | Buffer:{4} B	TCP: {0}  {1}  P:{2} | RX accept:{3} | Buffer:{4} B
+Connect	Connect
+Station setup	Station setup
+About	About
+UltimatePR Terminal {0}	UltimatePR Terminal {0}
+Created by UltimatePR.	Created by the UltimatePR team.
+A lightweight packet-radio terminal for connected-mode AX.25 operation. It is built for operator-to-station conversations and is not an APRS client.	A lightweight packet-radio terminal for connected-mode AX.25 operation. It is built for operator-to-station conversations and is not an APRS client.
+The application communicates with TNCs over KISS TCP or a serial port. This keeps the terminal independent of a particular modem and allows compatible hardware and software TNCs, including Dire Wolf.	The application communicates with TNCs over KISS TCP or a serial port. This keeps the terminal independent of a particular modem and allows compatible hardware and software TNCs, including Dire Wolf.
+You can use up to eight connected sessions at once, watch received and transmitted frames, and review stations in MHeard. With multiple interfaces, connections can use a selected port or fall back to the configured priority order.	You can use up to eight connected sessions at once, watch received and transmitted frames, and review stations in MHeard. With multiple interfaces, connections can use a selected port or fall back to the configured priority order.
+AX.25 parameter negotiation uses XID after SABM/UA and selects modulo 8 or modulo 128 according to the peer's response.	AX.25 parameter negotiation uses XID after SABM/UA and selects modulo 8 or modulo 128 according to the peer's response.
+Optional station messages, remote information commands, periodic beacons and digipeating support everyday packet-radio use. Beacon routing can be configured separately for each interface.	Optional station messages, remote information commands, periodic beacons and digipeating support everyday packet-radio use. Beacon routing can be configured separately for each interface.
+The interface currently includes English and Polish. Translation catalogs are stored outside the program code so additional languages can be added independently.	The interface currently includes English and Polish. Translation catalogs are stored outside the program code so additional languages can be added independently.
+UltimatePR Terminal is a prototype. Its KISS transport, AX.25 link handling and terminal interface are split into modules; the project documentation describes current behavior and known limits.	UltimatePR Terminal is a prototype. Its KISS transport, AX.25 link handling and terminal interface are split into modules; the project documentation describes current behavior and known limits.
+Esc/F9: close | Up/Down: scroll | PgUp/PgDn: page	Esc/F9: close | Up/Down: scroll | PgUp/PgDn: page
+Keyboard help	Keyboard help
+Exit terminal	Exit terminal
+Destination: CALL-SSID [via DIGI DIGI]	Destination: CALL-SSID [via DIGI DIGI]
+Enter: connect   Esc: cancel	Enter: connect   Esc: cancel
+Callsign-SSID	Callsign-SSID
+TNC host:port	TNC host:port
+Connection type	Connection type
+TCP/IP	TCP/IP
+Serial	Serial
+COM device	COM device
+Serial baud rate	Serial baud rate
+No COM devices found	No COM devices found
+Cannot list COM devices	Cannot list COM devices
+Serial interface must be serial:COMx@baud	Serial interface must be serial:COMx@baud
+Serial device must be a COM port name such as COM3	Serial device must be a COM port name such as COM3
+Serial baud rate must be a supported number	Serial baud rate must be a supported number
+Serial baud rate must be 1200-115200 from the supported list	Serial baud rate must be 1200-115200 from the supported list
+A serial COM device can only be assigned to one TNC interface	A serial COM device can only be assigned to one TNC interface
+Enter: choose type/COM/On-Off | Tab/Arrows: fields	Enter: choose type/COM/On-Off | Tab/Arrows: fields
+Select connection option	Select connection option
+Select interface language	Select interface language
+Installed language catalogs appear in the selector.	Installed language catalogs appear in the selector.
+Up/Down: select | Enter: use | Esc: cancel	Up/Down: select | Enter: use | Esc: cancel
+KISS channel	KISS channel
+T1 ms	T1 ms
+T3 ms	T3 ms
+Retries	Retries
+Packet bytes	Packet bytes
+Accept incoming	Accept incoming
+Language	Language
+The terminal emulator controls its own font settings.	The terminal emulator controls its own font settings.
+Tab: next field  Ctrl+U: clear  Enter: save  Esc: cancel	Tab: next field  Ctrl+U: clear  Enter: save  Esc: cancel
+Save applies the current On/Off selection.	Save applies the current On/Off selection.
+Language code (en/pl or a catalog code); Enter saves	Language code (en/pl or a catalog code); Enter saves
+F2  Connect selected slot    F3  Disconnect selected slot	F2  Connect (free/existing)  F3  Disconnect selected slot
+F4 Send BCN  F5 MHeard  F6 Monitor  F7 Settings	F4 Send BCN  F5 MHeard  F6 Monitor  F7 Settings
+TNC reconnects automatically (1 s). F10: Exit	TNC reconnects automatically (1 s). F10: Exit
+Tab / Shift+Tab: switch between the eight sessions	Tab / Shift+Tab: switch between the eight sessions
+An asterisk on a tab means unread data or status	An asterisk on a tab means unread data or status
+PgUp/PgDn: session history	PgUp/PgDn: session history
+Left/Right/Home/End, Backspace/Delete: edit input	Left/Right/Home/End, Backspace/Delete: edit input
+Ctrl+U: clear field          Enter: send text + CR	Ctrl+U: clear field          Enter: send text + CR
+Each session keeps its own draft and bounded history	Each session keeps its own draft and bounded history
+//connect CALL via DIGI, //session N, //disconnect, //tnc	//connect CALL via DIGI, //session N, //disconnect, //tnc
+//accept on|off, //monitor on|off, //quit also work	//accept on|off, //monitor on|off, //quit also work
+/text goes to the remote station; //help opens local help	/text goes to the remote station; //help opens local help
+Settings are saved to the selected configuration file	Settings are saved to the selected configuration file
+Disconnect all sessions and close terminal?	Disconnect all sessions and close terminal?
+Enter / Y: exit     Esc / N: return	Enter / Y: exit     Esc / N: return
+Starting terminal...	Starting terminal...
+Your callsign-SSID: 	Your callsign-SSID: 
+[TNC] TCP connected	[TNC] TCP connected
+[TCP] {0}; reconnecting automatically	[TCP] {0}; reconnecting automatically
+Selected session {0}	Selected session {0}
+Usage: //session 1..8	Usage: //session 1..8
+Usage: //connect CALL [via DIGI DIGI]	Usage: //connect CALL [via DIGI DIGI]
+Disconnect active sessions first	Disconnect active sessions first
+Unknown command; //help	Unknown command; //help
+Terminal closed.	Terminal closed.
+Input line exceeds 4096 bytes	Input line exceeds 4096 bytes
+Input must be UTF-8	Input must be UTF-8
+//help                         Commands (local commands start with //)	//help                         Commands (local commands start with //)
+//connect CALL [via DIGI DIGI]  Connect in selected slot	//connect CALL [via DIGI DIGI]  Use a free or existing session
+//session 1..8                 Select slot for outgoing text	//session 1..8                 Select slot for outgoing text
+//sessions                     List all sessions and buffered bytes	//sessions                     List all sessions and buffered bytes
+//disconnect                   Disconnect selected session	//disconnect                   Disconnect selected session
+//monitor on|off                Show decoded RX/TX frames	//monitor on|off                Show decoded RX/TX frames
+//accept on|off                 Allow incoming connections	//accept on|off                 Allow incoming connections
+//tnc                          Connect/reconnect TCP (no active sessions)	//tnc                          Connect/reconnect TCP (no active sessions)
+//quit                         Graceful disconnect, then exit	//quit                         Graceful disconnect, then exit
+Text + Enter sends a line ending in CR. // starts local commands.	Text + Enter sends a line ending in CR. // starts local commands.
+Received text from all sessions is labelled [RX n].	Received text from all sessions is labelled [RX n].
+kiss_port must be 0-15	kiss_port must be 0-15
+retries must be 1-30	retries must be 1-30
+paclen must be 1-256	paclen must be 1-256
+accept_incoming must be true/false	accept_incoming must be true/false
+Timers: t1_ms 1000-120000; t3_ms >= t1_ms and <= 3600000	Timers: t1_ms 1000-120000; t3_ms >= t1_ms and <= 3600000
+Duplicate config key: {0}	Duplicate config key: {0}
+Unknown config key: {0}	Unknown config key: {0}
+Invalid number for {0}	Invalid number for {0}
+Config line {0}: expected key=value	Config line {0}: expected key=value
+Language not found: {0}	Language not found: {0}
+Unknown translation key: {0}	Unknown translation key: {0}
+Translation placeholders differ: {0}	Translation placeholders differ: {0}
+Duplicate translation key: {0}	Duplicate translation key: {0}
+TNC closed TCP	TNC closed TCP
+TNC write returned zero	TNC write returned zero
+TNC TX queue exceeded 64 KiB	TNC TX queue exceeded 64 KiB
+Interactive terminals use the full-screen UI.	Interactive terminals use the full-screen UI.
+Invalid address length	Invalid address length
+Invalid address encoding	Invalid address encoding
+Invalid call	Invalid call
+Missing address/control	Missing address/control
+Missing PID	Missing PID
+Information field too long	Information field too long
+Supervisory frame with information	Supervisory frame with information
+Usage: //monitor on|off	Usage: //monitor on|off
+Usage: //accept on|off	Usage: //accept on|off
+MHeard - received stations	MHeard - received stations
+No stations received yet	No stations received yet
+Call	Call
+Frames	Frames
+Age	Age
+To / Path	To / Path
+Age(s)	Age(s)
+To	To
+Path:	Path:
+Path: none	Path: none
+Stations: {0}/256 | Latest first | RAM only	Stations: {0}/256 | Latest first | RAM only
+Up/Down PgUp/PgDn: scroll | Esc/Enter: close	Up/Down PgUp/PgDn: scroll | Esc/Enter: close
+//mheard                       List received stations	//mheard                       List received stations
+Reconnect	Reconnect
+TCP: {0}; retry in 1 s	TCP: {0}; retry in 1 s
+[TCP] Reconnect: {0}; retry in 1 s	[TCP] Reconnect: {0}; retry in 1 s
+
+Station	Station
+TNC	TNC
+AX.25	AX.25
+Digipeating	Digipeating
+Messages	Messages
+Beacon	Beacon
+Interface	Interface
+Application	Application
+Operator name	Operator name
+Welcome enabled	Welcome enabled
+Goodbye enabled	Goodbye enabled
+Remote commands	Remote commands
+Beacon enabled	Beacon enabled
+Interval minutes	Interval minutes
+Destination	Destination
+Digipeaters	Digipeaters
+Message template	Message template
+Template saved	Template saved
+Session is closing	Session is closing
+PgUp/PgDn: tabs | Tab: field | Ctrl+U: clear	PgUp/PgDn: tabs | Tab: field | Ctrl+U: clear
+Enter: save all settings | Esc: cancel	Enter: save all settings | Esc: cancel
+Arrows: select | PgUp/PgDn: tab | Esc: cancel	Arrows: select | PgUp/PgDn: tab | Esc: cancel
+Tab: next field | Ctrl+U: clear	Tab: next field | Ctrl+U: clear
+Enter: save settings	Enter: save settings
+F8: edit template for the selected row	F8: edit template for the selected row
+Remote commands row opens the info template	Remote commands row opens the info template
+Enter on service fields opens the On/Off selector.	Enter on service fields opens the On/Off selector.
+F2: save template | Enter: newline | Esc: cancel	F2: save template | Enter: newline | Esc: cancel
+Templates are in Messages and Beacon tabs	Templates are in Messages and Beacon tabs
+Template exceeds 4096 bytes	Template exceeds 4096 bytes
+Template contains unsupported control characters	Template contains unsupported control characters
+Unclosed template variable	Unclosed template variable
+Unsupported template variable: {0}	Unsupported template variable: {0}
+Automatic message not queued: {0}	Automatic message not queued: {0}
+Sending goodbye before disconnect (up to 10 s)	Sending goodbye before disconnect (up to 10 s)
+Beacon skipped: expanded text exceeds 256 bytes	Beacon skipped: expanded text exceeds 256 bytes
+Beacon interval must be 10-1440 minutes	Beacon interval must be 10-1440 minutes
+Beacon path allows at most 8 digipeaters	Beacon path allows at most 8 digipeaters
+Destination: CALL [via DIGI DIGI]	Destination: CALL [via DIGI DIGI]
+welcome_enabled must be true/false	welcome_enabled must be true/false
+goodbye_enabled must be true/false	goodbye_enabled must be true/false
+remote_commands must be true/false	remote_commands must be true/false
+beacon_enabled must be true/false	beacon_enabled must be true/false
+Operator name must be at most 80 bytes	Operator name must be at most 80 bytes
+TCP offline; beacon not sent	TCP offline; beacon not sent
+Beacon sent to TNC	Beacon sent to TNC
+Invalid beacon interval in minutes	Invalid beacon interval in minutes
+Monitor history	Monitor history
+FROZEN - reception continues	FROZEN - reception continues
+LIVE	LIVE
+Newest entries at top	Newest entries at top
+Space: freeze/live | Arrows/PgUp/PgDn | End: live | Esc: close	Space: freeze/live | Arrows/PgUp/PgDn | End: live | Esc: close
+Enter/F2: connect | Arrows/PgUp/PgDn | R: refresh | Esc: close	Enter/F2: connect | Arrows/PgUp/PgDn | R: refresh | Esc: close
+Call       P  Frames       UTC   Age(s)  To / Path	Call       P  Frames       UTC   Age(s)  To / Path
+Connection cancellation requested	Connection cancellation requested
+F1  Help	F1  Help
+F2  Connect selected slot	F2  Connect selected slot
+F3  Disconnect or cancel connection attempt	F3  Disconnect or cancel connection attempt
+F5  MHeard list	F5  MHeard list
+F6  Monitor history	F6  Monitor history
+F7  Settings	F7  Settings
+F10 Exit	F10 Exit
+Tab  Next session	Tab  Next session
+Shift+Tab  Previous session	Shift+Tab  Previous session
+Up/Down  Move or scroll	Up/Down  Move or scroll
+PgUp/PgDn  Scroll history or change settings tab	PgUp/PgDn  Scroll history or change settings tab
+Enter  Send text or confirm	Enter  Send text or confirm
+Ctrl+U  Clear input	Ctrl+U  Clear input
+//help, //h  Local help	//help, //h  Local help
+//connect [PORT] CALL  Connect	//connect [PORT] CALL  Connect
+//disconnect  Disconnect selected session	//disconnect  Disconnect selected session
+//session N  Select session 1..8	//session N  Select session 1..8
+//mheard  Open MHeard list	//mheard  Open MHeard list
+//tnc, //port  Reconnect / select TNC	//tnc, //port  Reconnect / select TNC
+//quit  Exit after disconnecting	//quit  Exit after disconnecting
+/text  Send text to the remote station	/text  Send text to the remote station
+Settings save to the selected configuration file	Settings save to the selected configuration file
+First-run setup	First-run setup
+Configure station and first TNC interface.	Configure station and first TNC interface.
+Station callsign	Station callsign
+Operator name (optional)	Operator name (optional)
+Interface name	Interface name
+Interface description	Interface description
+Tab/Up/Down: fields | Enter/F2: save and connect | Esc: exit	Tab/Up/Down: fields | Enter/F2: save and connect | Esc: exit
+Operator name and interface description are optional.	Operator name and interface description are optional.
+Tab/Up/Down: fields | Enter/F2: save | Esc: exit	Tab/Up/Down: fields | Enter/F2: save | Esc: exit
+F8: import backup | Name and description are optional.	F8: import backup | Name and description are optional.
+Configuration backup	Configuration backup
+Export configuration	Export configuration
+Import configuration	Import configuration
+File path	File path
+Import validates the file before replacing the active config.	Import validates the file before replacing the active config.
+Message templates and extra languages stay in separate folders.	Message templates and extra languages stay in separate folders.
+Tab: export/import | Enter/F2: run | Esc: cancel	Tab: export/import | Enter/F2: run | Esc: cancel
+Tab: next field | Ctrl+U: clear | Enter: save | F8: config backup	Tab: next field | Ctrl+U: clear | Enter: save | F8: config backup
+Enter/F2: import backup | Esc: cancel	Enter/F2: import backup | Esc: cancel
+Clear configuration	Clear configuration
+F9: clear configuration	F9: clear configuration
+Tab: next field | Ctrl+U: clear | Enter: save	Tab: next field | Ctrl+U: clear | Enter: save
+Clear active config and reopen setup?	Clear active config and reopen setup?
+Enter/Y: clear configuration | Esc/N: cancel	Enter/Y: clear configuration | Esc/N: cancel
+Configuration exported	Configuration exported
+Configuration imported	Configuration imported
+Enter a configuration file path	Enter a configuration file path
+Backup file already exists	Backup file already exists
+Backup must include a station callsign	Backup must include a station callsign
+Backup must include an enabled TNC interface	Backup must include an enabled TNC interface
+Choose a backup file different from the active configuration	Choose a backup file different from the active configuration
+Disconnect active sessions before importing configuration	Disconnect active sessions before importing configuration
+Cannot create backup directory: {0}	Cannot create backup directory: {0}
+Cannot read config: {0}	Cannot read config: {0}
+Cannot create backup: {0}	Cannot create backup: {0}
+Cannot write backup: {0}	Cannot write backup: {0}
+Cannot read backup: {0}	Cannot read backup: {0}
+Cannot import configuration: {0}	Cannot import configuration: {0}
+Any key closes this help	Any key closes this help
+Session history cleared	Session history cleared
+Sessions Tab/Shift+Tab | Hist Ctrl+Up/Dn PgUp/Dn | Input Ctrl+U | Chat Ctrl+L | YAPP Ctrl+Y | F10	Sessions Tab/Shift+Tab | Hist Ctrl+Up/Dn PgUp/Dn | Input Ctrl+U | Chat Ctrl+L | YAPP Ctrl+Y | F10
+Settings changed. Restart application now?	Settings changed. Restart application now?
+Enter / Y: restart     Esc / N: later	Enter / Y: restart     Esc / N: later
+Restart postponed	Restart postponed
+Enter / R: restart and apply changes	Enter / R: restart and apply changes
+D: disconnect all sessions and close	D: disconnect all sessions and close
+Q: close immediately without disconnecting	Q: close immediately without disconnecting
+Esc / N: cancel and keep running	Esc / N: cancel and keep running
+TNC reconnect requested	TNC reconnect requested
+TNC interfaces	TNC interfaces
+One interface per line: interface_NAME=host:port,kiss_port,priority,enabled	One interface per line: interface_NAME=host:port,kiss_port,priority,enabled
+Example: interface_VHF=127.0.0.1:8001,0,10,true	Example: interface_VHF=127.0.0.1:8001,0,10,true
+F2: apply list | Enter: new line | Esc: cancel	F2: apply list | Enter: new line | Esc: cancel
+F8: manage named TNC interfaces	F8: manage named TNC interfaces
+F2 apply list	F2 apply list
+At most 10 interfaces are supported	At most 10 interfaces are supported
+Interface name must be 1-16 ASCII letters, digits or _	Interface name must be 1-16 ASCII letters, digits or _
+Interface value must be endpoint,kiss_port[,priority[,enabled[,description]]]	Interface value must be endpoint,kiss_port[,priority[,enabled[,description]]]
+KISS port must be 0-15	KISS port must be 0-15
+Interface priority must be 0-255	Interface priority must be 0-255
+Interface enabled must be true/false	Interface enabled must be true/false
+Interface endpoint must be host:port	Interface endpoint must be host:port
+Interface description must be at most 60 characters	Interface description must be at most 60 characters
+Interface description cannot contain #	Interface description cannot contain #
+Operator name cannot contain #	Operator name cannot contain #
+Interface name is required	Interface name is required
+New interface names must be at most 10 characters	New interface names must be at most 10 characters
+Name (max 10)	Name (max 10)
+Description	Description
+At most 10 TNC interfaces are supported	At most 10 TNC interfaces are supported
+Order breaks MHeard ties and sets the fallback port	Order breaks MHeard ties and sets the fallback port
+Ctrl+Up/Down: reorder | A: add | Enter/F8: edit	Ctrl+Up/Down: reorder | A: add | Enter/F8: edit
+Ctrl+Up/Down: move | A: add | Enter/F8: edit	Ctrl+Up/Down: move | A: add | Enter/F8: edit
+D: remove | Space: enable/disable | F2: save | Esc: cancel	D: remove | Space: enable/disable | F2: save | Esc: cancel
+D: delete | Space: enable/disable | F2: save	D: delete | Space: enable/disable | F2: save
+An empty digi path sends the beacon directly	An empty digi path sends the beacon directly
+Enter: toggle | Type: digi path	Enter: toggle | Type: digi path
+F2: save | F8: template	F2: save | F8: template
+Interface names must be unique	Interface names must be unique
+Selected TNC interface is disabled	Selected TNC interface is disabled
+Selected TNC interface is offline; reconnect is in progress	Selected TNC interface is offline; reconnect is in progress
+Unknown TNC interface	Unknown TNC interface
+Default interface: {0}	Default interface: {0}
+TNC interfaces: {0}	TNC interfaces: {0}
+TNC {0}: connected	TNC {0}: connected
+TNC {0}: {1}; reconnecting automatically	TNC {0}: {1}; reconnecting automatically
+Export configuration backup	Export configuration backup
+Import configuration backup	Import configuration backup
+Clear configuration and reopen setup	Clear configuration and reopen setup
+Enter: activate | F2: save | F8: export | F9: clear config	Enter: activate | F2: save | F8: export | F9: clear config
+F2: save settings | F8: export backup | F9: clear config	F2: save settings | F8: export backup | F9: clear config
+F8: configuration backup - export or import	F8: configuration backup - export or import
+F9: clear configuration - remove file and reopen setup	F9: clear configuration - remove file and reopen setup
+Select an action above and press Enter.	Select an action above and press Enter.
+Choose a configuration backup in the file dialog.	Choose a configuration backup in the file dialog.
+Choose where to save the configuration backup.	Choose where to save the configuration backup.
+The terminal remains active while the dialog is open.	The terminal remains active while the dialog is open.
+Esc: close	Esc: close
+# Local MailBox UI
+On	On
+Off	Off
+Select service state	Select service state
+Up/Down: select | Enter: apply | Esc: cancel	Up/Down: select | Enter: apply | Esc: cancel
+Enter on service fields: choose On/Off	Enter on service fields: choose On/Off
+Enter: choose On/Off | Tab: next field	Enter: choose On/Off | Tab: next field
+Enter: choose On/Off or toggle | Type: digi path	Enter: choose On/Off or toggle | Type: digi path
+Enter on Enabled: choose On/Off	Enter on Enabled: choose On/Off
+Tab/Up/Down: fields | Enter on Enabled: choose On/Off	Tab/Up/Down: fields | Enter on Enabled: choose On/Off
+F6 MailBox 	F6 MailBox 
+F6 MailBox [{0}] 	F6 MailBox [{0}] 
+MailBox	MailBox
+Select message type	Select message type
+Message type	Message type
+Personal	Personal
+Bulletin	Bulletin
+Traffic	Traffic
+Type is a label; forwarding is not implemented	Type is a label; forwarding is not implemented
+Tab: next field | Enter: choose type/next line | F2: save | Esc: cancel	Tab: next field | Enter: choose type/next line | F2: save | Esc: cancel
+Delete MailBox message	Delete MailBox message
+Delete MailBox message #{0}?	Delete MailBox message #{0}?
+Enter/Y: delete | Esc/N: cancel	Enter/Y: delete | Esc/N: cancel
+Enter: read | N: new | R: reply | D: delete | Up/Down: select | Esc: close	Enter: read | N: new | R: reply | D: delete | Up/Down: select | Esc: close
+D  Delete the selected MailBox message after confirmation	D  Delete the selected MailBox message after confirmation
+MailBox message deleted	MailBox message deleted
+Cannot delete MailBox message	Cannot delete MailBox message
+ID	ID
+From	From
+Type	Type
+UTC	UTC
+State	State
+Subject	Subject
+Local MailBox	Local MailBox
+MailBox enabled	MailBox enabled
+MailBox callsign-SSID	MailBox callsign-SSID
+AX.25 autonegotiation (XID)	AX.25 autonegotiation (XID)
+New MailBox message from {0}	New MailBox message from {0}
+MailBox message #{0} saved	MailBox message #{0} saved
+MailBox uses a separate callsign-SSID and its own two connection slots.	MailBox uses a separate callsign-SSID and its own two connection slots.
+MailBox beacons reuse the station's enabled interfaces and digi paths.	MailBox beacons reuse the station's enabled interfaces and digi paths.
+MailBox storage is kept beside the configuration in mailbox/.	MailBox storage is kept beside the configuration in mailbox/.
+MailBox is disabled. Configure it in F8 > MailBox.	MailBox is disabled. Configure it in F8 > MailBox.
+F6  Open monitor history; Space freezes/unfreezes	F6  Open monitor history; Space freezes/unfreezes
+F1 Help  F2 Connect  F3 Disc  F4 Send BCN  F5 MHeard F6 Monitor F7 Setup F9 About	F1 Help  F2 Connect  F3 Disc  F4 Send BCN  F5 MHeard F6 Monitor F7 Setup F9 About
+F1 Help  F2 Connect  F3 Disc  F4 Send BCN  F5 MHeard  	F1 Help  F2 Connect  F3 Disc  F4 Send BCN  F5 MHeard  
+F7 Monitor  F8 Setup  F9 About	F7 Monitor  F8 Setup  F9 About
+When both slots are busy, new AX.25 connections are refused with DM.	When both slots are busy, new AX.25 connections are refused with DM.
+ID       From        To          Type     UTC       State Subject	ID       From        To          Type     UTC       State Subject
+To callsign-SSID	To callsign-SSID
+Message body (up to 8192 bytes):	Message body (up to 8192 bytes):
+R: reply | Esc: back to list	R: reply | Esc: back to list
+Enabled MailBox requires mailbox_callsign	Enabled MailBox requires mailbox_callsign
+MailBox callsign must differ from station callsign	MailBox callsign must differ from station callsign
+Enabled MailBox requires a callsign	Enabled MailBox requires a callsign
+F2: Save full monitor to TXT	F2: Save full monitor to TXT
+Monitor export saved: {0}	Monitor export saved: {0}
+Monitor export failed: {0}	Monitor export failed: {0}
+Monitor history: F2 saves the full capture as TXT in Downloads	Monitor history: F2 saves the full capture as TXT in Downloads
+Automatic receiving	Automatic receiving
+Ask where to save	Ask where to save
+Download directory	Download directory
+Classic YAPP 1.1 file transfers run inside AX.25 sessions.	Classic YAPP 1.1 file transfers run inside AX.25 sessions.
+YAPP-C and transfer resume are not enabled.	YAPP-C and transfer resume are not enabled.
+Automatic receiving is off by default.	Automatic receiving is off by default.
+Completed files do not overwrite existing files.	Completed files do not overwrite existing files.
+Arrows: select | PgUp/PgDn: tab | Enter: On/Off	Arrows: select | PgUp/PgDn: tab | Enter: On/Off
+Tab: next field | Ctrl+U: clear path | F2: save	Tab: next field | Ctrl+U: clear path | F2: save
+Ctrl+Y: send a file in the selected connected session	Ctrl+Y: send a file in the selected connected session
+Accept an incoming YAPP file on session {0}?	Accept an incoming YAPP file on session {0}?
+The sender will provide a filename and size.	The sender will provide a filename and size.
+Y / Enter: accept | N / Esc: refuse	Y / Enter: accept | N / Esc: refuse
+Choose a destination in the system save dialog.	Choose a destination in the system save dialog.
+Choose a file in the system open dialog.	Choose a file in the system open dialog.
+The active AX.25 session stays selected.	The active AX.25 session stays selected.
+Ctrl+Y  Send a file with YAPP in the selected connected session	Ctrl+Y  Send a file with YAPP in the selected connected session
+Configuration changed. Restart and apply now?	Configuration changed. Restart and apply now?
+Enter/R: restart | D: disconnect and close | Q: close now	Enter/R: restart | D: disconnect and close | Q: close now
+Esc/N: cancel and keep running	Esc/N: cancel and keep running
+Disconnect active sessions	Disconnect active sessions
+Active sessions will be disconnected before continuing.	Active sessions will be disconnected before continuing.
+Enter/Y: disconnect and continue | Esc/N: cancel	Enter/Y: disconnect and continue | Esc/N: cancel
+Disconnect all active sessions and close the application?	Disconnect all active sessions and close the application?
+Enter/Y: disconnect and close | Esc/N: cancel	Enter/Y: disconnect and close | Esc/N: cancel
+Monitor history - newest entries at top	Monitor history - newest entries at top
+F6  Open local MailBox; unread count remains until read	F6  Open local MailBox; unread count remains until read
+F7  Open monitor history	F7  Open monitor history
+    Arrows scroll; Space freezes or resumes the view	    Arrows scroll; Space freezes or resumes the view
+Monitor history: F2 saves a full TXT capture to Downloads	Monitor history: F2 saves a full TXT capture to Downloads
+MailBox over radio: H help, L list, R ID read, S send	MailBox over radio: H help, L list, R ID read, S send
+    Q disconnect	    Q disconnect
+//connect CALL [via DIGI...]  Connect automatically	//connect CALL [via DIGI...]  Connect automatically
+    Optional: //connect PORT CALL [via DIGI...]	    Optional: //connect PORT CALL [via DIGI...]
+//c CALL [via DIGI...]  Short form of //connect	//c CALL [via DIGI...]  Short form of //connect
+//c PORT CALL [via DIGI...]  Connect using that interface	//c PORT CALL [via DIGI...]  Connect using that interface
+//disconnect  Disconnect or cancel a connection attempt	//disconnect  Disconnect or cancel a connection attempt
+//port  List TNC interfaces and their states	//port  List TNC interfaces and their states
+//mheard  Open MHeard; Enter connects via selected interface	//mheard  Open MHeard; Enter connects via selected interface
+//tnc  Retry connections for enabled interfaces	//tnc  Retry connections for enabled interfaces
+/text  Send a slash command to the connected station	/text  Send a slash command to the connected station
+Ctrl+Y  Send a YAPP file in the selected session	Ctrl+Y  Send a YAPP file in the selected session
+PgUp/Dn or Ctrl+Arrows  History / settings tabs	PgUp/Dn or Ctrl+Arrows  History / settings tabs
+Arrows: select | PgUp/Dn or Ctrl+Left/Right: tab	Arrows: select | PgUp/Dn or Ctrl+Left/Right: tab
+Up/Down or Tab/Shift+Tab  Move through lists	Up/Down or Tab/Shift+Tab  Move through lists
+    Arrows/Tab scroll; Space freezes/resumes	    Arrows/Tab scroll; Space freezes/resumes
+Arrows/Tab: scroll | PgUp/PgDn: page | Space: freeze | Esc: close	Arrows/Tab scroll | PgUp/PgDn page | Space freeze | Esc close
+Enter: read | N: new | R: reply | D: delete | Arrows/Tab: select | Esc: close	Enter read | N new | R reply | D delete | Arrows/Tab select | Esc
+Enter/F2: connect | Arrows/Tab: select | PgUp/PgDn: page | R: refresh	Enter connect | Arrows/Tab select | PgUp/PgDn page | R refresh | Esc
+Esc: close | Arrows/Tab: scroll | PgUp/PgDn: page	Esc: close | Arrows/Tab scroll | PgUp/PgDn page
+Esc/F9: close | Arrows/Tab: scroll | PgUp/PgDn: page	Esc/F9 close | Arrows/Tab scroll | PgUp/PgDn page

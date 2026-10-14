@@ -1,0 +1,25 @@
+# Przykładowa konfiguracja Alpine. Uzupełnij własny znak i interfejs TNC.
+callsign=
+myname=
+language=pl
+welcome_enabled=true
+goodbye_enabled=true
+remote_commands=true
+beacon_enabled=false
+beacon_seconds=600
+beacon_to=BEACON
+digipeat_enabled=false
+t1_ms=5000
+t3_ms=180000
+retries=10
+paclen=128
+accept_incoming=true
+ax25_autonegotiation=true
+mailbox_enabled=false
+mailbox_callsign=
+yapp_enabled=false
+yapp_auto_receive=false
+yapp_ask_location=false
+yapp_download_dir=
+interface_NET=127.0.0.1:8001,0,10,true,Local KISS TNC
+beacon_interface_NET=false,
