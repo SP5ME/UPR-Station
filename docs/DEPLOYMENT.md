@@ -68,8 +68,8 @@ Nie publikuj całego katalogu danych ani nie włączaj go do paczek wydaniowych.
 Formaty danych radiowych pozostają zgodne z serwerem.
 
 Desktop przyjmuje `--config PATH` i `--web-config PATH`; do migracji używaj ścieżek
-bezwzględnych. Parametr `--demo` używa odrębnego katalogu demonstracyjnego.
-Nie łącz demo z katalogiem danych rzeczywistej stacji.
+bezwzględnych. Do testów używaj osobnego katalogu oraz jawnych ścieżek
+`--config` i `--web-config`; nie wskazuj danych rzeczywistej stacji.
 
 Desktop wiąże HTTP wyłącznie z loopbackiem na przydzielonym porcie i stosuje
 token na czas uruchomienia. Ustawienia nasłuchu w `web.conf` dotyczą wariantu

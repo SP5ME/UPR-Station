@@ -12,7 +12,7 @@ import urllib.request
 root, version, arch, mode = sys.argv[1:]
 if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,100}', version):
     raise SystemExit('Invalid release tag')
-if arch not in ['x86_64', 'aarch64', 'armv7'] or mode not in ['native', 'docker']:
+if arch not in ['x86_64', 'aarch64', 'armv7'] or mode not in ['native', 'docker', 'installer', 'terminal']:
     raise SystemExit('Invalid platform')
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, request, *args, **kwargs):
@@ -22,7 +22,7 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
         return redirected
 opener = urllib.request.build_opener(SafeRedirect())
 headers = {'User-Agent': 'UPR-Station-installer', 'Accept': 'application/vnd.github+json'}
-token = os.environ.get('GITHUB_TOKEN', '')
+token = os.environ.get('GITHUB_TOKEN', '') or os.environ.get('GH_TOKEN', '')
 if token:
     headers['Authorization'] = 'Bearer ' + token
 def fetch(url, accept=None, limit=2_000_000):
@@ -33,11 +33,26 @@ def fetch(url, accept=None, limit=2_000_000):
         raise RuntimeError('Response exceeds allowed size')
     return data
 try:
-    release = json.loads(fetch('https://api.github.com/repos/SP5ME/UPR-Terminal/releases/tags/' + version))
+    base = 'https://api.github.com/repos/SP5ME/UPR-Terminal/releases'
+    if version == 'latest':
+        releases = json.loads(fetch(base+'?per_page=100'))
+        published = [item for item in releases if not item['draft'] and item.get('published_at')]
+        if not published:
+            raise RuntimeError('No published release')
+        version = max(published, key=lambda item: item['published_at'])['tag_name']
+        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,100}', version):
+            raise RuntimeError('Invalid published release tag')
+    release = json.loads(fetch(base+'/tags/' + version))
     if release['tag_name'] != version or release['draft']:
         raise RuntimeError('Release is not published')
     extension = 'docker' if mode == 'docker' else 'linux'
     name = f'UPR-Station-{version}-{extension}-{arch}.tar.gz'
+    if mode == 'installer':
+        name = 'install-server.sh'
+    elif mode == 'terminal':
+        if arch != 'x86_64':
+            raise RuntimeError('Desktop architecture not supported')
+        name = f'UPR-Terminal-{version}-linux-x86_64.deb'
     assets = {a['name']: a for a in release['assets']}
     sums = fetch(assets['SHA256SUMS.txt']['url'], 'application/octet-stream').decode()
     expected = dict((line.split(None, 1)[1].lstrip('*'), line.split(None, 1)[0]) for line in sums.splitlines() if line.strip())[name]
@@ -56,6 +71,7 @@ try:
             destination.write(chunk)
     if digest.hexdigest().lower() != expected.lower():
         raise RuntimeError('SHA-256 mismatch; installation stopped')
+    (Path(root)/'release-tag.txt').write_text(version, encoding='utf-8')
     print(out)
 except (urllib.error.HTTPError, urllib.error.URLError, KeyError, RuntimeError) as error:
     if isinstance(error, urllib.error.HTTPError):

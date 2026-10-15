@@ -183,12 +183,9 @@ fn handle_menu(app: &tauri::AppHandle, id: &str) {
         let _ = item.set_checked(applied);
     }
 }
-fn desktop_autostart(state: &Desktop, enabled: Option<bool>) -> Result<(bool, bool), String> {
+fn desktop_autostart(state: &Desktop, enabled: Option<bool>) -> Result<bool, String> {
     let mut prefs = state.preferences.lock().unwrap();
     if let Some(enabled) = enabled {
-        if state.options.demo {
-            return Err("Autostart jest niedostępny w trybie demo".into());
-        }
         if enabled != prefs.autostart {
             autostart::set(enabled, &state.options.config, &state.options.web_config)?;
             let mut updated = prefs.clone();
@@ -201,7 +198,7 @@ fn desktop_autostart(state: &Desktop, enabled: Option<bool>) -> Result<(bool, bo
             *prefs = updated;
         }
     }
-    Ok((prefs.autostart, !state.options.demo))
+    Ok(prefs.autostart)
 }
 fn notifications(
     app: tauri::AppHandle,
@@ -296,7 +293,6 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
             config: state.options.config.clone(),
             web_config: state.options.web_config.clone(),
             web_config_explicit: true,
-            demo: state.options.demo,
             desktop: true,
             desktop_token: None,
             install_signals: false,
@@ -374,11 +370,7 @@ fn setup(app: &mut tauri::App, state: &Arc<Desktop>) -> Result<(), Box<dyn std::
         serde_json::to_string(&url)?
     );
     tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::External(url.parse()?))
-        .title(if state.options.demo {
-            "UPR Terminal — DEMO"
-        } else {
-            "UPR Terminal"
-        })
+        .title("UPR Terminal")
         .inner_size(1280.0, 850.0)
         .min_inner_size(800.0, 600.0)
         .visible(!(state.options.minimized && tray_ready))
@@ -499,7 +491,6 @@ fn run_server_mode(options: &Options) -> Result<(), String> {
                 config: options.config.clone(),
                 web_config: options.web_config.clone(),
                 web_config_explicit: true,
-                demo: options.demo,
                 desktop: false,
                 desktop_token: None,
                 install_signals: true,

@@ -217,16 +217,17 @@ pub struct Options {
     pub config: PathBuf,
     pub web_config: PathBuf,
     pub data: PathBuf,
-    pub demo: bool,
     pub minimized: bool,
     pub server_mode: bool,
 }
 impl Options {
     pub fn parse() -> Result<Option<Self>, String> {
-        let mut args = env::args().skip(1);
+        Self::from_cli(env::args().skip(1))
+    }
+    fn from_cli(args: impl IntoIterator<Item = String>) -> Result<Option<Self>, String> {
+        let mut args = args.into_iter();
         let mut config = None;
         let mut web_config = None;
-        let mut demo = false;
         let mut minimized = false;
         let mut server_mode = false;
         while let Some(arg) = args.next() {
@@ -237,7 +238,6 @@ impl Options {
                 "--web-config" => {
                     web_config = Some(PathBuf::from(args.next().ok_or("Missing web config path")?))
                 }
-                "--demo" => demo = true,
                 "--minimized" => minimized = true,
                 "--headless" => server_mode = true,
                 "--mode" => {
@@ -250,29 +250,20 @@ impl Options {
                 }
                 "--help" | "-h" => {
                     println!(
-                        "UPR Terminal\n--config PATH\n--web-config PATH\n--demo (isolated data)\n--minimized\n--mode desktop|server (Linux; desktop is default)\n--headless (alias for --mode server)"
+                        "UPR Terminal\n--config PATH\n--web-config PATH\n--minimized\n--mode desktop|server (Linux; desktop is default)\n--headless (alias for --mode server)"
                     );
                     return Ok(None);
                 }
                 _ => return Err(format!("Unknown argument: {arg}")),
             }
         }
-        if demo && (config.is_some() || web_config.is_some()) {
-            return Err("--demo cannot be combined with real station configuration paths".into());
-        }
         let default = default_data_dir()?;
         #[cfg(windows)]
-        if config.is_none() && !demo {
+        if config.is_none() {
             let legacy = legacy_data_dir()?;
             migrate_profile(&default, &legacy)?;
         }
-        let config = config.unwrap_or_else(|| {
-            if demo {
-                default.join("demo/station.conf")
-            } else {
-                default.join("station.conf")
-            }
-        });
+        let config = config.unwrap_or_else(|| default.join("station.conf"));
         let config = std::path::absolute(config).map_err(|e| e.to_string())?;
         let data = config.parent().ok_or("Invalid config path")?.to_path_buf();
         let web_config = std::path::absolute(web_config.unwrap_or_else(|| data.join("web.conf")))
@@ -281,7 +272,6 @@ impl Options {
             config,
             web_config,
             data,
-            demo,
             minimized,
             server_mode,
         }))
@@ -292,6 +282,12 @@ impl Options {
 mod tests {
     use super::*;
     use std::time::Duration;
+
+    #[test]
+    fn retired_startup_option_is_rejected_before_loading_user_data() {
+        let error = Options::from_cli(["--demo".to_owned()]).err().unwrap();
+        assert_eq!(error, "Unknown argument: --demo");
+    }
 
     fn temp_profile(name: &str) -> PathBuf {
         let stamp = SystemTime::now()

@@ -22,6 +22,7 @@ with tempfile.TemporaryDirectory() as directory:
         assert 'binary_sha256='+hashlib.sha256(data).hexdigest() in manifest
         assert not any('proxmox' in name.lower() for name in names)
         assert 'src/main.rs' not in names
+        assert not any(name.startswith('deploy/install/') for name in names)
     with tarfile.open(temp/'out/UPR-Station-vtest-linux-x86_64.tar.gz') as archive:
         assert archive.getmember('ultimatepr-station').mode==0o755
 print('PASS: binary package manifest, architecture, executable permissions, licenses and no Proxmox scripts.')

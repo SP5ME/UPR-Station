@@ -29,6 +29,7 @@ python tests/packaging/server-package.py
 python tests/packaging/release-download.py
 python tests/packaging/installer-hooks.py
 bash tests/installers/server-installer.sh
+bash tests/installers/bootstrap.sh
 bash tests/installers/alpine-update.sh
 ```
 
@@ -42,8 +43,9 @@ GitHub Actions i uruchamiany przez workflow wydania, nigdy na komputerze operato
 ## Kontrole ręczne i historyczne
 
 `manual/windows-desktop-smoke.ps1` i `manual/desktop-smoke.mjs` tworzą parę
-historycznych testów GUI/CDP. Mają założenia dotyczące wcześniejszego interfejsu
-i nazewnictwa; wymagają osobnego przeglądu przed użyciem z obecną aplikacją.
+ręcznych testów GUI/CDP. Używają jawnych ścieżek do nowego profilu pod `target/`,
+bez znaku stacji i bez interfejsów TNC. Nie włączają autostartu ani nie nadają ramek.
+Wymagają Windows z WebView2 i zasobnikiem systemowym; nie należą do CI.
 `manual/release_check.py` dotyczy dawnego układu paczki Windows portable,
 nie obecnych instalatorów NSIS, DEB ani AppImage.
 

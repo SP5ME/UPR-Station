@@ -20,13 +20,13 @@ with tempfile.TemporaryDirectory() as directory:
     subprocess.run([sys.executable,str(stage/'scripts/collect-desktop-release.py'),'Linux','vtest',str(out)],check=True)
     assert (out/'UPR-Terminal-vtest-linux-x86_64.deb').is_file()
     assert (out/'UPR-Terminal-vtest-linux-x86_64.AppImage').is_file()
-    names=['UPR-Terminal-vtest-windows-x86_64-setup.exe','install-server.sh']
+    names=['UPR-Terminal-vtest-windows-x86_64-setup.exe','install-server.sh','install.sh']
     names += [f'UPR-Station-vtest-{kind}-{arch}.{extension}' for arch in ['x86_64','aarch64','armv7'] for kind,extension in [('linux','tar.gz'),('alpine','zip'),('docker','tar.gz')]]
     for name in names: (out/name).write_bytes(b'isolated release fixture')
     subprocess.run([sys.executable,str(stage/'scripts/finalize-release.py'),'vtest',str(out)],check=True)
     assert 'konfigurację' in (out/'RELEASE-NOTES.md').read_text(encoding='utf-8')
     sums={line.split(None,1)[1]:line.split(None,1)[0] for line in (out/'SHA256SUMS.txt').read_text().splitlines()}
-    assert len(sums)==14
+    assert len(sums)==15
     for name,digest in sums.items(): assert hashlib.sha256((out/name).read_bytes()).hexdigest()==digest
     (out/'UPR-Terminal-vtest-linux-x86_64.AppImage').unlink()
     result=subprocess.run([sys.executable,str(stage/'scripts/finalize-release.py'),'vtest',str(out)],capture_output=True)

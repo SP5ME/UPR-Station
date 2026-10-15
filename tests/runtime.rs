@@ -8,6 +8,15 @@ use std::{
 };
 use ultimatepr::runtime::{self, RuntimeOptions};
 
+#[test]
+fn retired_startup_option_is_rejected_instead_of_starting_radio_services() {
+    let error = RuntimeOptions::from_cli(["--demo".to_owned()]).err().unwrap();
+    assert_eq!(error, "Unknown argument: --demo");
+    let options = RuntimeOptions::from_cli(Vec::<String>::new()).unwrap().unwrap();
+    assert_eq!(options.config, PathBuf::from("data/station.conf"));
+    assert_eq!(options.web_config, PathBuf::from("data/web.conf"));
+}
+
 struct Temporary(PathBuf);
 impl Temporary {
     fn new() -> Self {
@@ -97,7 +106,6 @@ fn desktop_runtime_is_authenticated_locked_and_releases_resources_on_stop() {
         config: dir.0.join("station.conf"),
         web_config: dir.0.join("web.conf"),
         web_config_explicit: true,
-        demo: false,
         desktop: false,
         desktop_token: Some("a".repeat(64)),
         install_signals: false,
@@ -113,6 +121,9 @@ fn desktop_runtime_is_authenticated_locked_and_releases_resources_on_stop() {
     let web_details = post_request(station.address, "/api/web/details", &auth);
     assert!(web_details.contains("\"runtime\":\"server\""));
     assert!(web_details.contains("\"webPanel\":true"));
+    let snapshot = request(station.address, "/api/state", &auth);
+    assert!(snapshot.starts_with("HTTP/1.1 200"));
+    assert!(!snapshot.contains("\"demo\":"));
     let update_status = post_request(station.address, "/api/update/status", &auth);
     assert!(update_status.contains("\"state\":\"idle\""));
     let update_status_get = request(station.address, "/api/update/status", &auth);
@@ -154,7 +165,6 @@ fn desktop_runtime_reports_desktop_profile() {
         config: dir.0.join("station.conf"),
         web_config: dir.0.join("web.conf"),
         web_config_explicit: true,
-        demo: false,
         desktop: true,
         desktop_token: Some("b".repeat(64)),
         install_signals: false,

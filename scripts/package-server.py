@@ -37,7 +37,8 @@ with tempfile.TemporaryDirectory(prefix='upr-server-package-') as temporary:
     shutil.copy2(binary, stage/'ultimatepr-station')
     for name in ['Cargo.toml', 'LICENSE', 'TRADEMARKS.md']:
         shutil.copy2(root/name, stage/name)
-    shutil.copytree(root/'deploy', stage/'deploy')
+    # The bootstrap template is not executable by itself; only publish its generated release asset.
+    shutil.copytree(root/'deploy', stage/'deploy', ignore=shutil.ignore_patterns('install'))
     shutil.copytree(licenses, stage/'licenses/crates')
     for name in ['Apache-2.0.txt', 'MDI-LICENSE.txt']:
         shutil.copy2(root/'licenses'/name, stage/'licenses'/name)

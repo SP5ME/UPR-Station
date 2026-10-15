@@ -4,17 +4,11 @@ fn run() -> Result<(), String> {
         return Ok(());
     };
     let path = options.config.clone();
-    let demo = options.demo;
     let station = runtime::start(options, None)?;
     println!(
-        "UPR Station: http://{}\nConfiguration: {}\n{}",
+        "UPR Station: http://{}\nConfiguration: {}\nRadio services remain active independently of the browser.",
         station.address,
-        path.display(),
-        if demo {
-            "DEMO: connect to DEMO; no radio attached."
-        } else {
-            "Radio services remain active independently of the browser."
-        }
+        path.display()
     );
     station.wait()
 }

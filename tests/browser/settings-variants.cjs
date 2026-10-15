@@ -16,7 +16,7 @@ async function check(flag,runtime,desktop){
     $:id=>fields[id],document:{
       querySelector(selector){if(selector==='.settings-form')return form;if(selector==='.telegram-settings')return{closest:()=>telegram};return heading;},
       querySelectorAll:()=>rows,
-    },request:async route=>{requests.push(route);return{enabled:true,available:false};},
+    },request:async route=>{requests.push(route);return{enabled:true};},
   });
   vm.runInContext(extract('function settingsTabItemsSeparated(){','\nsettingsTabItems=settingsTabItemsSeparated;')+
     extract('function settingsDesktopRuntime(){','\nsetInterval(syncSettingsRuntime,500);'),context);
@@ -32,7 +32,7 @@ async function check(flag,runtime,desktop){
   assert.equal(heading.textContent,'Powiadomienia');
   await context.loadDesktopApplicationSettings();
   assert.equal(requests.length,desktop?1:0,'Server must never request desktop preferences');
-  if(desktop){assert.equal(control.checked,true);assert.equal(control.disabled,true,'Demo cannot change autostart');}
+  if(desktop){assert.equal(control.checked,true);assert.equal(control.disabled,false,'Autostart is available after preferences load');}
   context.state.language='en';context.syncNotificationChannels();assert.equal(heading.textContent,'Notifications');
 }
 (async()=>{
@@ -41,5 +41,5 @@ async function check(flag,runtime,desktop){
   assert(!desktop.includes('("autostart", "Start po zalogowaniu"'));
   assert(!desktop.includes('&checks["autostart"]'));
   assert(source.includes('control.checked=previous;throw exception;'),'Restore checkbox after save failure');
-  console.log('PASS: variant tabs, channel columns, Telegram card, autostart read/demo/error handling and removed menu entry.');
+  console.log('PASS: variant tabs, channel columns, Telegram card, autostart read/error handling and removed menu entry.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

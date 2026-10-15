@@ -225,6 +225,7 @@ assert 1<=int(port)<=65535, 'Invalid port'
 PY
     WORK=$(mktemp -d /var/tmp/upr-install.XXXXXX)
     PACKAGE=$(download_package)
+    VERSION=$(cat "$WORK/release-tag.txt")
     unset GITHUB_TOKEN GH_TOKEN
     if [ "$MODE" = docker ]; then install_docker;else install_native;fi
     printf 'First-run account: change the initial password before exposing the panel. Refresh the browser with Ctrl+F5.\n'

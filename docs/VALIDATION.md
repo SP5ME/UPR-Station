@@ -42,5 +42,5 @@ zaliczonego i nie refaktoryzujemy przy tej okazji protokołów radiowych.
 - [ ] Podpisanie instalatora i końcowy przegląd licencji przed publikacją.
 
 Na stanowisku implementacyjnym brak WSL/Docker oraz środowiska Linux.
-Testy demo nie zastępują testu radiowego. Brak powiadomień zależny od konfiguracji
+Testy automatyczne nie zastępują testu radiowego. Brak powiadomień zależny od konfiguracji
 OS nie może być interpretowany jako brak pracy stacji.

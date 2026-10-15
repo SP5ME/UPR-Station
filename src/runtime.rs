@@ -21,7 +21,6 @@ pub struct RuntimeOptions {
     pub config: PathBuf,
     pub web_config: PathBuf,
     pub web_config_explicit: bool,
-    pub demo: bool,
     pub desktop: bool,
     /// Deprecated compatibility field. Desktop no longer authenticates via
     /// an injected token, but older callers may still populate it.
@@ -35,7 +34,6 @@ impl RuntimeOptions {
         let mut web_config_path = PathBuf::from("data/web.conf");
         let mut web_config_explicit = false;
         let mut args = args.into_iter();
-        let mut demo = false;
         while let Some(arg) = args.next() {
             match arg.as_str() {
                 "--bind" => address = args.next().ok_or("Missing bind address")?,
@@ -44,10 +42,9 @@ impl RuntimeOptions {
                     web_config_path = PathBuf::from(args.next().ok_or("Missing web config path")?);
                     web_config_explicit = true;
                 }
-                "--demo" => demo = true,
                 "--help" | "-h" => {
                     println!(
-                        "UltimatePR Station {}\n  --bind IP:PORT      default 127.0.0.1:8080\n  --config PATH       default data/station.conf\n  --web-config PATH   default data/web.conf\n  --demo              local echo TNC; isolated data/demo/station.conf\nServer access uses the operator account (default admin/packet on first run); STATION_TOKEN or token_file remain supported for API compatibility.\nTerminal-compatible configuration; no radio transmission before callsign setup.",
+                        "UltimatePR Station {}\n  --bind IP:PORT      default 127.0.0.1:8080\n  --config PATH       default data/station.conf\n  --web-config PATH   default data/web.conf\nServer access uses the operator account (default admin/packet on first run); STATION_TOKEN or token_file remain supported for API compatibility.\nTerminal-compatible configuration; no radio transmission before callsign setup.",
                         env!("CARGO_PKG_VERSION")
                     );
                     return Ok(None);
@@ -56,15 +53,11 @@ impl RuntimeOptions {
             }
         }
 
-        if demo {
-            path = PathBuf::from("data/demo/station.conf");
-        }
         Ok(Some(Self {
             address,
             config: path,
             web_config: web_config_path,
             web_config_explicit,
-            demo,
             desktop: false,
             desktop_token: None,
             install_signals: true,
@@ -116,7 +109,6 @@ pub fn start(
         config: mut path,
         web_config: web_config_path,
         web_config_explicit,
-        demo,
         desktop,
         desktop_token,
         install_signals,
@@ -172,43 +164,8 @@ pub fn start(
     }
     fs::create_dir_all(path.parent().unwrap()).map_err(|e| e.to_string())?;
     let _lock = DataLock::acquire(path.parent().unwrap().join(".station.lock"))?;
-    let demo_listener = if demo {
-        Some(TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?)
-    } else {
-        None
-    };
-    let demo_endpoint = demo_listener
-        .as_ref()
-        .map(|l| l.local_addr().unwrap().to_string());
     if !path.exists() {
-        let text = if demo {
-            INITIAL
-                .replace("# callsign=YOURCALL-1", "callsign=TEST-1")
-                .replace("127.0.0.1:8001", "127.0.0.1:18001")
-                .replace(
-                    "mailbox_enabled=false",
-                    "mailbox_enabled=true\nmailbox_callsign=TEST-8",
-                )
-                .replace("yapp_enabled=false", "yapp_enabled=true")
-        } else {
-            INITIAL.into()
-        };
-        storage::write_atomic(&path, text.as_bytes()).map_err(|e| e.to_string())?;
-    }
-    if let Some(endpoint) = &demo_endpoint {
-        let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
-        let mut lines = raw
-            .lines()
-            .filter(|line| {
-                let key = line.split('=').next().unwrap_or_default().trim();
-                !key.starts_with("interface_")
-                    && !key.starts_with("beacon_interface")
-                    && !["tnc", "beacon_path"].contains(&key)
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-        lines.push_str(&format!("\ninterface_VHF={endpoint},0,10,true,Local demonstration TNC\nbeacon_interface_VHF=true,\n"));
-        storage::write_atomic(&path, lines.as_bytes()).map_err(|e| e.to_string())?;
+        storage::write_atomic(&path, INITIAL.as_bytes()).map_err(|e| e.to_string())?;
     }
     let station_web_path = if web_config_explicit {
         web_config_path.clone()
@@ -229,7 +186,6 @@ pub fn start(
     let runtime = if desktop { "desktop" } else { "server" };
     let mut station = station::Station::new_with_web_config(
         path.clone(),
-        demo_endpoint,
         Some(station_web_path.clone()),
         runtime,
     )?;
@@ -275,11 +231,6 @@ pub fn start(
             signal_hook::flag::register(signal, stop.clone()).map_err(|e| e.to_string())?;
         }
     }
-    let demo_stop = Arc::new(AtomicBool::new(false));
-    let demo_thread = demo_listener.map(|listener| {
-        let stop = demo_stop.clone();
-        thread::spawn(move || crate::demo::run(listener, stop))
-    });
     let snapshot = Arc::new(RwLock::new(station.snapshot()));
     let (tx, rx) = mpsc::sync_channel::<http::Envelope>(8);
     let (telegram_sender, telegram_worker) = if desktop {
@@ -365,10 +316,6 @@ pub fn start(
         .run(listener);
         stop.store(true, Ordering::Relaxed);
         let runtime_result = runtime.join();
-        demo_stop.store(true, Ordering::Relaxed);
-        if let Some(worker) = demo_thread {
-            let _ = worker.join();
-        }
         if let Some(worker) = telegram_worker {
             let _ = worker.join();
         }

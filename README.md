@@ -25,6 +25,12 @@ Sesje AX.25, interfejsy TNC/KISS, terminal, monitor ramek, MHeard, digipeater,
 beacony, lokalny MailBox, YAPP i konfigurowalne powiadomienia.
 Usługi radiowe serwera działają niezależnie od karty przeglądarki.
 
+## Instalacja i aktualizacja Linux
+
+Instalację i aktualizację Linux jednym poleceniem opisuje
+[LINUX-INSTALL.md](docs/LINUX-INSTALL.md). Skrypt wybiera jawnie Station albo Terminal;
+prywatne wydania wymagają uwierzytelnienia GitHub.
+
 ## Budowanie i testy
 
 Wymagany Rust zgodny z manifestami; deklarowane minimum wymaga osobnej walidacji.

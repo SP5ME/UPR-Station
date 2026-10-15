@@ -39,6 +39,7 @@ jobs:
           node tests/browser/product-identity.cjs
           node tests/browser/settings-variants.cjs
           bash tests/installers/server-installer.sh
+          bash tests/installers/bootstrap.sh
           python3 tests/packaging/release-download.py
           python3 tests/packaging/server-package.py
           python3 tests/packaging/desktop-release.py
@@ -163,6 +164,7 @@ jobs:
           path: target/release-assets
           merge-multiple: true
       - run: python3 scripts/emit-installer.py target/release-assets/install-server.sh
+      - run: python3 scripts/emit-installer.py --bootstrap target/release-assets/install.sh
       - run: python3 scripts/finalize-release.py "$RELEASE_TAG" target/release-assets
       - name: Upload complete release (never replace an existing tag)
         env:

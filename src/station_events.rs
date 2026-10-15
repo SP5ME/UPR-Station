@@ -279,7 +279,7 @@ pub enum StationEvent {
     Sound(u8),
     Autostart {
         enabled: Option<bool>,
-        reply: std::sync::mpsc::SyncSender<Result<(bool, bool), String>>,
+        reply: std::sync::mpsc::SyncSender<Result<bool, String>>,
     },
 }
 

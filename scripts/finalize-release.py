@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 tag,directory=sys.argv[1:]
 root=Path(directory)
-required=[f'UPR-Terminal-{tag}-windows-x86_64-setup.exe',f'UPR-Terminal-{tag}-linux-x86_64.deb',f'UPR-Terminal-{tag}-linux-x86_64.AppImage','install-server.sh']
+required=[f'UPR-Terminal-{tag}-windows-x86_64-setup.exe',f'UPR-Terminal-{tag}-linux-x86_64.deb',f'UPR-Terminal-{tag}-linux-x86_64.AppImage','install-server.sh','install.sh']
 required += [f'UPR-Station-{tag}-{kind}-{arch}.{extension}' for arch in ['x86_64','aarch64','armv7'] for kind,extension in [('linux','tar.gz'),('alpine','zip'),('docker','tar.gz')]]
 for name in required:
     if not (root/name).is_file() or not (root/name).stat().st_size: raise SystemExit('Missing release asset: '+name)
@@ -25,8 +25,33 @@ Wydanie testowe pre-alfa. Wersja aplikacji pozostaje 0.1.3-prealpha.1.
   ale jego konfiguracja i plik tokenu pozostają zachowane.
 - Instalator Windows zawiera poprawkę katalogu zapisu przy migracji starszej instalacji.
 - Uporządkowane testy źródłowe i workflow; bez prywatnych danych i wyników testów w repozytorium.
+- Usunięty tryb demonstracyjny; pozostały niezależne testy automatyczne.
+- Instalator install.sh: wybór Station/Terminal, najnowsze opublikowane wydanie i aktualizacja tym samym poleceniem.
 
-## Instalacja serwera jednym poleceniem po pobraniu install-server.sh
+## Łatwa instalacja i aktualizacja Linux
+
+Pobierz `install.sh` z załączników. To samo polecenie służy do instalacji i aktualizacji:
+
+`sh install.sh --station` — serwer; `sh install.sh --terminal` — desktop Debian/Ubuntu x86-64.
+
+Domyślnie wybierane jest najnowsze opublikowane wydanie, również pre-release.
+Opcja `--version {tag}` przypina konkretny tag. Terminal musi być zamknięty przed aktualizacją.
+Instalator desktopu uruchamiaj jako zwykły użytkownik; o sudo poprosi tylko instalacja pakietu.
+
+Przy publicznym repozytorium pobranie i instalacja Station jednym poleceniem:
+
+`curl -fsSL https://github.com/SP5ME/UPR-Terminal/releases/download/{tag}/install.sh | sh -s -- --station`
+
+Dla Terminala:
+
+`curl -fsSL https://github.com/SP5ME/UPR-Terminal/releases/download/{tag}/install.sh | sh -s -- --terminal`
+
+Te polecenia wykonują pobrany kod.
+Repozytorium jest prywatne: zwykły anonimowy curl nie zadziała; instrukcja z uwierzytelnionym
+GitHub CLI znajduje się w [instrukcji instalacji Linux](https://github.com/SP5ME/UPR-Terminal/blob/{tag}/docs/LINUX-INSTALL.md).
+Nie wklejaj tokenu do polecenia.
+
+## Instalator serwera z przypiętym wydaniem
 
 `sudo sh install-server.sh --version {tag}`
 

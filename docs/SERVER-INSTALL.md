@@ -16,6 +16,10 @@ dobiera skrypt. Nie deklarujemy obsługi każdej dystrybucji Linux.
 
 ## Jedno polecenie po pobraniu skryptu
 
+Łatwiejszy bootstrap `install.sh --station`, wybór najnowszego wydania oraz
+polecenia curl/GitHub CLI opisano w [LINUX-INSTALL.md](LINUX-INSTALL.md).
+Poniższy instalator pozwala bezpośrednio przypiąć wydanie serwera.
+
 Z Releases pobierz `install-server.sh`, sprawdź jego SHA-256 i uruchom:
 
 ```sh

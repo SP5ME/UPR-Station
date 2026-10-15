@@ -31,7 +31,6 @@ struct Interface {
 }
 pub struct Station {
     runtime: &'static str,
-    demo_endpoint: Option<String>,
     config: Config,
     path: PathBuf,
     web_path: PathBuf,
@@ -91,12 +90,12 @@ mod configuration_tests {
         fs::create_dir_all(&root).unwrap();
         let text = "callsign=TEST-1\ntelegram_enabled=true\ntelegram_chat_id=12345\nnotification_outgoing_connection_telegram=true\n";
         let (sender, receiver) = std::sync::mpsc::sync_channel(8);
-        let mut server = Station::from_text(root.join("server.conf"), text.into(), None, None, "server").unwrap();
+        let mut server = Station::from_text(root.join("server.conf"), text.into(), None, "server").unwrap();
         server.set_telegram_sender(Some(sender.clone()));
         server.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
         assert!(matches!(receiver.try_recv(), Ok(telegram::Command::Send(_))));
 
-        let mut desktop = Station::from_text(root.join("desktop.conf"), text.into(), None, None, "desktop").unwrap();
+        let mut desktop = Station::from_text(root.join("desktop.conf"), text.into(), None, "desktop").unwrap();
         let token = desktop.telegram_token_path();
         fs::write(&token, "existing-private-token").unwrap();
         desktop.set_telegram_sender(Some(sender));
@@ -119,7 +118,7 @@ mod configuration_tests {
     fn autostart_requests_are_desktop_only_and_use_native_host_reply() {
         let root = crate::test_temp_dir("autostart-runtime-boundary");
         fs::create_dir_all(&root).unwrap();
-        let mut station = Station::from_text(root.join("station.conf"), "callsign=TEST-1\n".into(), None, None, "server").unwrap();
+        let mut station = Station::from_text(root.join("station.conf"), "callsign=TEST-1\n".into(), None, "server").unwrap();
         assert!(station.command(request("desktop/autostart", "")).err().unwrap().contains("UPR Terminal"));
         station.runtime = "desktop";
         let (sender, receiver) = std::sync::mpsc::sync_channel(8);
@@ -131,7 +130,7 @@ mod configuration_tests {
                 match receiver.recv_timeout(Duration::from_secs(2)).unwrap() {
                     StationEvent::Autostart { enabled, reply } => {
                         assert_eq!(enabled, expected);
-                        reply.send(Ok((enabled.unwrap_or(false), true))).unwrap();
+                        reply.send(Ok(enabled.unwrap_or(false))).unwrap();
                     }
                     _ => panic!("Expected native preferences request"),
                 }
@@ -151,7 +150,7 @@ mod configuration_tests {
         let root = crate::test_temp_dir("station-independent-sound");
         fs::create_dir_all(&root).unwrap();
         let mut station = Station::from_text(root.join("station.conf"),
-            "callsign=TEST-1\n".into(), None, None, "server").unwrap();
+            "callsign=TEST-1\n".into(), None, "server").unwrap();
         let (sender, receiver) = std::sync::mpsc::sync_channel(8);
         station.event_sender = Some(sender);
         for (in_app, native) in [(false, false), (true, false), (false, true), (true, true)] {
@@ -207,7 +206,7 @@ mod configuration_tests {
         fs::create_dir_all(&root).unwrap();
         let path = root.join("station.conf");
         let text = "callsign=TEST-1\ninterface_VHF=127.0.0.1:8001,0,0,true,Radio\nax25_autonegotiation=false\nax25_modulo_128=false\n";
-        let mut station = Station::from_text(path.clone(), text.into(), None, None, "server").unwrap();
+        let mut station = Station::from_text(path.clone(), text.into(), None, "server").unwrap();
         let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
         station.interfaces[0].transport = Some(Transport::connect(&listener.local_addr().unwrap().to_string()).unwrap());
         let (_peer, _) = listener.accept().unwrap();
@@ -266,7 +265,7 @@ mod configuration_tests {
         let path = root.join("station.conf");
         let text = "callsign=TEST-1\nmailbox_enabled=true\nmailbox_callsign=TEST-2\nwl2k_enabled=true\nwl2k_gateway=RMS-1\nnotification_winlink_in-app=true\n";
         fs::write(&path, text).unwrap();
-        let mut station = Station::from_text(path.clone(), text.into(), None, None, "server").unwrap();
+        let mut station = Station::from_text(path.clone(), text.into(), None, "server").unwrap();
         assert!(station.mailbox_engine.is_some());
         for action in ["wl2k/sync", "wl2k/create", "wl2k/read", "wl2k/file", "wl2k/password", "wl2k/p2p/start", "wl2k/grib", "wl2k/disconnect", "wl2k/attachment", "wl2k/mark", "wl2k/queue"] {
             assert!(station.command(request(action, "")).is_err(), "{action}");
@@ -500,17 +499,15 @@ impl Station {
 
     pub fn new_with_web_config(
         path: PathBuf,
-        demo_endpoint: Option<String>,
         web_path: Option<PathBuf>,
         runtime: &'static str,
     ) -> Result<Self, String> {
         let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
-        Self::from_text(path, raw, demo_endpoint, web_path, runtime)
+        Self::from_text(path, raw, web_path, runtime)
     }
     fn from_text(
         path: PathBuf,
         raw: String,
-        demo_endpoint: Option<String>,
         web_path: Option<PathBuf>,
         runtime: &'static str,
     ) -> Result<Self, String> {
@@ -520,13 +517,6 @@ impl Station {
             .map(|path| WebConfig::load(path))
             .transpose()?
             .unwrap_or_default();
-        if let Some(endpoint) = &demo_endpoint
-            && (config.interfaces.len() != 1
-                || config.interfaces[0].endpoint != *endpoint
-                || config.interfaces[0].transport != crate::config::TransportKind::Tcp)
-        {
-            return Err("Demo mode only permits its built-in loopback TNC".into());
-        }
         let mut mailbox = Store::open(&path)?;
         let warnings = mailbox.take_warnings();
         let directory = if config.yapp_download_dir.trim().is_empty() {
@@ -554,7 +544,6 @@ impl Station {
         let heard = Heard::load(&mheard_path, Heard::current_utc(), config.interfaces.len());
         let mut s = Self {
             runtime,
-            demo_endpoint,
             engine: engine(&config, false),
             mailbox_engine: config.mailbox_enabled.then(|| engine(&config, true)),
             automatic: Automation::new(&config, &path, 0)?,
@@ -1158,11 +1147,12 @@ impl Station {
                 let (reply, receiver) = std::sync::mpsc::sync_channel(1);
                 sender.try_send(StationEvent::Autostart { enabled, reply })
                     .map_err(|_| "Desktop preferences queue is busy")?;
-                let (enabled, available) = receiver.recv_timeout(Duration::from_secs(5))
+                let enabled = receiver.recv_timeout(Duration::from_secs(5))
                     .map_err(|_| "Desktop host did not respond")??;
                 return Ok(Reply::json(json::object([
                     ("enabled", enabled.to_string()),
-                    ("available", available.to_string()),
+                    // Keep the response compatible with previously cached desktop panels.
+                    ("available", "true".into()),
                 ])));
             }
             "connect" => {
@@ -1870,7 +1860,6 @@ impl Station {
                 let mut next = Self::from_text(
                     self.path.clone(),
                     text.clone(),
-                    self.demo_endpoint.clone(),
                     Some(self.web_path.clone()),
                     self.runtime,
                 )?;
@@ -2161,7 +2150,6 @@ impl Station {
             ])
         }));
         json::object([
-            ("demo", self.demo_endpoint.is_some().to_string()),
             (
                 "callsign",
                 js(&self

@@ -2,7 +2,6 @@ pub mod auth;
 pub mod automation;
 pub mod ax25;
 pub mod config;
-pub mod demo;
 pub mod digipeat;
 pub mod i18n;
 pub mod kiss;

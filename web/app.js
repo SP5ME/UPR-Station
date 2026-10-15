@@ -684,7 +684,7 @@ document.addEventListener('visibilitychange',sendHeartbeat);
 heartbeatTimer=setInterval(sendHeartbeat,30000);
 request('config/details').then(details=>loadLanguage(details.language)).catch(()=>loadLanguage('en'));
 function ensureDiagnostics(){if($('view-diagnostics'))return;const nav=node('button','nav');nav.dataset.view='diagnostics';nav.innerHTML='<svg class="icon" aria-hidden="true"><use href="/icons.svg#pulse"></use></svg> Diagnostyka';nav.addEventListener('click',()=>showView('diagnostics'));document.querySelector('nav').append(nav);const view=node('section','view');view.id='view-diagnostics';view.hidden=true;const panel=node('section','panel');panel.innerHTML='<div class="panel-head"><h2>Diagnostyka stacji</h2><button id="diagnostics-refresh" class="button secondary small" type="button">Odśwież</button></div><div class="panel-content"><div id="diagnostics-body" class="monitor-body">Ładowanie…</div></div>';view.append(panel);document.querySelector('main').append(view);$('diagnostics-refresh').onclick=()=>guard(loadDiagnostics);}
-async function loadDiagnostics(){ensureDiagnostics();const [s,w,b]=await Promise.all([request('state',{method:'GET'}),request('web/details'),request('build-info',{method:'GET'})]);const values=[`Wersja aplikacji: ${b.version}`,`Tryb demo: ${s.demo?'tak':'nie'}`,`Znak stacji: ${s.callsign||'nie ustawiono'}`,`Czas pracy: ${s.uptime}s`,`RX / TX: ${s.rx} / ${s.tx}`,`Sesje aktywne: ${s.sessions.filter(x=>x.state!=='Idle').length} / ${s.sessions.length}`,`Interfejsy: ${s.interfaces.filter(x=>x.online).length} online / ${s.interfaces.length}`,`Plik WWW: ${w.path}`,`Nasłuch WWW: ${w.bind}`,`Plik tokenu: ${w.tokenFile||'brak (tylko lokalny dostęp)'}`];rows($('diagnostics-body'),values.map(x=>node('div','',x)));}
+async function loadDiagnostics(){ensureDiagnostics();const [s,w,b]=await Promise.all([request('state',{method:'GET'}),request('web/details'),request('build-info',{method:'GET'})]);const values=[`Wersja aplikacji: ${b.version}`,`Znak stacji: ${s.callsign||'nie ustawiono'}`,`Czas pracy: ${s.uptime}s`,`RX / TX: ${s.rx} / ${s.tx}`,`Sesje aktywne: ${s.sessions.filter(x=>x.state!=='Idle').length} / ${s.sessions.length}`,`Interfejsy: ${s.interfaces.filter(x=>x.online).length} online / ${s.interfaces.length}`,`Plik WWW: ${w.path}`,`Nasłuch WWW: ${w.bind}`,`Plik tokenu: ${w.tokenFile||'brak (tylko lokalny dostęp)'}`];rows($('diagnostics-body'),values.map(x=>node('div','',x)));}
 ensureDiagnostics();
 document.querySelector('#config-import')?.addEventListener('click',()=>{$('config-file')?.click();});
 document.querySelector('#config-file')?.addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{await ensureStationSettingsLoaded();importConfigForm(await file.text());$('config-text').value=settingsConfigText();toast('Zaimportowano konfigurację do formularza. Sprawdź ją i kliknij „Zapisz ustawienia”.');}catch(exception){error(exception);}finally{event.target.value='';}});
@@ -1067,7 +1067,7 @@ function syncNotificationChannels(){
   if(heading)heading.textContent=state.catalog['settings.notifications']||(state.language==='en'?'Notifications':'Powiadomienia');
   const label=$('settings-desktop-autostart-label'),hint=$('settings-desktop-autostart-hint');
   if(label)label.textContent=state.language==='en'?'Launch UPR Terminal after signing in':'Uruchamiaj UPR Terminal po zalogowaniu';
-  if(hint)hint.textContent=state.language==='en'?'Saved automatically. Unavailable in demo mode.':'Zmiana zapisywana automatycznie. Niedostępne w trybie demo.';
+  if(hint)hint.textContent=state.language==='en'?'Saved automatically.':'Zmiana zapisywana automatycznie.';
 }
 async function loadDesktopApplicationSettings(){
   if(!settingsDesktopRuntime())return;
@@ -1076,7 +1076,7 @@ async function loadDesktopApplicationSettings(){
   control.disabled=true;
   const result=await request('desktop/autostart');
   control.checked=result.enabled;
-  control.disabled=!result.available;
+  control.disabled=false;
 }
 setInterval(syncSettingsRuntime,500);
 
