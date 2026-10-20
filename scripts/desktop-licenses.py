@@ -54,4 +54,4 @@ if missing:
     (destination / "MISSING-LICENSE-TEXTS.txt").write_text("\n".join(missing) + "\n", encoding="utf-8")
 else:
     (destination / "MISSING-LICENSE-TEXTS.txt").unlink(missing_ok=True)
-print(f"Collected notices for {len(metadata['packages'])} packages ({host}).")
+print(f"Collected notices for {len(metadata['packages'])} packages ({args.target}).")

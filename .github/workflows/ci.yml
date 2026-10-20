@@ -35,10 +35,12 @@ jobs:
           node tests/browser/product-identity.cjs
           node tests/browser/settings-variants.cjs
           bash tests/installers/server-installer.sh
+          bash tests/installers/alpine-update.sh
           UPR_TEST_PYTHON=python bash tests/installers/bootstrap.sh
           python tests/packaging/product-boundary.py
           python tests/packaging/release-download.py
           python tests/packaging/server-package.py
+          python tests/packaging/web-update.py
       - name: HTTP and KISS acceptance test
         shell: bash
         run: |

@@ -5,6 +5,7 @@ cd "$(dirname "$0")/../.."
 source <(sed -n '/^station_pids() {/,/^mkdir -p /p' deploy/alpine/ultimatepr-update | sed '$d')
 
 SERVICE=ultimatepr-station
+MANAGER=openrc
 CURRENT=/opt/ultimatepr-station/current
 remaining=42
 calls=()
@@ -40,3 +41,23 @@ wait_for_current_process() { calls+=(process); }
 start_and_wait
 [[ "${calls[*]}" == 'zap start health process' ]]
 echo 'PASS: startup checks health and release identity'
+
+calls=()
+MANAGER=systemd
+systemctl() { calls+=("$1"); [[ "$1" != is-active ]]; }
+stop_station_processes
+[[ "${calls[*]}" == 'stop is-active' ]]
+calls=()
+start_and_wait
+[[ "${calls[*]}" == 'start health process' ]]
+echo 'PASS: systemd lifecycle uses only the managed service'
+
+calls=()
+OLD_TARGET=/opt/ultimatepr-station/releases/old
+stop_station_processes() { calls+=(stop); }
+start_and_wait() { calls+=(start); }
+rm() { calls+=(remove-current); }
+ln() { [[ "$2" == "$OLD_TARGET" && "$3" == "$CURRENT" ]]; calls+=(restore-current); }
+rollback
+[[ "${calls[*]}" == 'stop remove-current restore-current start' ]]
+echo 'PASS: rollback restores the previous release and checks startup'

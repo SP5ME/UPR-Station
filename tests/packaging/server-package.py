@@ -20,6 +20,9 @@ with tempfile.TemporaryDirectory() as directory:
         assert archive.getinfo('ultimatepr-station').external_attr>>16 & 0o111
         manifest=archive.read('PACKAGE-MANIFEST.txt').decode()
         assert 'binary_sha256='+hashlib.sha256(data).hexdigest() in manifest
+        helper=archive.read('deploy/alpine/ultimatepr-update').decode()
+        assert 'Unexpanded helper:' not in helper
+        assert 'def validate(package, architecture, destination=None, expected_tag=None):' in helper
         assert not any('proxmox' in name.lower() for name in names)
         assert 'src/main.rs' not in names
         assert not any(name.startswith('deploy/install/') for name in names)

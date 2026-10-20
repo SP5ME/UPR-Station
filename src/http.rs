@@ -24,6 +24,7 @@ pub struct Server {
     pub token: String,
     pub auth_enabled: bool,
     pub web_config: PathBuf,
+    pub update_directory: PathBuf,
     pub snapshot: Arc<RwLock<String>>,
     pub commands: mpsc::SyncSender<Envelope>,
     pub stop: Arc<AtomicBool>,
@@ -158,8 +159,13 @@ impl Server {
                     &format!("Bearer {}", self.token),
                 );
             let auth_enabled = self.auth_is_enabled();
-            let authenticated =
-                !auth_enabled || legacy || self.auth.lock().unwrap().valid_session(session);
+            let operator = legacy || self.auth.lock().unwrap().valid_session(session);
+            // Public radio monitoring never grants software installation or
+            // account takeover. Updates always require an operator session.
+            let privileged = r.path.starts_with("/api/update/") && r.method == "POST"
+                && !matches!(r.path.as_str(), "/api/update/check" | "/api/update/status")
+                || r.path == "/api/auth/account";
+            let authenticated = operator || (!auth_enabled && !privileged);
             if !authenticated {
                 return send(
                     stream,
@@ -188,10 +194,7 @@ impl Server {
                     stream,
                     200,
                     "application/json; charset=utf-8",
-                    format!(
-                        "{{\"version\":{}}}",
-                        json::string(env!("CARGO_PKG_VERSION"))
-                    )
+                    crate::update::build_info()
                     .as_bytes(),
                 );
             }
@@ -279,27 +282,17 @@ impl Server {
                     Err(_) => send(stream, 503, "text/plain", b"Station response timed out"),
                 };
             }
-            if r.method == "GET" && r.path == "/api/update/status" {
-                let (tx, rx) = mpsc::sync_channel(1);
-                if self
-                    .commands
-                    .try_send((
-                        Request {
-                            action: "update/status".into(),
-                            fields: HashMap::new(),
-                            body: vec![],
-                        },
-                        tx,
-                    ))
-                    .is_err()
-                {
-                    return send(stream, 503, "text/plain", b"Station busy; retry");
-                }
-                return match rx.recv_timeout(Duration::from_secs(10)) {
-                    Ok(Ok(reply)) => send(stream, 200, reply.mime, &reply.body),
-                    Ok(Err(e)) => send(stream, 400, "text/plain", e.as_bytes()),
-                    Err(_) => send(stream, 503, "text/plain", b"Station response timed out"),
+            if r.method == "GET" && r.path == "/api/update/check" {
+                let result = form(&r.query).and_then(|fields| {
+                    crate::update::check(fields.get("channel").map(String::as_str).unwrap_or("test"))
+                });
+                return match result {
+                    Ok(body) => send(stream, 200, "application/json; charset=utf-8", body.as_bytes()),
+                    Err(error) => send(stream, 400, "application/json; charset=utf-8", json::object([("error", json::string(&error))]).as_bytes()),
                 };
+            }
+            if r.method == "GET" && r.path == "/api/update/status" {
+                return send(stream, 200, "application/json", crate::update::status_json(&self.update_directory).as_bytes());
             }
             if r.method == "GET" && r.path == "/api/file" {
                 let fields = match form(&r.query) {
@@ -349,6 +342,22 @@ impl Server {
                 Ok(f) => f,
                 Err(e) => return send(stream, 400, "text/plain", e.as_bytes()),
             };
+            // Updates are maintenance I/O, not radio-engine commands.
+            if r.path.starts_with("/api/update/") {
+                let root = &self.update_directory;
+                let result = match r.path.as_str() {
+                    "/api/update/check" => crate::update::check(fields.get("channel").map(String::as_str).unwrap_or("test")),
+                    "/api/update/download" => crate::update::download(root, fields.get("tag").map(String::as_str).unwrap_or("")),
+                    "/api/update/upload" => crate::update::upload(root, &r.body),
+                    "/api/update/status" => Ok(crate::update::status_json(root)),
+                    "/api/update/install" if fields.get("confirm").map(String::as_str) == Some("yes") => crate::update::start(root).map(|s| json::object([("message", json::string(&s))])),
+                    _ => Err("Nieprawidłowe polecenie lub brak potwierdzenia instalacji".into()),
+                };
+                return match result {
+                    Ok(body) => send(stream, 200, "application/json; charset=utf-8", body.as_bytes()),
+                    Err(error) => send(stream, 400, "application/json; charset=utf-8", json::object([("error", json::string(&error))]).as_bytes()),
+                };
+            }
             let (tx, rx) = mpsc::sync_channel(1);
             let request = Request {
                 action: r.path.trim_start_matches("/api/").into(),

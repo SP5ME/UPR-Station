@@ -20,6 +20,9 @@ workflow=(root/'.github/workflows/release.yml').read_text()
 assert ('  desktop:\n' in workflow)==DESKTOP
 assert ('  server:\n' in workflow)!=DESKTOP
 assert 'proxmox' not in (root/'scripts/download-release.py').read_text().lower()
+context=(root/'.dockerignore').read_text()
+for name in ['update-package.py','update-release.py']:
+    assert '!deploy/server/'+name in context, 'Embedded updater source must be available during Docker builds'
 
 with tempfile.TemporaryDirectory() as directory:
     out=Path(directory)

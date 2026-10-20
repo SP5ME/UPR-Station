@@ -39,10 +39,12 @@ jobs:
           node tests/browser/product-identity.cjs
           node tests/browser/settings-variants.cjs
           bash tests/installers/server-installer.sh
+          bash tests/installers/alpine-update.sh
           bash tests/installers/bootstrap.sh
           python3 tests/packaging/product-boundary.py
           python3 tests/packaging/release-download.py
           python3 tests/packaging/server-package.py
+          python3 tests/packaging/web-update.py
 
   server:
     needs: checks
@@ -69,7 +71,11 @@ jobs:
       - run: python3 -m pip install ziglang==0.13.0
       # Rust 1.98 adds an AArch64 linker flag handled since cargo-zigbuild 0.23.
       - run: cargo install cargo-zigbuild --version 0.23.2 --locked
+      - run: echo "UPR_BUILD_EPOCH=$(date +%s)" >> "$GITHUB_ENV"
       - run: cargo zigbuild --locked --release --target ${{ matrix.target }} --bin ultimatepr-station
+        env:
+          UPR_BUILD_TAG: ${{ inputs.tag }}
+          UPR_BUILD_COMMIT: ${{ github.sha }}
       - name: Verify static binary
         run: |
           file target/${{ matrix.target }}/release/ultimatepr-station

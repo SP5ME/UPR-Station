@@ -47,6 +47,9 @@ as_root install -m 0755 "$ROOT_DIR/deploy/alpine/ultimatepr-station-run" /usr/lo
 as_root install -m 0755 "$ROOT_DIR/deploy/alpine/ultimatepr-station.initd" "/etc/init.d/$SERVICE"
 as_root install -m 0755 "$ROOT_DIR/deploy/alpine/ultimatepr-update" /usr/local/libexec/ultimatepr-update
 as_root chown root:root /usr/local/libexec/ultimatepr-update
+if ! command -v python3 >/dev/null 2>&1; then
+    as_root apk add --no-cache python3
+fi
 if ! command -v doas >/dev/null 2>&1; then
     as_root apk add --no-cache doas
 fi

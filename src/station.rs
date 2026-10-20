@@ -1159,18 +1159,6 @@ impl Station {
             }
             "config" => return Ok(Reply::text(self.raw.clone())),
             "stats" => return Ok(Reply::json(self.statistics.snapshot())),
-            "update/status" => {
-                let root = crate::update::directory(&self.path);
-                return Ok(Reply::json(crate::update::status_json(&root)));
-            }
-            "update/upload" => {
-                let root = crate::update::directory(&self.path);
-                return crate::update::upload(&root, &r.body).map(Reply::json);
-            }
-            "update/install" => {
-                let root = crate::update::directory(&self.path);
-                return crate::update::start(&root).map(Reply::text);
-            }
             "web/details" => {
                 let config = WebConfig::load(&self.web_path)?;
                 return Ok(Reply::json(json::object([

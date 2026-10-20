@@ -8,6 +8,7 @@ Type=simple
 User=ultimatepr
 Group=ultimatepr
 WorkingDirectory=/var/lib/ultimatepr
+Environment=UPR_UPDATE_DIR=/var/lib/ultimatepr/update
 ExecStart=/opt/ultimatepr-station/current/ultimatepr-station --bind 127.0.0.1:8080 --config /etc/ultimatepr/station.conf --web-config /etc/ultimatepr/web.conf
 Restart=on-failure
 RestartSec=2

@@ -259,6 +259,29 @@ button,a{transition:background .15s,color .15s,border-color .15s}
 .settings-form #settings-mqtt-card .form-grid>label>input:not([type=checkbox]){width:100%;margin-top:6px;min-height:40px}
 .settings-form #settings-mqtt-card .actions{align-items:center;gap:9px}
 .settings-form #settings-mqtt-card .actions>input[type=password]{width:min(280px,100%);min-height:40px}
+.settings-form #settings-update-card .update-intro{max-width:none;margin:0 0 18px}
+.settings-form #settings-update-card .update-build{display:flex;flex-wrap:wrap;gap:12px 36px;margin:0 0 22px;padding:0 0 18px;border-bottom:1px solid var(--line)}
+.settings-form #settings-update-card .update-build>div{min-width:130px;max-width:100%}
+.settings-form #settings-update-card .update-build dt{font-size:11px;color:var(--muted);margin-bottom:4px}
+.settings-form #settings-update-card .update-build dd{margin:0;font:11px/1.6 var(--mono);overflow-wrap:anywhere}
+.settings-form #settings-update-card .update-sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 36px}
+.settings-form #settings-update-card .update-source{min-width:0}
+.settings-form #settings-update-card .update-source h4{margin:0 0 14px;font-size:12px;font-weight:600}
+.settings-form #settings-update-card .update-source .section-help{margin:0;max-width:480px}
+.settings-form #settings-update-card .update-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px}
+.settings-form #settings-update-card .update-toolbar>label{display:flex;flex-direction:column;gap:6px;margin:0;min-width:190px}
+.settings-form #settings-update-card .update-toolbar select{width:100%;margin:0;min-height:38px}
+.settings-form #settings-update-card .update-toolbar>.button{min-height:38px}
+.settings-form #settings-update-card .update-source .actions{margin-top:14px}
+.settings-form #settings-update-card .hint{margin:12px 0 0;font:11px/1.6 var(--mono);overflow-wrap:anywhere}
+.settings-form #settings-update-card .update-installation{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.settings-form #settings-update-card .update-installation>.hint{margin:0 0 12px}
+.settings-form #settings-update-card .update-installation .update-toolbar{align-items:center}
+.settings-form #settings-update-card .update-installation .section-help{flex:1 1 300px;max-width:640px;margin:0}
+.settings-form #settings-update-card .update-terminal{font-size:11px;overflow-wrap:anywhere}
+.settings-form #settings-update-card details{margin-top:10px;font-size:11px;color:var(--green)}
+.settings-form #settings-update-card details summary{cursor:pointer}
+@media(max-width:800px){.settings-form #settings-update-card .update-sources{grid-template-columns:1fr;gap:20px}.settings-form #settings-update-card .update-source+.update-source{padding-top:18px;border-top:1px solid var(--line)}.settings-form #settings-update-card .update-build{gap:12px 22px}}
 .mqtt-help{margin-top:14px;padding:10px 12px;border:1px solid #e5ebdf;border-radius:6px;background:#fbfcf8;font-size:11px;color:var(--muted)}.mqtt-help summary{cursor:pointer;color:var(--ink)}.mqtt-help ol{margin:10px 0 8px 18px;padding:0;line-height:1.7}.mqtt-help code{font-family:var(--mono);color:var(--ink)}
 .settings-form .form-grid>label:has(> input[type=checkbox]){flex-direction:row;align-items:center;gap:8px;min-height:40px;margin-top:6px}.settings-form .form-grid>label>input[type=checkbox]{width:16px!important;min-width:16px;max-width:16px;height:16px;min-height:16px;margin:0;flex:0 0 16px;accent-color:#769954}
 input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:#bd765d;background:#fff8f3;box-shadow:0 0 0 3px #bd765d22!important}

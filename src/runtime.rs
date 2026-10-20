@@ -287,6 +287,7 @@ pub fn start(options: RuntimeOptions) -> Result<StationRuntime, String> {
             token,
             auth_enabled: web_config.auth_enabled,
             web_config: web_config_path.clone(),
+            update_directory: crate::update::directory(&path),
             snapshot,
             commands: tx,
             stop: stop.clone(),

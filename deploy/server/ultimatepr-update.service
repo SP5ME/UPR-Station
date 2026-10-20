@@ -1,0 +1,9 @@
+[Unit]
+Description=UPR Station independent binary updater
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/ultimatepr-update --request
+TimeoutStartSec=600
+PrivateTmp=true
+UMask=0027

@@ -1,2 +1,2 @@
 # UltimatePR Station: allow only the update helper for the service account.
-permit nopass ultimatepr as root cmd /usr/local/libexec/ultimatepr-update
+permit nopass ultimatepr as root cmd /usr/local/libexec/ultimatepr-update args --request

@@ -9,6 +9,10 @@
 !.dockerignore
 !src/
 !src/**
+!deploy/
+!deploy/server/
+!deploy/server/update-package.py
+!deploy/server/update-release.py
 !web/
 !web/**
 !messages/

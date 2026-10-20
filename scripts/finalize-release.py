@@ -20,11 +20,30 @@ Instalator rozpoznaje Alpine/OpenRC oraz Debian/Ubuntu/Raspberry Pi OS/systemd.
 Opcja --docker wymaga istniejącego Docker Engine. Bez skryptów Proxmox.
 Zachowano konfigurację i katalogi danych. Po aktualizacji panelu Ctrl+F5.
 
+## Zmiany w tym wydaniu
+
+- Panel aktualizacji: osobne sekcje GitHub i ZIP, wyrównane kontrolki i układ mobilny.
+- Sprawdzanie wersji na publicznym panelu nie otwiera dodatkowego logowania.
+  Pobieranie, przesłanie ZIP-a i instalacja nadal wymagają operatora.
+- Pobieranie gotowych paczek z GitHub, kanały stabilny/testowy, identyfikator buildu
+  i weryfikacja SHA-256, produktu, architektury oraz plików ZIP przed instalacją.
+- Aktualizacje bez kompilacji źródeł jako root; niezależny helper OpenRC/systemd,
+  kontrola procesu/health oraz próba rollbacku bez nadpisywania danych.
+- Nowy panel odświeża kartę po aktualizacji; restart może wymagać ponownego logowania.
+
+Wymagane dla updatera natywnego: Python 3 i wget. Starszy Alpine może wymagać
+`apk add python3 wget ca-certificates` przed pierwszym testem. Pierwszą aktualizację
+przeprowadza jeszcze stary helper, z jego dotychczasowymi ograniczeniami.
+Docker aktualizuj z hosta, nie z panelu wewnątrz kontenera. Przed aktualizacją
+wykonaj kopię /etc/ultimatepr i /var/lib/ultimatepr; sesje radiowe zostaną rozłączone.
+Testy helpera używają atrap usług. Pełny upgrade/rollback na rzeczywistym OpenRC
+i systemd nadal wymaga testu wdrożeniowego na kopii instalacji.
+
 Instalacja/aktualizacja: pobierz install.sh, następnie `sudo sh install.sh`.
 Opcja `--version {tag}` przypina wydanie; domyślnie najnowszy opublikowany tag,
 także pre-release. Skrypt pobiera tylko pliki z SP5ME/UPR-Station i sprawdza SHA-256.
 
-Po upublicznieniu repozytorium:
+Instalacja jednym poleceniem z publicznego repozytorium:
 `curl -fsSL https://github.com/SP5ME/UPR-Station/releases/download/{tag}/install.sh | sudo sh`
 
 Polecenie wykonuje pobrany kod. Repozytorium prywatne wymaga autoryzowanego

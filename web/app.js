@@ -232,7 +232,7 @@ async function request(path,{body,raw,query,method='POST'}={}){
   if(path==='web/details')method='POST';
   const h=headers();if(method==='POST'&&!raw)h['Content-Type']='application/x-www-form-urlencoded';
   const response=await fetch(`/api/${path}${query?'?'+new URLSearchParams(query):''}`,{method,headers:h,credentials:'same-origin',body:method==='GET'?undefined:raw||new URLSearchParams(body||{}),signal:AbortSignal.timeout(35000)});
-  if(response.status===401){const dialog=$('token-dialog');if(dialog&&!dialog.open)dialog.showModal();throw Error('Zaloguj się, aby otworzyć stację.');}
+  if(response.status===401){const dialog=$('token-dialog');if(dialog&&!dialog.open)dialog.showModal();throw Object.assign(Error('Zaloguj się, aby otworzyć stację.'),{status:401});}
   if(!response.ok){const text=await response.text();let msg=text;try{msg=JSON.parse(text).error||text;}catch{}throw Error(msg);}
   const result=response.headers.get('content-type')?.includes('application/json')?await response.json():await response.text();
   if(path==='web/details'&&result&&typeof result==='object'){state.webDetails=result;syncProductIdentity();}
@@ -898,7 +898,21 @@ function ensureUpdateSettingsPanel(){
   toggle.type='button';
   toggle.setAttribute('aria-expanded','false');
   const body=node('div','interface-body');
-  body.innerHTML='<p class="section-help">Wybierz paczkę ZIP przygotowaną dla Alpine. Instalacja zatrzyma usługę, sprawdzi paczkę i uruchomi ją ponownie.</p><p class="hint update-version" id="settings-update-version">Obecna wersja: sprawdzanie… <button id="settings-update-version-check" type="button" class="button secondary small">Sprawdź wersję</button></p><div class="actions"><button id="settings-update-choose" type="button" class="button secondary">Wybierz ZIP</button><button id="settings-update-install" type="button" class="button primary" disabled>Zainstaluj aktualizację</button><input id="settings-update-file" type="file" accept=".zip" hidden></div><p id="settings-update-file-info" class="hint">Nie wybrano paczki.</p><pre id="settings-update-terminal" class="update-terminal" role="status" aria-live="polite">Status aktualizacji: nie sprawdzono.</pre>';
+  body.innerHTML=`<p class="section-help update-intro">Sprawdź dostępne wydania lub wybierz gotową paczkę ZIP. Pobieranie nie przerywa pracy radia.</p>
+    <dl class="update-build"><div><dt>Wersja aplikacji</dt><dd id="settings-update-version">Sprawdzanie…</dd></div><div><dt>Build</dt><dd id="settings-update-build">—</dd></div><div><dt>Architektura</dt><dd id="settings-update-architecture">—</dd></div></dl>
+    <div class="update-sources">
+      <section class="update-source" aria-labelledby="settings-update-github-heading"><h4 id="settings-update-github-heading">Z GitHub</h4>
+        <div class="update-toolbar"><label for="settings-update-channel">Kanał wydań<select id="settings-update-channel"><option value="test">Testowe i stabilne</option><option value="stable">Tylko stabilne</option></select></label><button id="settings-update-version-check" type="button" class="button secondary">Sprawdź GitHub</button></div>
+        <p id="settings-update-release" class="hint">Nie sprawdzono dostępnych wydań.</p><details id="settings-update-notes" hidden><summary>Zmiany w wydaniu</summary><pre class="update-terminal"></pre></details>
+        <div class="actions"><button id="settings-update-download" type="button" class="button secondary" disabled>Pobierz paczkę</button></div>
+      </section>
+      <section class="update-source" aria-labelledby="settings-update-zip-heading"><h4 id="settings-update-zip-heading">Z pliku ZIP</h4>
+        <p class="section-help">Wybierz wewnętrzny ZIP Alpine z paczki testera, zgodny z architekturą serwera — nie całe archiwum testera.</p>
+        <div class="actions"><button id="settings-update-choose" type="button" class="button secondary">Wybierz ZIP</button><input id="settings-update-file" type="file" accept=".zip" hidden></div>
+      </section>
+    </div>
+    <div class="update-installation"><p id="settings-update-file-info" class="hint">Nie wybrano paczki do instalacji.</p><div class="update-toolbar"><button id="settings-update-install" type="button" class="button primary" disabled>Zainstaluj aktualizację</button><p class="section-help">Pobieranie, przesłanie ZIP-a i instalacja wymagają logowania operatora. Instalacja rozłączy sesje radiowe i uruchomi usługę ponownie.</p></div></div>
+    <pre id="settings-update-terminal" class="update-terminal" role="status" aria-live="polite">Status aktualizacji: nie sprawdzono.</pre>`;
   const toggleCard=event=>{if(event.target.closest('button'))return;toggle.click();};
   toggle.onclick=()=>{
     const collapsed=card.classList.toggle('collapsed');
@@ -912,14 +926,39 @@ function ensureUpdateSettingsPanel(){
   web.append(card);
   const file=$('settings-update-file'),choose=$('settings-update-choose'),install=$('settings-update-install');
   const info=$('settings-update-file-info'),terminal=$('settings-update-terminal'),versionInfo=$('settings-update-version'),versionCheck=$('settings-update-version-check');
+  const download=$('settings-update-download'),channel=$('settings-update-channel'),releaseInfo=$('settings-update-release'),notes=$('settings-update-notes');
+  let currentBuild=null,availableRelease=null,installationPending=false;
   const refreshUpdateVersion=async()=>{
     if(!versionInfo)return;
     try{
       const result=await request('build-info',{method:'GET'});
-      versionInfo.firstChild.textContent=`Obecna wersja: ${result?.version||'nieznana'} `;
-    }catch{versionInfo.firstChild.textContent='Obecna wersja: niedostępna ';}
+      currentBuild=result;
+      versionInfo.textContent=result?.version||'Nieznana';
+      $('settings-update-build').textContent=result?.tag||'Nieznany';
+      $('settings-update-architecture').textContent=result?.architecture||'Nieznana';
+      choose.disabled=!result?.webUpdate;
+      versionCheck.disabled=!result?.webUpdate;
+      if(!result?.webUpdate)info.textContent='Ta instalacja wymaga aktualizacji instalatorem na hoście (Docker lub brak helpera).';
+    }catch{versionInfo.textContent='Niedostępna';}
   };
-  versionCheck?.addEventListener('click',refreshUpdateVersion);
+  versionCheck.onclick=()=>guard(async()=>{
+    versionCheck.disabled=true;channel.disabled=true;download.disabled=true;availableRelease=null;
+    try{
+      await refreshUpdateVersion();
+      versionCheck.disabled=true;
+      releaseInfo.textContent='Sprawdzanie dostępnych wydań…';
+      const result=await request('update/check',{method:'GET',query:{channel:channel.value}});
+      availableRelease=result.available?result:null;
+      const same=result.tag===currentBuild?.tag;
+      const older=Boolean(currentBuild?.builtAt&&result.publishedAt<=currentBuild.builtAt&&!same);
+      if(older)availableRelease=null;
+      releaseInfo.textContent=result.available?`Wydanie na GitHub: ${result.tag}${result.prerelease?' (testowe)':''}${same?' — już zainstalowane':older?' — starsze od lokalnego buildu; nie proponuję cofania wersji':''}`:'Brak opublikowanych wydań w wybranym kanale.';
+      notes.hidden=!result.notes;notes.querySelector('pre').textContent=result.notes||'';
+      download.disabled=!availableRelease||same||!currentBuild?.webUpdate;
+    }catch(exception){releaseInfo.textContent='Nie udało się sprawdzić dostępnych wydań.';throw exception;}
+    finally{versionCheck.disabled=!currentBuild?.webUpdate;channel.disabled=false;}
+  });
+  channel.onchange=()=>{availableRelease=null;download.disabled=true;notes.hidden=true;releaseInfo.textContent='Zmieniono kanał. Sprawdź GitHub ponownie.';};
   refreshUpdateVersion();
   const renderUpdateStatus=status=>{
     if(!status||!terminal)return;
@@ -927,8 +966,14 @@ function ensureUpdateSettingsPanel(){
     const stateName=status.state||'idle';
     const version=status.version||'—';
     terminal.textContent=`Stan: ${stateName}\nWersja: ${version}\n${status.log||'Brak statusu.'}`;
+    const busy=['downloading','running','validating','building','stopping','starting'].includes(stateName);
+    if(busy&&!updateStatusTimer)updateStatusTimer=setInterval(()=>window.refreshUpdateStatus?.(),2000);
+    choose.disabled=busy||!currentBuild?.webUpdate;
+    download.disabled=busy||!availableRelease||availableRelease.tag===currentBuild?.tag||!currentBuild?.webUpdate;
+    install.disabled=busy||stateName!=='uploaded'||!currentBuild?.webUpdate;
     if(stateName==='completed'||stateName==='failed'||stateName==='rolled-back'){
       if(updateStatusTimer){clearInterval(updateStatusTimer);updateStatusTimer=null;}
+      if(stateName==='completed'&&installationPending){installationPending=false;toast('Aktualizacja udana. Odświeżam panel…');setTimeout(()=>location.reload(),1500);}
     }
   };
   window.refreshUpdateStatus=async()=>{
@@ -937,6 +982,9 @@ function ensureUpdateSettingsPanel(){
       try{
         renderUpdateStatus(await request('update/status',{method:'GET'}));
       }catch(exception){
+        // Sessions are in memory and expire on service restart. Reload the new
+        // panel instead of keeping old assets behind a login dialog forever.
+        if(installationPending&&exception.status===401){installationPending=false;setTimeout(()=>location.reload(),1000);return;}
         if(terminal){
           const prefix=updateStatusLast?'Status chwilowo niedostępny — usługa może być restartowana.':'Nie można jeszcze pobrać statusu aktualizacji.';
           terminal.textContent=`${prefix}\nPonawiam sprawdzanie…`;
@@ -951,6 +999,15 @@ function ensureUpdateSettingsPanel(){
     window.refreshUpdateStatus?.();
   };
   choose.onclick=()=>file.click();
+  download.onclick=()=>guard(async()=>{
+    if(!availableRelease)return;
+    download.disabled=true;choose.disabled=true;install.disabled=true;
+    try{
+      await request('update/download',{body:{tag:availableRelease.tag}});
+      info.textContent=`Pobieranie: ${availableRelease.tag}`;
+      startStatusPolling();
+    }catch(exception){choose.disabled=!currentBuild?.webUpdate;download.disabled=false;throw exception;}
+  });
   file.onchange=()=>guard(async()=>{
     const selected=file.files?.[0];
     if(!selected)return;
@@ -961,12 +1018,13 @@ function ensureUpdateSettingsPanel(){
       install.disabled=false;
       renderUpdateStatus({state:'uploaded',version:'—',log:`Paczka przesłana. SHA-256: ${result.sha256||'brak'}`});
       toast('Paczka aktualizacji przesłana.');
-    }finally{choose.disabled=false;file.value='';}
+    }finally{choose.disabled=!currentBuild?.webUpdate;file.value='';}
   });
   install.onclick=()=>guard(async()=>{
-    if(!window.confirm('Zainstalować wybraną paczkę? Usługa zostanie chwilowo zatrzymana.'))return;
+    if(!window.confirm('Zainstalować wybraną paczkę? Aktywne sesje radiowe zostaną rozłączone. Usługa zostanie chwilowo zatrzymana; konfiguracja i dane pozostaną zachowane.'))return;
     install.disabled=true;
     await request('update/install',{body:{confirm:'yes'}});
+    installationPending=true;
     renderUpdateStatus({state:'running',version:'—',log:'Uruchomiono aktualizację…'});
     startStatusPolling();
   });

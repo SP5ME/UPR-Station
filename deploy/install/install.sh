@@ -114,7 +114,7 @@ with zipfile.ZipFile(sys.argv[2],'w',zipfile.ZIP_DEFLATED) as archive:
         if p.is_file(): archive.write(p,p.relative_to(root))
 PY
             mkdir -p /var/lib/ultimatepr/update
-            sh "$PKG/deploy/alpine/ultimatepr-update" --install "$WORK/update.zip" /var/lib/ultimatepr/update
+            UPR_INSTALL_LOCK_HELD=1 sh "$PKG/deploy/alpine/ultimatepr-update" --install "$WORK/update.zip" /var/lib/ultimatepr/update
         else
             printf 'bind=%s\nauth_enabled=true\n' "$LISTEN" > "$PKG/deploy/alpine/web.conf.example"
             sh "$PKG/deploy/alpine/install-server-linux.sh" "$PKG/ultimatepr-station"
@@ -168,6 +168,13 @@ PY
     )
     for _ in $(seq 1 30); do
         if systemctl is-active --quiet ultimatepr-station && curl -fsS --max-time 2 "$HEALTH_URL" | grep -qx ok; then
+            install -d -m 0750 -o ultimatepr -g ultimatepr /var/lib/ultimatepr/update
+            install -d /usr/local/libexec
+            install -m 0755 "$PKG/deploy/alpine/ultimatepr-update" /usr/local/libexec/ultimatepr-update
+            install -m 0644 "$PKG/deploy/server/ultimatepr-update.service" /etc/systemd/system/ultimatepr-update.service
+            install -m 0644 "$PKG/deploy/server/ultimatepr-update.path" /etc/systemd/system/ultimatepr-update.path
+            systemctl daemon-reload
+            systemctl enable --now ultimatepr-update.path
             printf 'UPR Station installed; configuration preserved in /etc/ultimatepr.\n'
             return
         fi
@@ -213,8 +220,8 @@ main() {
     mkdir /run/lock/upr-station-install 2>/dev/null || fail 'Another installer is running.'
     LOCKED=1;trap cleanup EXIT;trap 'cleanup;exit 1' HUP INT TERM
     if [ "$INIT" = openrc ]; then apk add --no-cache python3 curl ca-certificates tar gzip unzip; else
-        command -v python3 >/dev/null && command -v curl >/dev/null && command -v unzip >/dev/null || {
-            apt-get update;apt-get install -y python3 curl ca-certificates tar gzip unzip;
+        command -v python3 >/dev/null && command -v curl >/dev/null && command -v unzip >/dev/null && command -v wget >/dev/null || {
+            apt-get update;apt-get install -y python3 curl ca-certificates tar gzip unzip wget;
         }
     fi
     python3 - "$LISTEN" <<'PY'

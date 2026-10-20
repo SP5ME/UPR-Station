@@ -38,7 +38,16 @@ with tempfile.TemporaryDirectory(prefix='upr-server-package-') as temporary:
     for name in ['Cargo.toml', 'LICENSE', 'TRADEMARKS.md']:
         shutil.copy2(root/name, stage/name)
     # The bootstrap template is not executable by itself; only publish its generated release asset.
-    shutil.copytree(root/'deploy', stage/'deploy', ignore=shutil.ignore_patterns('install'))
+    shutil.copytree(root/'deploy', stage/'deploy', ignore=shutil.ignore_patterns(
+        'install', 'update-package.py', 'update-release.py', 'update-tester.sh', '__pycache__'))
+    # Older installed helpers copy only this maintenance file. Embed validation
+    # so it remains self-contained after that first compatibility upgrade.
+    helper = stage/'deploy/alpine/ultimatepr-update'
+    marker = "raise SystemExit('Unexpanded helper: build a binary package with package-server.py')"
+    source = helper.read_text()
+    if source.count(marker) != 1:
+        raise SystemExit('Update helper validator marker missing')
+    helper.write_text(source.replace(marker, (root/'deploy/server/update-package.py').read_text()), newline='\n')
     shutil.copytree(licenses, stage/'licenses/crates')
     for name in ['Apache-2.0.txt', 'MDI-LICENSE.txt']:
         shutil.copy2(root/'licenses'/name, stage/'licenses'/name)
@@ -47,7 +56,7 @@ with tempfile.TemporaryDirectory(prefix='upr-server-package-') as temporary:
     (stage/'PACKAGE-MANIFEST.txt').write_text(
         f'name=UPR-Station-{args.tag}-{args.arch}\nversion={version}\n'
         'variant=linux-headless-server-alpine-musl\nsource=binary\n'
-        f'created={args.tag}\narchitecture={args.arch}\nbinary_sha256={digest}\n')
+        f'created={args.tag}\nbuild_tag={args.tag}\narchitecture={args.arch}\nbinary_sha256={digest}\n')
     files = sorted(p for p in stage.rglob('*') if p.is_file())
     def executable(path):
         return path.name == 'ultimatepr-station' or path.suffix == '.sh' or path.name in ['ultimatepr-update', 'ultimatepr-station-run']
