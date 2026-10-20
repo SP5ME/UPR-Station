@@ -16,6 +16,7 @@ parser.add_argument('--tag', required=True)
 parser.add_argument('--licenses', required=True)
 parser.add_argument('--output', default='release/current')
 args = parser.parse_args()
+version=re.search(r'^version\s*=\s*"([^"]+)"', (root/'Cargo.toml').read_text(encoding='utf-8'), re.M)[1]
 # package-server validates tag before it can be used as a path component.
 packages = root/'target/tester-assets'/args.tag
 if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,100}', args.tag):
@@ -41,7 +42,7 @@ assert script.count(marker) == 1
 inner = f'UPR-Station-{args.tag}-alpine-{args.arch}.zip'
 (folder/'START-TUTAJ.md').write_text(f'''# UPR Station — paczka testera
 
-Wersja aplikacji: 0.1.3-prealpha.1. Build: {args.tag}. Architektura: {args.arch}.
+Wersja aplikacji: {version}. Build: {args.tag}. Architektura: {args.arch}.
 To jest wyłącznie serwer Station, bez Terminala, Windows i skryptów Proxmox.
 
 ## Aktualizacja w panelu WWW

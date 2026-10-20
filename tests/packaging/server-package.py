@@ -7,6 +7,17 @@ import tarfile
 import tempfile
 import zipfile
 root=Path(__file__).resolve().parents[2]
+# Runtime Python must be provisioned before any first-install files/service,
+# and before release downloads/extraction in both single-command installers.
+alpine=(root/'deploy/alpine/install-server-linux.sh').read_text(encoding='utf-8')
+dependency='as_root apk add --no-cache python3 wget ca-certificates'
+preflight="python3 -I -c 'import sys, ssl, urllib.request, zipfile;"
+assert alpine.index(dependency)<alpine.index(preflight)<alpine.index('as_root install -d')
+for name in ['deploy/server/install-server.sh','deploy/install/install.sh']:
+    installer=(root/name).read_text(encoding='utf-8')
+    main=installer[installer.index('main() {'):]
+    assert main.index('apk add --no-cache python3')<main.index(preflight)<main.index('PACKAGE=$(download_package)')
+    assert 'tar gzip unzip wget' in main
 with tempfile.TemporaryDirectory() as directory:
     temp=Path(directory)
     binary=temp/'binary'
@@ -19,6 +30,7 @@ with tempfile.TemporaryDirectory() as directory:
             assert required in names,required
         assert archive.getinfo('ultimatepr-station').external_attr>>16 & 0o111
         manifest=archive.read('PACKAGE-MANIFEST.txt').decode()
+        assert 'version=0.1.3\n' in manifest
         assert 'binary_sha256='+hashlib.sha256(data).hexdigest() in manifest
         helper=archive.read('deploy/alpine/ultimatepr-update').decode()
         assert 'Unexpanded helper:' not in helper

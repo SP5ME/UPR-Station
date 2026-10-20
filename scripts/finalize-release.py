@@ -1,7 +1,12 @@
 import hashlib
+import os
 from pathlib import Path
+import re
 import sys
 tag,directory=sys.argv[1:]
+project=Path(__file__).resolve().parents[1]
+version=re.search(r'^version\s*=\s*"([^"]+)"', (project/'Cargo.toml').read_text(encoding='utf-8'), re.M)[1]
+kind='Wydanie testowe (pre-release)' if os.environ.get('UPR_RELEASE_PRERELEASE')=='true' else 'Wydanie pełne'
 root=Path(directory)
 required=['install-server.sh','install.sh']
 required += [f'UPR-Station-{tag}-{kind}-{arch}.{extension}' for arch in ['x86_64','aarch64','armv7'] for kind,extension in [('linux','tar.gz'),('alpine','zip'),('docker','tar.gz')]]
@@ -11,7 +16,7 @@ for name in required:
     if not (root/name).is_file() or not (root/name).stat().st_size: raise SystemExit('Missing release asset: '+name)
 notes=f'''# UPR Station — {tag}
 
-Wydanie testowe pre-alfa. Wersja aplikacji: 0.1.3-prealpha.1.
+{kind}. Wersja aplikacji: {version}.
 To wydanie zawiera wyłącznie UPR Station; drugi produkt ma osobne repozytorium.
 
 Linux/musl: x86-64, ARM64 i ARMv7. Alpine: ZIP do panelu aktualizacji.
@@ -30,6 +35,8 @@ Zachowano konfigurację i katalogi danych. Po aktualizacji panelu Ctrl+F5.
 - Aktualizacje bez kompilacji źródeł jako root; niezależny helper OpenRC/systemd,
   kontrola procesu/health oraz próba rollbacku bez nadpisywania danych.
 - Nowy panel odświeża kartę po aktualizacji; restart może wymagać ponownego logowania.
+- Instalatory zapewniają Python 3, wget i certyfikaty przed zmianą plików aplikacji
+  oraz sprawdzają obsługę HTTPS i ZIP. Błąd zależności przerywa instalację.
 
 Wymagane dla updatera natywnego: Python 3 i wget. Starszy Alpine może wymagać
 `apk add python3 wget ca-certificates` przed pierwszym testem. Pierwszą aktualizację

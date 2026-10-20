@@ -932,6 +932,7 @@ function ensureUpdateSettingsPanel(){
     if(!versionInfo)return;
     try{
       const result=await request('build-info',{method:'GET'});
+      if(!currentBuild)channel.value=String(result?.version||'').includes('-')?'test':'stable';
       currentBuild=result;
       versionInfo.textContent=result?.version||'Nieznana';
       $('settings-update-build').textContent=result?.tag||'Nieznany';

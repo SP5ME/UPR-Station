@@ -1,6 +1,6 @@
 # UPR Station
 
-Niezależna aplikacja packet radio (AX.25/KISS), wersja `0.1.3-prealpha.1`.
+Niezależna aplikacja packet radio (AX.25/KISS), wersja `0.1.3`.
 Repozytorium: `SP5ME/UPR-Station`. Serwer bez GUI systemowego, z panelem WWW, Telegramem i MQTT.
 
 To nie jest APRS. Funkcje obejmują terminal radiowy, digipeater, MailBox,

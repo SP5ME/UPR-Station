@@ -25,3 +25,29 @@ if (main --version '../bad' --dry-run >/dev/null 2>&1); then exit 1;fi
 if (main --version vtest --listen '127.0.0.1:8080;bad' --dry-run >/dev/null 2>&1); then exit 1;fi
 main --help >/dev/null
 echo 'PASS: Alpine/Debian/Raspberry Pi OS detection, 32/64-bit architectures and unsafe input rejection.'
+
+# Source only the privilege wrapper and prerequisites, stopping before any
+# application filesystem operation. All system commands below are mocks.
+(
+    calls=()
+    id() { printf '0\n'; }
+    apk() { calls+=("apk $*"); }
+    python3() { calls+=("python $*"); }
+    source <(sed -n '/^as_root() {/,/^as_root install -d /p' deploy/alpine/install-server-linux.sh | sed '$d')
+    [[ "${calls[0]}" == 'apk add --no-cache python3 wget ca-certificates' ]]
+    [[ "${calls[1]}" == 'python -I -c import sys, ssl, urllib.request, zipfile;'* ]]
+    [[ "${#calls[@]}" == 2 ]]
+)
+for failing in apk python3; do
+    if bash -e -c '
+        id() { printf "0\n"; }
+        apk() { [[ "$1" == add ]]; }
+        python3() { :; }
+        if [[ "$1" == apk ]]; then apk() { return 17; }; else python3() { return 18; }; fi
+        source <(sed -n "/^as_root() {/,/^as_root install -d /p" deploy/alpine/install-server-linux.sh | sed "\$d")
+    ' -- "$failing"; then
+        echo "FAIL: installer ignored prerequisite failure: $failing" >&2
+        exit 1
+    fi
+done
+echo 'PASS: persistent Python/HTTPS/ZIP prerequisites precede installation; package-manager and Python failures abort.'

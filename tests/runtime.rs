@@ -76,6 +76,7 @@ fn public_panel_does_not_grant_update_or_account_access() {
     assert!(post_request(station.address, "/api/update/install", &auth).starts_with("HTTP/1.1 400"));
     assert!(post_raw_request(station.address, "/api/update/upload", &auth, b"not a zip").starts_with("HTTP/1.1 400"));
     let build = request(station.address, "/api/build-info", "");
+    assert!(build.contains(&format!("\"version\":\"{}\"", env!("CARGO_PKG_VERSION"))));
     assert!(build.contains("\"architecture\":") && build.contains("\"tag\":") && build.contains("\"commit\":"));
     assert!(request(station.address, "/api/state", "").starts_with("HTTP/1.1 200"));
     drop(station);

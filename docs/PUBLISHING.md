@@ -15,7 +15,8 @@ Podział nie tworzy repozytorium zdalnego, nie robi push ani release.
 
 Do czasu zamknięcia listy zalecane jest repozytorium prywatne.
 Push sam nie publikuje Releases. Ręczny workflow wymaga unikalnego tagu
-i świadomego wyboru publikacji; zawsze oznacza wydanie jako pre-release.
+i świadomego wyboru publikacji. Opcja `prerelease` wybiera wydanie testowe;
+pełne wydanie wymaga tagu `vVERSION` zgodnego z wersją w Cargo.toml bez sufiksu.
 Nie skonfigurowano podpisywania. Dopóki audyt jest otwarty, zachowaj repozytorium prywatne.
 
 
@@ -39,6 +40,7 @@ znaleźć się w plikach publikowanych. Instalatory pobierają wyłącznie włas
 
 Push uruchamia kontrole źródeł; nie tworzy wydania. Build release jest ręczny,
 wymaga unikalnego tagu i sprawdzenia wszystkich paczek. Domyślnie tworzy draft;
-po jawnym wyborze publikuje pre-release. Nie skonfigurowano podpisywania.
+po jawnym wyborze publikuje wybrany typ wydania. Pełne wydanie jest oznaczane
+jako Latest; wydanie testowe ma flagę pre-release. Nie skonfigurowano podpisywania.
 Włącz wymagane kontrole gałęzi i ochronę sekretów przed publikacją.
 Dotychczasowe wydania w repo Terminal nie zostały zmienione ani usunięte.

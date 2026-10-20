@@ -3,11 +3,15 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Unique release tag (application version stays unchanged)
+        description: Release tag (vVERSION for a full release)
         required: true
         type: string
       publish:
-        description: Publish as pre-release after all checks (otherwise draft)
+        description: Publish after all checks (otherwise draft)
+        default: false
+        type: boolean
+      prerelease:
+        description: Mark as pre-release (false for a full release)
         default: false
         type: boolean
 permissions:
@@ -17,6 +21,7 @@ concurrency:
   cancel-in-progress: false
 env:
   RELEASE_TAG: ${{ inputs.tag }}
+  UPR_RELEASE_PRERELEASE: ${{ inputs.prerelease }}
 jobs:
   checks:
     runs-on: ubuntu-24.04
@@ -28,7 +33,16 @@ jobs:
       - run: rustup update stable --no-self-update
       - run: python3 scripts/verify-publication.py
       - name: Validate tag
-        run: python3 -c 'import os,re; assert re.fullmatch(r"v[0-9][A-Za-z0-9._-]{0,99}",os.environ["RELEASE_TAG"]), "Invalid release tag"'
+        run: |
+          python3 - <<'PY'
+          import os, re, tomllib
+          from pathlib import Path
+          tag = os.environ['RELEASE_TAG']
+          version = tomllib.loads(Path('Cargo.toml').read_text())['package']['version']
+          assert re.fullmatch(r'v[0-9][A-Za-z0-9._-]{0,99}', tag), 'Invalid release tag'
+          if os.environ['UPR_RELEASE_PRERELEASE'] != 'true':
+              assert tag == 'v' + version and '-' not in version, 'Full release tag must match the stable Cargo version'
+          PY
       - run: cargo +stable test --locked --tests
       - run: cargo +stable build --locked --bin ultimatepr-station
       - run: python3 tests/e2e.py target/debug/ultimatepr-station
@@ -133,5 +147,13 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
         run: |
           if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then echo 'Release already exists; refusing overwrite'; exit 1; fi
-          gh release create "$RELEASE_TAG" --repo "$REPOSITORY" --target "$COMMIT" --draft --prerelease --title "UPR Station $RELEASE_TAG" --notes-file target/release-assets/RELEASE-NOTES.md target/release-assets/*
-          if [ "$PUBLISH" = true ]; then gh release edit "$RELEASE_TAG" --repo "$REPOSITORY" --draft=false; fi
+          flags=()
+          if [ "$UPR_RELEASE_PRERELEASE" = true ]; then flags+=(--prerelease); fi
+          gh release create "$RELEASE_TAG" --repo "$REPOSITORY" --target "$COMMIT" --draft "${flags[@]}" --title "UPR Station $RELEASE_TAG" --notes-file target/release-assets/RELEASE-NOTES.md target/release-assets/*
+          if [ "$PUBLISH" = true ]; then
+            if [ "$UPR_RELEASE_PRERELEASE" = true ]; then
+              gh release edit "$RELEASE_TAG" --repo "$REPOSITORY" --draft=false
+            else
+              gh release edit "$RELEASE_TAG" --repo "$REPOSITORY" --draft=false --latest
+            fi
+          fi

@@ -24,7 +24,8 @@
   Restart unieważnia sesję logowania zapisaną w pamięci; panel może poprosić
   o ponowne zalogowanie. Konto i hasło pozostają niezmienione.
 - Docker aktualizuje się wyłącznie z hosta; aplikacja nie dostaje socketu Docker.
-- Bez zmiany wersji 0.1.3-prealpha.1, schematu danych i logiki AX.25/KISS.
+- Wersja pełnego wydania: 0.1.3 (wcześniej 0.1.3-prealpha.1).
+  Bez zmiany schematu danych i logiki AX.25/KISS.
 
 ## Kontrola lokalna
 

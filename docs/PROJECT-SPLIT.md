@@ -2,7 +2,7 @@
 
 Projekt: **UPR Station**, docelowe repozytorium **SP5ME/UPR-Station**.
 Baza historii: `eb42f2e0056c56f2ec0560330186e18641a83609`.
-Wersja pozostaje `0.1.3-prealpha.1`. Brak migracji schematu danych.
+W momencie rozdzielenia wersja pozostała `0.1.3-prealpha.1`. Brak migracji schematu danych.
 Nie wykonano push ani wydania. Repozytorium Station nie jest tworzone automatycznie.
 
 Oba produkty mają pełne własne źródła protokołów AX.25/KISS, poczty,

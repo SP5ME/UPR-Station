@@ -29,6 +29,7 @@ try{
   assert.equal(await evaluate('!!document.querySelector(".telegram-settings,#settings-mqtt-card,#settings-web-bind")'),true);
   assert.equal(await evaluate('document.querySelector("#settings-update-card").classList.contains("collapsed")'),true);
   assert.deepEqual(await evaluate('Array.from(document.querySelector("#settings-update-channel").options,o=>o.value)'),['test','stable']);
+  assert.equal(await evaluate('document.querySelector("#settings-update-channel").value'),'stable');
   assert.equal(await evaluate('document.querySelector("#settings-update-download").disabled'),true);
   assert.equal(await evaluate('document.querySelector("#settings-update-notes").hidden'),true);
   assert.equal(await evaluate('document.querySelector("#settings-update-install").disabled'),true);

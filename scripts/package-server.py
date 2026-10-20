@@ -56,12 +56,12 @@ with tempfile.TemporaryDirectory(prefix='upr-server-package-') as temporary:
     (stage/'PACKAGE-MANIFEST.txt').write_text(
         f'name=UPR-Station-{args.tag}-{args.arch}\nversion={version}\n'
         'variant=linux-headless-server-alpine-musl\nsource=binary\n'
-        f'created={args.tag}\nbuild_tag={args.tag}\narchitecture={args.arch}\nbinary_sha256={digest}\n')
+        f'created={args.tag}\nbuild_tag={args.tag}\narchitecture={args.arch}\nbinary_sha256={digest}\n', encoding='utf-8', newline='\n')
     files = sorted(p for p in stage.rglob('*') if p.is_file())
     def executable(path):
         return path.name == 'ultimatepr-station' or path.suffix == '.sh' or path.name in ['ultimatepr-update', 'ultimatepr-station-run']
     (stage/'SHA256SUMS.txt').write_text(''.join(
-        f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(stage).as_posix()}\n' for p in files))
+        f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(stage).as_posix()}\n' for p in files), encoding='utf-8', newline='\n')
     files.append(stage/'SHA256SUMS.txt')
     tar_path = out/f'UPR-Station-{args.tag}-linux-{args.arch}.tar.gz'
     zip_path = out/f'UPR-Station-{args.tag}-alpine-{args.arch}.zip'

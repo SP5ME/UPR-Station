@@ -65,6 +65,13 @@ Instalator odmawia nadpisania istniejącej instalacji wskazanej przez `current`.
 Do działającej instalacji używaj procedury aktualizacji, aby zachować możliwość
 rollbacku.
 
+Przed utworzeniem plików aplikacji instalator instaluje przez `apk` trwałe
+zależności `python3`, `wget` i `ca-certificates`, następnie sprawdza Python 3.9+
+oraz moduły HTTPS/ZIP. Niepowodzenie przerywa instalację przed zmianą plików
+Station. Pobranie brakujących pakietów wymaga dostępu do repozytoriów Alpine.
+Aktualizacja samym ZIP-em nie uruchamia instalatora zależności: starszą instalację
+bez Pythona trzeba jednorazowo uzupełnić przez `apk add --no-cache python3 wget ca-certificates`.
+
 ## Weryfikacja
 
 ```sh

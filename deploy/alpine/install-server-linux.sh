@@ -21,6 +21,11 @@ as_root() {
     else echo "BŁĄD: potrzebny root, doas albo sudo." >&2; exit 1; fi
 }
 
+# Runtime prerequisites must be ready before creating a partial installation or
+# starting the service. They are not temporary Cargo/build dependencies.
+as_root apk add --no-cache python3 wget ca-certificates
+python3 -I -c 'import sys, ssl, urllib.request, zipfile; assert sys.version_info >= (3, 9), "Station installer requires Python 3.9 or newer"'
+
 as_root install -d -m 0755 "$INSTALL_ROOT" "$INSTALL_ROOT/releases" "$DATA_DIR" "$CONFIG_DIR" /usr/local/libexec
 if ! id ultimatepr >/dev/null 2>&1; then
     as_root addgroup -S ultimatepr
@@ -47,9 +52,6 @@ as_root install -m 0755 "$ROOT_DIR/deploy/alpine/ultimatepr-station-run" /usr/lo
 as_root install -m 0755 "$ROOT_DIR/deploy/alpine/ultimatepr-station.initd" "/etc/init.d/$SERVICE"
 as_root install -m 0755 "$ROOT_DIR/deploy/alpine/ultimatepr-update" /usr/local/libexec/ultimatepr-update
 as_root chown root:root /usr/local/libexec/ultimatepr-update
-if ! command -v python3 >/dev/null 2>&1; then
-    as_root apk add --no-cache python3
-fi
 if ! command -v doas >/dev/null 2>&1; then
     as_root apk add --no-cache doas
 fi
@@ -67,9 +69,6 @@ fi
 # OpenRC may report that the supervisor was started even when the child
 # process exits immediately. Confirm the application itself before reporting
 # a successful installation.
-if ! command -v wget >/dev/null 2>&1; then
-    as_root apk add --no-cache wget
-fi
 healthy=false
 for _ in 1 2 3 4 5 6 7 8 9 10; do
     health="$(wget -qO- http://127.0.0.1:8080/healthz 2>/dev/null || true)"

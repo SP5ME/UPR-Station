@@ -219,11 +219,13 @@ main() {
     install -d /run/lock
     mkdir /run/lock/upr-station-install 2>/dev/null || fail 'Another installer is running.'
     LOCKED=1;trap cleanup EXIT;trap 'cleanup;exit 1' HUP INT TERM
-    if [ "$INIT" = openrc ]; then apk add --no-cache python3 curl ca-certificates tar gzip unzip; else
+    if [ "$INIT" = openrc ]; then apk add --no-cache python3 curl ca-certificates tar gzip unzip wget; else
         command -v python3 >/dev/null && command -v curl >/dev/null && command -v unzip >/dev/null && command -v wget >/dev/null || {
             apt-get update;apt-get install -y python3 curl ca-certificates tar gzip unzip wget;
         }
     fi
+    # A command on PATH is not enough: ZIP validation and HTTPS need stdlib SSL.
+    python3 -I -c 'import sys, ssl, urllib.request, zipfile; assert sys.version_info >= (3, 9), "Station installer requires Python 3.9 or newer"'
     python3 - "$LISTEN" <<'PY'
 import ipaddress,sys
 host,port=sys.argv[1].rsplit(':',1)

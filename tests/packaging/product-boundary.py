@@ -1,6 +1,8 @@
 """Offline product/publication contracts, including rejected foreign release assets."""
 import hashlib
+import os
 from pathlib import Path
+import re
 import runpy
 import subprocess
 import sys
@@ -8,6 +10,8 @@ import tempfile
 from unittest.mock import patch
 
 root=Path(__file__).resolve().parents[2]
+version=re.search(r'^version\s*=\s*"([^"]+)"', (root/'Cargo.toml').read_text(), re.M)[1]
+assert f'name = "ultimatepr-station"\nversion = "{version}"' in (root/'Cargo.lock').read_text()
 DESKTOP=False
 repo='UPR-Terminal' if DESKTOP else 'UPR-Station'
 assert ('SP5ME/'+repo+'/releases') in (root/'scripts/download-release.py').read_text()
@@ -19,6 +23,8 @@ assert (root/'Dockerfile').exists()!=DESKTOP
 workflow=(root/'.github/workflows/release.yml').read_text()
 assert ('  desktop:\n' in workflow)==DESKTOP
 assert ('  server:\n' in workflow)!=DESKTOP
+assert '      prerelease:\n' in workflow and 'flags+=(--prerelease)' in workflow
+assert '--draft=false --latest' in workflow
 assert 'proxmox' not in (root/'scripts/download-release.py').read_text().lower()
 context=(root/'.dockerignore').read_text()
 for name in ['update-package.py','update-release.py']:
@@ -30,11 +36,15 @@ with tempfile.TemporaryDirectory() as directory:
         ['install-server.sh','install.sh']+[f'UPR-Station-vtest-{kind}-{arch}.{ext}' for arch in ['x86_64','aarch64','armv7'] for kind,ext in [('linux','tar.gz'),('alpine','zip'),('docker','tar.gz')]])
     for name in required:(out/name).write_bytes(b'isolated release contract fixture')
     script=root/'scripts/finalize-release.py'
-    subprocess.run([sys.executable,str(script),'vtest',str(out)],check=True)
+    subprocess.run([sys.executable,str(script),'vtest',str(out)],check=True,env={**os.environ,'UPR_RELEASE_PRERELEASE':'false'})
+    notes=(out/'RELEASE-NOTES.md').read_text(encoding='utf-8')
+    assert f'Wydanie pełne. Wersja aplikacji: {version}.' in notes
     sums=(out/'SHA256SUMS.txt').read_text().splitlines()
     for line in sums:
         digest,name=line.split(None,1)
         assert hashlib.sha256((out/name).read_bytes()).hexdigest()==digest
+    subprocess.run([sys.executable,str(script),'vtest',str(out)],check=True,env={**os.environ,'UPR_RELEASE_PRERELEASE':'true'})
+    assert 'Wydanie testowe (pre-release).' in (out/'RELEASE-NOTES.md').read_text(encoding='utf-8')
     foreign=out/('UPR-Station-vtest-alpine-x86_64.zip' if DESKTOP else 'UPR-Terminal-vtest-windows-x86_64-setup.exe')
     foreign.write_bytes(b'foreign product fixture')
     result=subprocess.run([sys.executable,str(script),'vtest',str(out)],capture_output=True)
