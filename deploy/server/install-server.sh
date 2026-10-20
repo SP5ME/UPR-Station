@@ -207,7 +207,7 @@ main() {
         case "$LISTEN" in 127.0.0.1:8080|0.0.0.0:8080) ;; *) fail 'Alpine updater currently supports IPv4 on port 8080 only.' ;; esac
     fi
     printf 'Platform: %s/%s; mode: %s; release: %s\n' "$INIT" "$ARCH" "$MODE" "$VERSION"
-    [ "$DRY_RUN" = 0 ] || return
+    [ "$DRY_RUN" = 0 ] || return 0
     [ "$(id -u)" -eq 0 ] || fail 'Run with sudo/doas or as root.'
     install -d /run/lock
     mkdir /run/lock/upr-station-install 2>/dev/null || fail 'Another installer is running.'

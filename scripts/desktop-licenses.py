@@ -8,9 +8,9 @@ import argparse
 root = Path(__file__).resolve().parents[1]
 host = next(line.split(": ", 1)[1] for line in subprocess.check_output(["rustc", "-vV"], text=True).splitlines() if line.startswith("host: "))
 parser = argparse.ArgumentParser()
-parser.add_argument('--manifest', default='desktop/Cargo.toml')
+parser.add_argument('--manifest', default='Cargo.toml')
 parser.add_argument('--target', default=host)
-parser.add_argument('--output', default='desktop/target/legal')
+parser.add_argument('--output', default='target/server-licenses')
 args = parser.parse_args()
 metadata = json.loads(subprocess.check_output([
     "cargo", "metadata", "--format-version", "1", "--locked", "--offline",

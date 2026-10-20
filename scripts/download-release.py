@@ -12,7 +12,7 @@ import urllib.request
 root, version, arch, mode = sys.argv[1:]
 if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,100}', version):
     raise SystemExit('Invalid release tag')
-if arch not in ['x86_64', 'aarch64', 'armv7'] or mode not in ['native', 'docker', 'installer', 'terminal']:
+if arch not in ['x86_64', 'aarch64', 'armv7'] or mode not in ['native', 'docker']:
     raise SystemExit('Invalid platform')
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, request, *args, **kwargs):
@@ -33,7 +33,7 @@ def fetch(url, accept=None, limit=2_000_000):
         raise RuntimeError('Response exceeds allowed size')
     return data
 try:
-    base = 'https://api.github.com/repos/SP5ME/UPR-Terminal/releases'
+    base = 'https://api.github.com/repos/SP5ME/UPR-Station/releases'
     if version == 'latest':
         releases = json.loads(fetch(base+'?per_page=100'))
         published = [item for item in releases if not item['draft'] and item.get('published_at')]
@@ -47,12 +47,6 @@ try:
         raise RuntimeError('Release is not published')
     extension = 'docker' if mode == 'docker' else 'linux'
     name = f'UPR-Station-{version}-{extension}-{arch}.tar.gz'
-    if mode == 'installer':
-        name = 'install-server.sh'
-    elif mode == 'terminal':
-        if arch != 'x86_64':
-            raise RuntimeError('Desktop architecture not supported')
-        name = f'UPR-Terminal-{version}-linux-x86_64.deb'
     assets = {a['name']: a for a in release['assets']}
     sums = fetch(assets['SHA256SUMS.txt']['url'], 'application/octet-stream').decode()
     expected = dict((line.split(None, 1)[1].lstrip('*'), line.split(None, 1)[0]) for line in sums.splitlines() if line.strip())[name]

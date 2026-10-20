@@ -11,7 +11,7 @@ use crate::{
 use crate::{
     history::History,
     json::{self, string as js},
-    station_events::{Notification, NotificationKind, StationEvent},
+    station_events::{Notification, NotificationKind},
     storage, telegram,
     transfers::Transfers,
     web_config::WebConfig,
@@ -30,7 +30,6 @@ struct Interface {
     error: String,
 }
 pub struct Station {
-    runtime: &'static str,
     config: Config,
     path: PathBuf,
     web_path: PathBuf,
@@ -53,7 +52,6 @@ pub struct Station {
     rx: u64,
     tx: u64,
     pub stopping: bool,
-    event_sender: Option<std::sync::mpsc::SyncSender<crate::station_events::StationEvent>>,
     telegram_sender: Option<std::sync::mpsc::SyncSender<telegram::Command>>,
     mqtt_discovery_sender: Option<std::sync::mpsc::SyncSender<()>>,
     mailbox_seen: u64,
@@ -80,124 +78,47 @@ pub struct Reply {
 mod configuration_tests {
     use super::*;
 
+    #[test]
+    fn server_delivers_telegram_and_browser_sound_without_a_native_host() {
+        let root = crate::test_temp_dir("server-service-boundary");
+        fs::create_dir_all(&root).unwrap();
+        let text = "callsign=TEST-1\ntelegram_enabled=true\ntelegram_chat_id=12345\nnotification_outgoing_connection_in_app=false\nnotification_outgoing_connection_sound=2\nnotification_outgoing_connection_telegram=true\n";
+        let mut station = Station::from_text(root.join("station.conf"), text.into(), None).unwrap();
+        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
+        station.set_telegram_sender(Some(sender));
+        station.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
+        assert!(matches!(receiver.try_recv(), Ok(telegram::Command::Send(_))));
+        assert!(station.notifications.is_empty());
+        assert_eq!(station.notification_sounds.len(), 1);
+        assert_eq!(station.notification_sounds[0].1, 2);
+        assert!(station.command(request("desktop/autostart", "")).is_err());
+        drop(station);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn persisted_mail_is_not_reannounced_when_server_starts() {
+        let root = crate::test_temp_dir("server-existing-mail");
+        fs::create_dir_all(&root).unwrap();
+        let path = root.join("station.conf");
+        let mut mailbox = Store::open(&path).unwrap();
+        mailbox.add("PEER-1".parse().unwrap(), "TEST-1".parse().unwrap(), "Old mail", "Existing message").unwrap();
+        drop(mailbox);
+        let text = "callsign=TEST-1\nmailbox_enabled=true\nmailbox_callsign=TEST-2\ntelegram_enabled=true\ntelegram_chat_id=12345\nnotification_mailbox_telegram=true\n";
+        let mut station = Station::from_text(path, text.into(), None).unwrap();
+        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
+        station.set_telegram_sender(Some(sender));
+        station.notify_mail();
+        assert!(receiver.try_recv().is_err());
+        station.mailbox.add("PEER-1".parse().unwrap(), "TEST-1".parse().unwrap(), "New mail", "New message").unwrap();
+        station.notify_mail();
+        assert!(matches!(receiver.try_recv(), Ok(telegram::Command::Send(_))));
+        drop(station);
+        fs::remove_dir_all(root).unwrap();
+    }
+
     fn request(action: &str, text: &str) -> Request {
         Request { action: action.into(), fields: HashMap::from([("text".into(), text.into())]), body: vec![] }
-    }
-
-    #[test]
-    fn telegram_is_server_only_without_erasing_desktop_configuration() {
-        let root = crate::test_temp_dir("telegram-runtime-boundary");
-        fs::create_dir_all(&root).unwrap();
-        let text = "callsign=TEST-1\ntelegram_enabled=true\ntelegram_chat_id=12345\nnotification_outgoing_connection_telegram=true\n";
-        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
-        let mut server = Station::from_text(root.join("server.conf"), text.into(), None, "server").unwrap();
-        server.set_telegram_sender(Some(sender.clone()));
-        server.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
-        assert!(matches!(receiver.try_recv(), Ok(telegram::Command::Send(_))));
-
-        let mut desktop = Station::from_text(root.join("desktop.conf"), text.into(), None, "desktop").unwrap();
-        let token = desktop.telegram_token_path();
-        fs::write(&token, "existing-private-token").unwrap();
-        desktop.set_telegram_sender(Some(sender));
-        desktop.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
-        assert!(receiver.try_recv().is_err());
-        for action in ["telegram/status", "telegram/token", "telegram/select", "telegram/discover", "telegram/test"] {
-            assert!(desktop.command(request(action, "")).err().unwrap().contains("UPR Station"));
-        }
-        desktop.command(request("config/save", &format!("{text}myname=Updated\n"))).unwrap();
-        assert!(desktop.config.telegram_enabled);
-        assert_eq!(desktop.config.telegram_chat_id, "12345");
-        assert!(desktop.config.notifications.outgoing_connection.telegram);
-        assert_eq!(fs::read_to_string(token).unwrap(), "existing-private-token");
-        drop(desktop);
-        drop(server);
-        fs::remove_dir_all(root).unwrap();
-    }
-
-    #[test]
-    fn autostart_requests_are_desktop_only_and_use_native_host_reply() {
-        let root = crate::test_temp_dir("autostart-runtime-boundary");
-        fs::create_dir_all(&root).unwrap();
-        let mut station = Station::from_text(root.join("station.conf"), "callsign=TEST-1\n".into(), None, "server").unwrap();
-        assert!(station.command(request("desktop/autostart", "")).err().unwrap().contains("UPR Terminal"));
-        station.runtime = "desktop";
-        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
-        station.set_events(Some(sender));
-        let invalid = Request { action: "desktop/autostart".into(), fields: HashMap::from([("enabled".into(), "yes".into())]), body: vec![] };
-        assert!(station.command(invalid).err().unwrap().contains("Invalid autostart"));
-        let host = std::thread::spawn(move || {
-            for expected in [None, Some(true)] {
-                match receiver.recv_timeout(Duration::from_secs(2)).unwrap() {
-                    StationEvent::Autostart { enabled, reply } => {
-                        assert_eq!(enabled, expected);
-                        reply.send(Ok(enabled.unwrap_or(false))).unwrap();
-                    }
-                    _ => panic!("Expected native preferences request"),
-                }
-            }
-        });
-        let reply = station.command(request("desktop/autostart", "")).unwrap();
-        assert_eq!(String::from_utf8(reply.body).unwrap(), "{\"enabled\":false,\"available\":true}");
-        let reply = station.command(Request { action: "desktop/autostart".into(), fields: HashMap::from([("enabled".into(), "true".into())]), body: vec![] }).unwrap();
-        assert_eq!(String::from_utf8(reply.body).unwrap(), "{\"enabled\":true,\"available\":true}");
-        host.join().unwrap();
-        drop(station);
-        fs::remove_dir_all(root).unwrap();
-    }
-
-    #[test]
-    fn notification_sound_is_independent_bounded_and_not_duplicated_on_desktop() {
-        let root = crate::test_temp_dir("station-independent-sound");
-        fs::create_dir_all(&root).unwrap();
-        let mut station = Station::from_text(root.join("station.conf"),
-            "callsign=TEST-1\n".into(), None, "server").unwrap();
-        let (sender, receiver) = std::sync::mpsc::sync_channel(8);
-        station.event_sender = Some(sender);
-        for (in_app, native) in [(false, false), (true, false), (false, true), (true, true)] {
-            station.notifications.clear();
-            station.notification_sounds.clear();
-            let rule = &mut station.config.notifications.outgoing_connection;
-            rule.in_app = in_app;
-            rule.native = native;
-            rule.telegram = false;
-            rule.sound = 2;
-            station.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
-            assert_eq!(station.notifications.len(), usize::from(in_app));
-            assert_eq!(station.notification_sounds.len(), 1);
-            assert_eq!(station.notification_sounds[0].1, 2);
-            let events: Vec<_> = receiver.try_iter().collect();
-            assert_eq!(events.len(), 1);
-            match &events[0] {
-                StationEvent::Notification(n) => { assert!(native); assert_eq!(n.sound, 2); }
-                StationEvent::Sound(count) => { assert!(!native); assert_eq!(*count, 2); }
-                StationEvent::Autostart { .. } => panic!("Unexpected preferences request"),
-            }
-        }
-        station.event_sender = None;
-        station.notifications.clear();
-        let rule = &mut station.config.notifications.outgoing_connection;
-        rule.in_app = false;
-        rule.native = false;
-        rule.sound = 0;
-        let before = station.notification_sounds.len();
-        station.notify(NotificationKind::OutgoingConnection, "Silent", "");
-        assert_eq!(station.notification_sounds.len(), before);
-        station.config.notifications.outgoing_connection.sound = 1;
-        for _ in 0..150 {
-            station.notify(NotificationKind::OutgoingConnection, "Connected", "PEER");
-        }
-        assert_eq!(station.notification_sounds.len(), 100);
-        assert!(station.notifications.is_empty());
-        assert!(station.snapshot().contains("\"notificationSounds\":[{\"id\":"));
-        station.config.notifications.yapp.sound = 3;
-        let last = *station.notification_sounds.back().unwrap();
-        station.notify(NotificationKind::Yapp, "Disabled module", "");
-        assert_eq!(*station.notification_sounds.back().unwrap(), last);
-        station.stopping = true;
-        station.notify(NotificationKind::OutgoingConnection, "Stopping", "");
-        assert_eq!(*station.notification_sounds.back().unwrap(), last);
-        drop(station);
-        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
@@ -206,7 +127,7 @@ mod configuration_tests {
         fs::create_dir_all(&root).unwrap();
         let path = root.join("station.conf");
         let text = "callsign=TEST-1\ninterface_VHF=127.0.0.1:8001,0,0,true,Radio\nax25_autonegotiation=false\nax25_modulo_128=false\n";
-        let mut station = Station::from_text(path.clone(), text.into(), None, "server").unwrap();
+        let mut station = Station::from_text(path.clone(), text.into(), None).unwrap();
         let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
         station.interfaces[0].transport = Some(Transport::connect(&listener.local_addr().unwrap().to_string()).unwrap());
         let (_peer, _) = listener.accept().unwrap();
@@ -265,7 +186,7 @@ mod configuration_tests {
         let path = root.join("station.conf");
         let text = "callsign=TEST-1\nmailbox_enabled=true\nmailbox_callsign=TEST-2\nwl2k_enabled=true\nwl2k_gateway=RMS-1\nnotification_winlink_in-app=true\n";
         fs::write(&path, text).unwrap();
-        let mut station = Station::from_text(path.clone(), text.into(), None, "server").unwrap();
+        let mut station = Station::from_text(path.clone(), text.into(), None).unwrap();
         assert!(station.mailbox_engine.is_some());
         for action in ["wl2k/sync", "wl2k/create", "wl2k/read", "wl2k/file", "wl2k/password", "wl2k/p2p/start", "wl2k/grib", "wl2k/disconnect", "wl2k/attachment", "wl2k/mark", "wl2k/queue"] {
             assert!(station.command(request(action, "")).is_err(), "{action}");
@@ -350,34 +271,17 @@ impl Station {
         self.engine.extended_for(source)
     }
 
-    pub fn set_events(
-        &mut self,
-        sender: Option<std::sync::mpsc::SyncSender<crate::station_events::StationEvent>>,
-    ) {
-        self.event_sender = sender;
-        self.mailbox_seen = self
-            .mailbox
-            .messages()
-            .iter()
-            .map(|m| m.id)
-            .max()
-            .unwrap_or(0);
-    }
     pub fn set_telegram_sender(
         &mut self,
         sender: Option<std::sync::mpsc::SyncSender<telegram::Command>>,
     ) {
-        self.telegram_sender = if self.runtime == "desktop" { None } else { sender };
+        self.telegram_sender = sender;
     }
     pub fn notify_application_started(&mut self) {
         self.notify(
             NotificationKind::ApplicationStarted,
             "Uruchomienie aplikacji",
-            if self.runtime == "desktop" {
-                "UPR Terminal jest gotowy do pracy"
-            } else {
-                "UPR Station jest gotowa do pracy"
-            },
+            "UPR Station jest gotowa do pracy",
         );
     }
     pub fn set_mqtt_discovery_sender(&mut self, sender: Option<std::sync::mpsc::SyncSender<()>>) {
@@ -413,7 +317,6 @@ impl Station {
         }
         let rule = self.config.notifications.rule(kind).clone();
         if !rule.in_app
-            && !rule.native
             && rule.sound == 0
             && !(rule.telegram
                 && self.config.telegram_enabled
@@ -447,15 +350,6 @@ impl Station {
                 self.notifications.pop_front();
             }
         }
-        if rule.native
-            && let Some(sender) = &self.event_sender
-        {
-            let _ = sender.try_send(StationEvent::Notification(notification));
-        } else if rule.sound > 0
-            && let Some(sender) = &self.event_sender
-        {
-            let _ = sender.try_send(StationEvent::Sound(rule.sound));
-        }
         if rule.telegram
             && self.config.telegram_enabled
             && !self.config.telegram_chat_id.is_empty()
@@ -470,7 +364,7 @@ impl Station {
         }
     }
     pub fn notify_mail(&mut self) {
-        if self.event_sender.is_none() && self.telegram_sender.is_none() {
+        if self.telegram_sender.is_none() {
             return;
         }
         let mailbox_events = self
@@ -500,17 +394,15 @@ impl Station {
     pub fn new_with_web_config(
         path: PathBuf,
         web_path: Option<PathBuf>,
-        runtime: &'static str,
-    ) -> Result<Self, String> {
+        ) -> Result<Self, String> {
         let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
-        Self::from_text(path, raw, web_path, runtime)
+        Self::from_text(path, raw, web_path)
     }
     fn from_text(
         path: PathBuf,
         raw: String,
         web_path: Option<PathBuf>,
-        runtime: &'static str,
-    ) -> Result<Self, String> {
+        ) -> Result<Self, String> {
         let config = Config::parse(&raw)?;
         let web_settings = web_path
             .as_ref()
@@ -518,6 +410,9 @@ impl Station {
             .transpose()?
             .unwrap_or_default();
         let mut mailbox = Store::open(&path)?;
+        // Previously initialized by the shared native-event host setter.
+        // Server startup must not announce all persisted mail as newly received.
+        let mailbox_seen = mailbox.messages().iter().map(|message| message.id).max().unwrap_or(0);
         let warnings = mailbox.take_warnings();
         let directory = if config.yapp_download_dir.trim().is_empty() {
             path.parent().unwrap().join("files")
@@ -543,7 +438,6 @@ impl Station {
         let mheard_path = path.clone().with_file_name("mheard.dat");
         let heard = Heard::load(&mheard_path, Heard::current_utc(), config.interfaces.len());
         let mut s = Self {
-            runtime,
             engine: engine(&config, false),
             mailbox_engine: config.mailbox_enabled.then(|| engine(&config, true)),
             automatic: Automation::new(&config, &path, 0)?,
@@ -579,10 +473,9 @@ impl Station {
             rx: 0,
             tx: 0,
             stopping: false,
-            event_sender: None,
             telegram_sender: None,
             mqtt_discovery_sender: None,
-            mailbox_seen: 0,
+            mailbox_seen,
             presence_mode: web_settings.presence_mode,
             absence_profile: web_settings.absence_profile,
             heartbeat_timeout: Duration::from_secs(web_settings.heartbeat_timeout),
@@ -1129,32 +1022,9 @@ impl Station {
         if self.stopping {
             return Err("Station is shutting down".into());
         }
-        if self.runtime == "desktop" && r.action.starts_with("telegram/") {
-            return Err("Telegram jest dostępny tylko w UPR Station".into());
-        }
+
         match r.action.as_str() {
-            "desktop/autostart" => {
-                if self.runtime != "desktop" {
-                    return Err("Autostart jest dostępny tylko w UPR Terminal".into());
-                }
-                let enabled = match get("enabled") {
-                    "" => None,
-                    "true" => Some(true),
-                    "false" => Some(false),
-                    _ => return Err("Invalid autostart setting".into()),
-                };
-                let sender = self.event_sender.as_ref().ok_or("Desktop host unavailable")?;
-                let (reply, receiver) = std::sync::mpsc::sync_channel(1);
-                sender.try_send(StationEvent::Autostart { enabled, reply })
-                    .map_err(|_| "Desktop preferences queue is busy")?;
-                let enabled = receiver.recv_timeout(Duration::from_secs(5))
-                    .map_err(|_| "Desktop host did not respond")??;
-                return Ok(Reply::json(json::object([
-                    ("enabled", enabled.to_string()),
-                    // Keep the response compatible with previously cached desktop panels.
-                    ("available", "true".into()),
-                ])));
-            }
+
             "connect" => {
                 if self.config.call.is_none() {
                     return Err("Configure your callsign first".into());
@@ -1304,7 +1174,7 @@ impl Station {
             "web/details" => {
                 let config = WebConfig::load(&self.web_path)?;
                 return Ok(Reply::json(json::object([
-                    ("runtime", js(self.runtime)),
+                    ("runtime", js("server")),
                     ("webPanel", "true".into()),
                     ("bind", js(&config.bind.to_string())),
                     (
@@ -1362,40 +1232,6 @@ impl Station {
                         while self.notifications.len() > 100 {
                             self.notifications.pop_front();
                         }
-                        Ok(Reply::ok())
-                    }
-                    "native" => {
-                        let Some(sender) = &self.event_sender else {
-                            return Err(
-                                "Powiadomienia systemowe są dostępne tylko w aplikacji desktopowej"
-                                    .into(),
-                            );
-                        };
-                        sender
-                            .try_send(StationEvent::Notification(Notification {
-                                id: self.next_notification_id,
-                                time: SystemTime::now()
-                                    .duration_since(UNIX_EPOCH)
-                                    .unwrap_or_default()
-                                    .as_secs(),
-                                kind: NotificationKind::Critical,
-                                title: "Test powiadomienia".into(),
-                                body: "To jest test dymka systemowego.".into(),
-                                sound: 0,
-                            }))
-                            .map_err(|_| "Kolejka powiadomień desktopowych jest zajęta")?;
-                        Ok(Reply::ok())
-                    }
-                    "sound" => {
-                        let Some(sender) = &self.event_sender else {
-                            return Err(
-                                "Dźwięk systemowy jest dostępny tylko w aplikacji desktopowej"
-                                    .into(),
-                            );
-                        };
-                        sender
-                            .try_send(StationEvent::Sound(1))
-                            .map_err(|_| "Kolejka powiadomień desktopowych jest zajęta")?;
                         Ok(Reply::ok())
                     }
                     _ => Err("Nieznany kanał testowy powiadomień".into()),
@@ -1829,7 +1665,16 @@ impl Station {
                 if text.len() > 65536 {
                     return Err("Configuration exceeds 64 KiB".into());
                 }
-                let config = Config::parse(text)?;
+                let mut config = Config::parse(text)?;
+                // Native channel settings belong to legacy Terminal profiles.
+                // Keep them when the Station form (which has no native column)
+                // omits those keys, without activating a desktop integration.
+                for kind in NotificationKind::ALL {
+                    let key = format!("notification_{}_native=", kind.key());
+                    if !text.lines().any(|line| line.trim_start().starts_with(&key)) {
+                        config.notifications.rule_mut(kind).native = self.config.notifications.rule(kind).native;
+                    }
+                }
                 let rebuild = self.configuration_requires_rebuild(&config);
                 if r.action == "config/check" {
                     return Ok(Reply::json(json::object([
@@ -1861,11 +1706,9 @@ impl Station {
                     self.path.clone(),
                     text.clone(),
                     Some(self.web_path.clone()),
-                    self.runtime,
                 )?;
                 storage::backup_existing(&self.path).map_err(|e| e.to_string())?;
                 storage::write_atomic(&self.path, text.as_bytes()).map_err(|e| e.to_string())?;
-                next.set_events(self.event_sender.clone());
                 next.set_telegram_sender(self.telegram_sender.clone());
                 next.set_mqtt_discovery_sender(self.mqtt_discovery_sender.clone());
                 *self = next;

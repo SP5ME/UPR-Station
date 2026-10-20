@@ -9,11 +9,11 @@ Panel używa ikon Material Design Icons / Pictogrammers. Do dystrybucji
 dołączamy `licenses/MDI-LICENSE.txt` i `licenses/Apache-2.0.txt`.
 Źródło licencji: https://pictogrammers.com/docs/general/license/
 
-## Rust i desktop
+## Rust
 
-Dokładne wersje wynikają z Cargo.lock i desktop/Cargo.lock.
+Dokładne wersje wynikają z Cargo.lock.
 `python scripts/desktop-licenses.py` zbiera teksty licencji dla docelowej
-platformy do desktop/target/legal/. Tauri dołącza je jako zasoby instalatora.
+platformy do target/server-licenses/. Paczki serwera dołączają te noty.
 Nie buduj wydania, jeśli pozostaje MISSING-LICENSE-TEXTS.txt.
 
 Obecność tekstu licencji nie dowodzi spełnienia wszystkich jej warunków.

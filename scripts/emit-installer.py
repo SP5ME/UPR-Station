@@ -6,15 +6,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('output')
 parser.add_argument('--bootstrap', action='store_true')
 args=parser.parse_args()
-server=(root/'deploy/server/install-server.sh').read_text()
-source=(root/'deploy/install/install.sh').read_text() if args.bootstrap else server
-if args.bootstrap:
-    source=source.replace('# Template. Releases contain a self-contained install.sh emitted by emit-installer.py.', '# Generated self-contained UPR installer. Do not edit.')
-    start=source.index('detect_platform() {')
-    end=source.index('\n}\n', start)+2
-    original=server.index('detect_platform() {')
-    original_end=server.index('\n}\n', original)+2
-    source=source[:start]+server[original:original_end]+source[end:]
+source=(root/('deploy/install/install.sh' if args.bootstrap else 'deploy/server/install-server.sh')).read_text()
 start=source.index('download_package() {')
 end=source.index('\n}\n',start)+2
 body=(root/'scripts/download-release.py').read_text()

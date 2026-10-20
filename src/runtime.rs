@@ -21,10 +21,8 @@ pub struct RuntimeOptions {
     pub config: PathBuf,
     pub web_config: PathBuf,
     pub web_config_explicit: bool,
-    pub desktop: bool,
-    /// Deprecated compatibility field. Desktop no longer authenticates via
-    /// an injected token, but older callers may still populate it.
-    pub desktop_token: Option<String>,
+    /// Optional bearer token override for embedded API callers and isolated tests.
+    pub token_override: Option<String>,
     pub install_signals: bool,
 }
 impl RuntimeOptions {
@@ -58,8 +56,7 @@ impl RuntimeOptions {
             config: path,
             web_config: web_config_path,
             web_config_explicit,
-            desktop: false,
-            desktop_token: None,
+            token_override: None,
             install_signals: true,
         }))
     }
@@ -100,17 +97,13 @@ impl Drop for StopOnDrop {
     }
 }
 
-pub fn start(
-    options: RuntimeOptions,
-    events: Option<mpsc::SyncSender<crate::station_events::StationEvent>>,
-) -> Result<StationRuntime, String> {
+pub fn start(options: RuntimeOptions) -> Result<StationRuntime, String> {
     let RuntimeOptions {
         mut address,
         config: mut path,
         web_config: web_config_path,
         web_config_explicit,
-        desktop,
-        desktop_token,
+        token_override,
         install_signals,
     } = options;
     if let Some(parent) = web_config_path
@@ -128,7 +121,7 @@ pub fn start(
         address = web_config.bind.to_string();
     }
     let address: SocketAddr = address.parse().map_err(|_| "Invalid bind address")?;
-    let token = if let Some(value) = desktop_token.clone() {
+    let token = if let Some(value) = token_override.clone() {
         value
     } else if let Ok(value) = env::var("STATION_TOKEN") {
         value
@@ -178,17 +171,13 @@ pub fn start(
         // already existed. Desktop profiles historically used a local token;
         // keep those profiles open while making new installations open by
         // default as well.
-        web_config.auth_enabled = desktop_token.is_some() || (!desktop && auth_path.exists());
+        web_config.auth_enabled = token_override.is_some() || auth_path.exists();
         storage::write_atomic(&web_config_path, web_config.encode().as_bytes())
             .map_err(|e| format!("Cannot migrate {}: {e}", web_config_path.display()))?;
     }
     let auth = std::sync::Arc::new(std::sync::Mutex::new(crate::auth::Auth::load(auth_path)?));
-    let runtime = if desktop { "desktop" } else { "server" };
-    let mut station = station::Station::new_with_web_config(
-        path.clone(),
-        Some(station_web_path.clone()),
-        runtime,
-    )?;
+    let mut station =
+        station::Station::new_with_web_config(path.clone(), Some(station_web_path.clone()))?;
     let mqtt_config = web_config::WebConfig::load(&station_web_path)?;
     let mqtt_password_path = station_web_path
         .parent()
@@ -198,17 +187,14 @@ pub fn start(
         .ok()
         .and_then(|bytes| String::from_utf8(bytes).ok())
         .unwrap_or_default();
-    let mqtt = match crate::mqtt::Publisher::start(
-        &mqtt_config,
-        mqtt_password,
-        station.mqtt_callsign(),
-    ) {
-        Ok(publisher) => publisher,
-        Err(error) => {
-            eprintln!("MQTT disabled: {error}");
-            None
-        }
-    };
+    let mqtt =
+        match crate::mqtt::Publisher::start(&mqtt_config, mqtt_password, station.mqtt_callsign()) {
+            Ok(publisher) => publisher,
+            Err(error) => {
+                eprintln!("MQTT disabled: {error}");
+                None
+            }
+        };
     let (mqtt_discovery_sender, mqtt_discovery_receiver) = mpsc::sync_channel::<()>(1);
     station.set_mqtt_discovery_sender(mqtt.is_some().then_some(mqtt_discovery_sender));
     let files_directory = station.files_directory();
@@ -233,17 +219,11 @@ pub fn start(
     }
     let snapshot = Arc::new(RwLock::new(station.snapshot()));
     let (tx, rx) = mpsc::sync_channel::<http::Envelope>(8);
-    let (telegram_sender, telegram_worker) = if desktop {
-        (None, None)
-    } else {
-        let (sender, worker) =
-            crate::telegram::spawn_worker(stop.clone(), path.with_file_name("telegram.log"));
-        (Some(sender), Some(worker))
-    };
+    let (telegram_sender, telegram_worker) =
+        crate::telegram::spawn_worker(stop.clone(), path.with_file_name("telegram.log"));
     let runtime_stop = stop.clone();
     let runtime_snapshot = snapshot.clone();
-    station.set_events(events);
-    station.set_telegram_sender(telegram_sender);
+    station.set_telegram_sender(Some(telegram_sender));
     station.notify_application_started();
     let runtime = thread::spawn(move || {
         let _stop_on_exit = StopOnDrop(runtime_stop.clone());
@@ -316,9 +296,7 @@ pub fn start(
         .run(listener);
         stop.store(true, Ordering::Relaxed);
         let runtime_result = runtime.join();
-        if let Some(worker) = telegram_worker {
-            let _ = worker.join();
-        }
+        let _ = telegram_worker.join();
         runtime_result.map_err(|_| "Station runtime panicked".to_owned())?;
         result.map_err(|e| e.to_string())
     });

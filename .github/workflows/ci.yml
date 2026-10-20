@@ -36,30 +36,13 @@ jobs:
           node tests/browser/settings-variants.cjs
           bash tests/installers/server-installer.sh
           UPR_TEST_PYTHON=python bash tests/installers/bootstrap.sh
+          python tests/packaging/product-boundary.py
           python tests/packaging/release-download.py
           python tests/packaging/server-package.py
-          python tests/packaging/desktop-release.py
-          python tests/packaging/installer-hooks.py
       - name: HTTP and KISS acceptance test
         shell: bash
         run: |
           binary=target/debug/ultimatepr-station
           if [[ "$RUNNER_OS" == "Windows" ]]; then binary="$binary.exe"; fi
           python tests/e2e.py "$binary"
-  desktop:
-    runs-on: windows-2022
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - run: rustup update stable --no-self-update
-      - run: cargo +stable fetch --locked --manifest-path desktop/Cargo.toml
-      - name: Collect license notices
-        shell: pwsh
-        run: |
-          python scripts/desktop-licenses.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (Test-Path desktop/target/legal/MISSING-LICENSE-TEXTS.txt) { throw 'Missing license texts' }
-      - run: cargo +stable test --locked --manifest-path desktop/Cargo.toml
-# No releases, deployment, signing secrets or pull_request_target.
+# Server project only; no GUI dependencies.

@@ -1,75 +1,43 @@
-# UPR Terminal
+# UPR Station
 
-Wspólne źródła terminala packet radio w dwóch wariantach:
+Niezależna aplikacja packet radio (AX.25/KISS), wersja `0.1.3-prealpha.1`.
+Repozytorium: `SP5ME/UPR-Station`. Serwer bez GUI systemowego, z panelem WWW, Telegramem i MQTT.
 
-- **UPR Terminal** — lokalna aplikacja Windows/Linux z oknem Tauri (wariant desktopowy).
-- **UPR Station** — stacja bez okna, obsługiwana przez przeglądarkę (wariant serwerowy; Alpine/OpenRC).
-
-Oba warianty korzystają ze wspólnego silnika AX.25/KISS i panelu WWW.
-Desktop uruchamia własny silnik, nie jest klientem zdalnej instalacji Server.
-To projekt packet radio, nie aplikacja APRS. Winlink nie jest obecnie obsługiwany.
-
-## Stan projektu
-
-Wersja testowa: **0.1.3-prealpha.1**; bez deklaracji gotowości produkcyjnej.
-Nazwy produktów to UPR Terminal i UPR Station; desktop/server to określenia techniczne.
-Pakiety Cargo, pliki wykonywalne, usługa i katalogi danych zachowują historyczne
-identyfikatory UltimatePR Station dla zgodności istniejących instalacji.
-Instalator i skróty desktopu noszą nazwę UPR Terminal.
-Przed publiczną dystrybucją zamknij [listę publikacji i licencji](docs/PUBLISHING.md).
-Ten zestaw nie zawiera gotowych wydań.
-
-## Funkcje
-
-Sesje AX.25, interfejsy TNC/KISS, terminal, monitor ramek, MHeard, digipeater,
-beacony, lokalny MailBox, YAPP i konfigurowalne powiadomienia.
-Usługi radiowe serwera działają niezależnie od karty przeglądarki.
-
-## Instalacja i aktualizacja Linux
-
-Instalację i aktualizację Linux jednym poleceniem opisuje
-[LINUX-INSTALL.md](docs/LINUX-INSTALL.md). Skrypt wybiera jawnie Station albo Terminal;
-prywatne wydania wymagają uwierzytelnienia GitHub.
+To nie jest APRS. Funkcje obejmują terminal radiowy, digipeater, MailBox,
+YAPP, beacon, monitor i MHeard. Winlink i demo nie są częścią projektu.
+Zanim uruchomisz radio, ustaw znak i właściwy interfejs TNC.
 
 ## Budowanie i testy
 
-Wymagany Rust zgodny z manifestami; deklarowane minimum wymaga osobnej walidacji.
-Zależności są zablokowane w Cargo.lock.
+Wymagany Rust zgodny z manifestem i zależności zapisane w Cargo.lock.
+Projekt jest samodzielny; nie pobiera źródeł z sąsiedniego folderu.
 
 ```sh
 cargo test --locked --tests
-cargo build --locked --bin ultimatepr-station
-node tests/browser/mheard-routes.cjs
-node tests/browser/notification-audio.cjs
-node tests/browser/notification-sounds.cjs
-python tests/e2e.py target/debug/ultimatepr-station
+cargo build --locked --release --bin ultimatepr-station
+python3 tests/e2e.py target/release/ultimatepr-station
 ```
 
-Na Windows ostatni argument ma rozszerzenie `.exe`. Testy używają izolowanych
-katalogów pod target/, bez konfiguracji operatora i bez prawdziwego radia.
+Dystrybucja Linux/musl/Alpine/Docker: `.github/workflows/release.yml`.
+Lokalne budowanie przez Docker: `bash scripts/build-linux.sh`.
 
-Układ testów i pełny zestaw poleceń opisano w [tests/README.md](tests/README.md).
-Kod aplikacji znajduje się w `src/`, desktop w `desktop/`, interfejs w `web/`,
-budowanie w `scripts/`, a instalacja usług w `deploy/`. Gotowe paczki należą do
-Releases, nie do katalogów źródłowych.
 
-- [Budowanie instalatorów](scripts/README.md)
-- [Instalacja serwera jednym poleceniem: Alpine/Linux/Raspberry Pi OS/Docker](docs/SERVER-INSTALL.md)
-- [Instalacja i aktualizacja Alpine](deploy/alpine/README.md)
-- [Obsługa i diagnostyka](docs/DEPLOYMENT.md)
-- [Architektura](docs/ARCHITECTURE.md)
-- [Zmiany](docs/CHANGES-DESKTOP.md)
-- [Współpraca](CONTRIBUTING.md) i [bezpieczeństwo](SECURITY.md)
+Testy protokołów: `cargo test --locked --tests`.
+Testy JS: pliki `tests/browser/*.cjs` uruchamiane przez Node.
+Kontrola publikacji: `python scripts/verify-publication.py`.
+Testy źródłowe pozostają w repo; dane operatora i wyniki są ignorowane.
 
-Paczki testowe publikuj osobno w Releases, nie w historii kodu.
-Ręcznie uruchamiany workflow „Build release” buduje Windows NSIS, Linux DEB i AppImage,
-serwer Linux/Alpine i obrazy Docker dla x86-64/ARM64/ARMv7. Publikacja następuje
-dopiero po przejściu wszystkich zadań; domyślnie powstaje draft.
-Do aktualizacji Server przez stronę służy ZIP Alpine, nie wspólny ZIP testera.
-Po aktualizacji odśwież panel przez Ctrl+F5.
+## Instalacja i wydania
 
-## Licencje
+[Instalacja Linux](docs/LINUX-INSTALL.md). Workflow wydania jest uruchamiany
+ręcznie i weryfikuje komplet paczek tylko tego produktu przed publikacją.
+Podział lokalny nie wykonał push ani release.
 
-Własny kod deklaruje [Apache License 2.0](LICENSE). Komponenty zewnętrzne
-zachowują swoje licencje: [THIRD-PARTY](docs/THIRD-PARTY.md), [marka](TRADEMARKS.md).
-Nie jest to zapewnienie zakończonego audytu pochodzenia wszystkich fragmentów.
+## Zgodność i bezpieczeństwo
+
+[Opis podziału](docs/PROJECT-SPLIT.md), [publikacja](docs/PUBLISHING.md),
+[materiały osób trzecich](docs/THIRD-PARTY.md), [SECURITY.md](SECURITY.md).
+Zachowano stare identyfikatory instalacji i ścieżki danych. Wykonaj kopię
+profilu przed ręcznym wdrożeniem; nie dołączaj sekretów do Git ani zgłoszeń.
+Licencja własnego kodu: Apache-2.0; licencje zależności pozostają niezależne.
+Audyt pochodzenia inspiracji nie jest uznany za zakończony.

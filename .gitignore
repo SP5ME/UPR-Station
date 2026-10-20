@@ -13,10 +13,6 @@
 !/Cargo.lock
 !/Dockerfile
 !/docker-compose.yml
-!/build-installer.ps1
-!/build-windows.cmd
-!/station-control.cmd
-!/station-control.ps1
 !/ultimatepr-logo.png
 !/ultimatepr-station-icon.ico
 !/ultimatepr-station-icon.png
@@ -30,7 +26,6 @@
 !/messages/
 !/assets/
 !/licenses/
-!/desktop/
 target/
 target-*/
 release/

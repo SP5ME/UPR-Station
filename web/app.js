@@ -163,8 +163,7 @@ function playNotificationSound(count){
   }catch{}
 }
 function syncProductIdentity(){
-  const desktop=Boolean(window.__UPR_DESKTOP__)||state.webDetails?.runtime==='desktop';
-  const variant=desktop?'Terminal':'Station',name=`UPR ${variant}`;
+  const variant='Station',name=`UPR ${variant}`;
   document.title=name;
   const brand=document.querySelector('.sidebar .brand');
   brand?.setAttribute('aria-label',name);
@@ -612,7 +611,6 @@ function decorateSettingsSections(){const form=document.querySelector('.settings
   group('Dostęp operatora',item=>item.matches('.access-panel'));
   group('Telegram',item=>item.matches('.telegram-settings'));
   group('Powiadomienia',item=>item.matches('.notification-settings'));
-  group('Uruchamianie',item=>item.matches('.desktop-settings'));
   application.dataset.settingsGroupsReady='true';
 }function organizeSettingsSections(){const form=document.querySelector('.settings-form');if(!form||form.dataset.sectionsOrganized==='true')return;const sections=[...form.querySelectorAll(':scope > .panel-content > .form-section')];const find=id=>$(id)?.closest('.form-section');const identity=find('settings-callsign'),interfaces=find('interface-forms'),ax25=find('settings-t1'),services=find('settings-welcome'),web=find('settings-web-bind'),application=web;if(!identity||!interfaces||!ax25||!services)return;form.dataset.sectionsOrganized='true';const mark=(section,key,title)=>{section.dataset.settingsKey=key;const heading=section.querySelector(':scope > h3');if(heading)heading.textContent=title;};mark(identity,'station','Stacja');mark(interfaces,'interfaces','Interfejsy TNC');mark(ax25,'ax25','AX.25 i ruch');if(web)mark(web,'application','Aplikacja i WWW');const panelContent=form.querySelector(':scope > .panel-content');const actions=form.querySelector(':scope > .panel-content > .actions');const section=(key,title,kind='form-grid')=>{const value=node('div','form-section');value.dataset.settingsKey=key;value.innerHTML=`<h3>${title}</h3><p class="section-help"></p><div class="${kind}"></div>`;panelContent.insertBefore(value,actions||null);return value;};const messages=section('messages','Komunikaty i komendy','check-grid'),beacon=section('beacon','Beacon','check-grid'),mailbox=section('mailbox','MailBox','check-grid'),yapp=section('yapp','YAPP','check-grid');const telegram=services.querySelector('.telegram-settings'),notifications=services.querySelector('.notification-settings');const formGrid=key=>{const target=key.querySelector('.form-grid');if(target)return target;const value=node('div','form-grid');key.append(value);return value;};const move=(id,target)=>{const value=$(id)?.closest('label');if(value)target.append(value);};['settings-welcome','settings-goodbye','settings-remote'].forEach(id=>move(id,messages));['settings-beacon'].forEach(id=>move(id,beacon));['settings-mailbox'].forEach(id=>move(id,mailbox));['settings-yapp','settings-yapp-auto','settings-yapp-location'].forEach(id=>move(id,yapp));['settings-beacon-seconds','settings-beacon-to'].forEach(id=>move(id,formGrid(beacon)));move('settings-mailbox-call',formGrid(mailbox));move('settings-yapp-dir',formGrid(yapp));const max=node('label','','Limit plików YAPP');const maxInput=node('input');maxInput.id='settings-yapp-max-files';maxInput.type='number';maxInput.min='1';maxInput.max='100000';maxInput.value='1000';max.append(maxInput);formGrid(yapp).append(max);const cleanup=node('label');cleanup.innerHTML='<input id="settings-yapp-cleanup" type="checkbox"> Automatycznie usuwaj najstarsze pliki po osiągnięciu limitu';yapp.append(cleanup);const side=form.querySelector(':scope > .panel-content > .settings-side');const templates=side?.querySelector('#template-select')?.closest('.panel');const access=side?.querySelector('#logout')?.closest('.panel');if(templates)messages.append(templates);if(access&&application)application.append(access);if(telegram&&application)application.append(telegram);if(notifications&&application)application.append(notifications);if(side&&!side.querySelector('.panel'))side.remove();services.remove();collapseApplicationSettings(application);const oldGrids=services.querySelectorAll('.form-grid,.check-grid');oldGrids.forEach(grid=>{if(!grid.children.length)grid.remove();});}
 function applySettingsFullWidth(){const form=document.querySelector('.settings-form');const grid=document.querySelector('#view-settings .settings-grid');if(!form||!grid)return;grid.style.display='block';form.style.width='100%';form.querySelector(':scope > .panel-content > .settings-side')?.setAttribute('hidden','');}
@@ -733,7 +731,7 @@ function updateTelegramStatus(){const el=$('telegram-status');if(!el)return;cons
 async function saveTelegramToken(){const token=$('settings-telegram-token')?.value.trim()||'';await request('telegram/token',{body:{token}});telegramFeedback('Token Telegrama zapisany.');state.telegramTokenPresent=Boolean(token);$('settings-telegram-token').value='';updateTelegramStatus();toast(token?'Token Telegrama zapisany.':'Token Telegrama usunięty.');}
 async function discoverTelegramChats(){const chats=await request('telegram/discover');const list=$('telegram-chat-list');list.replaceChildren(new Option('Wybierz wykryty czat',''));(chats||[]).forEach(chat=>list.append(new Option(chat.name+' ('+chat.kind+') · '+chat.id,chat.id)));list.hidden=!(chats||[]).length;if(!chats?.length)throw Error('Nie znaleziono czatów. Wyślij /start do bota i spróbuj ponownie.');telegramFeedback('Wybierz wykryty czat z listy.');toast('Wybierz wykryty czat z listy.');}
 $('settings-telegram-enabled')?.addEventListener('change',updateTelegramStatus);$('settings-telegram-chat-id')?.addEventListener('input',updateTelegramStatus);$('telegram-save-token')?.addEventListener('click',()=>guard(saveTelegramToken,e=>telegramFeedback(e.message||String(e),true)));$('telegram-discover')?.addEventListener('click',()=>guard(discoverTelegramChats,e=>telegramFeedback(e.message||String(e),true)));$('telegram-chat-list')?.addEventListener('change',e=>{if(e.target.value){$('settings-telegram-chat-id').value=e.target.value;updateTelegramStatus();}});$('telegram-test')?.addEventListener('click',()=>guard(async()=>{await request('telegram/test',{body:{chat_id:$('settings-telegram-chat-id').value.trim()}});telegramFeedback('Wiadomość testowa Telegrama została wysłana.');toast('Wiadomość testowa Telegrama została wysłana.');}),e=>telegramFeedback(e.message||String(e),true));
-function settingsConfigText(){const v=id=>$(id)?.value.trim()||'',b=id=>Boolean($(id)?.checked);const notificationLines=["incoming_connection","outgoing_connection","terminal_message","disconnection","mailbox","yapp","tnc","critical"].flatMap(k=>[`notification_${k}_in_app=${notificationSetting(k,'in-app',b(`notification-${k}-in-app`))}`,`notification_${k}_native=${notificationSetting(k,'native',b(`notification-${k}-native`))}`,`notification_${k}_telegram=${notificationSetting(k,'telegram',b(`notification-${k}-telegram`))}`,`notification_${k}_sound=${notificationSetting(k,'sound',v(`notification-${k}-sound`)||0)}`]);const lines=[...notificationLines,`telegram_enabled=${b('settings-telegram-enabled')}`,`telegram_chat_id=${v('settings-telegram-chat-id')}`,`telegram_token_file=telegram.bot-token`,`callsign=${v('settings-callsign')}`,`myname=${v('settings-myname')}`,`locator=${v('settings-locator')}`,`language=${v('settings-language')}`,`welcome_enabled=${b('settings-welcome')}`,`goodbye_enabled=${b('settings-goodbye')}`,`remote_commands=${b('settings-remote')}`,`beacon_enabled=${b('settings-beacon')}`,`beacon_seconds=${Math.round(Number(v('settings-beacon-seconds'))*60)}`,`beacon_to=${v('settings-beacon-to')}`,`digipeat_enabled=${b('settings-digipeat')}`,`t1_ms=${v('settings-t1')}`,`t3_ms=${v('settings-t3')}`,`retries=${v('settings-retries')}`,`paclen=${v('settings-paclen')}`,`accept_incoming=${b('settings-accept')}`,`ax25_autonegotiation=${b('settings-autoneg')}`,`mailbox_enabled=${b('settings-mailbox')}`,`mailbox_callsign=${v('settings-mailbox-call')}`,`yapp_enabled=${b('settings-yapp')}`,`yapp_auto_receive=${b('settings-yapp-auto')}`,`yapp_ask_location=${b('settings-yapp-location')}`,`yapp_download_dir=${v('settings-yapp-dir')}`,`yapp_max_files=${v('settings-yapp-max-files')||1000}`,`yapp_auto_cleanup=${b('settings-yapp-cleanup')}`];document.querySelectorAll('#interface-forms > .interface-form').forEach(card=>{const q=s=>card.querySelector(s),name=q('.if-name')?.value.trim()||'',transport=q('[id^="if-transport"]')?.value||'tcp',endpoint=q('[id^="if-endpoint"]')?.value.trim()||'',baud=q('[id^="if-baud"]')?.value||9600,encoded=transport==='serial'?`serial:${endpoint}@${baud}`:endpoint;lines.push(`interface_${name}=${encoded},${q('[id^="if-port"]')?.value||0},${q('[id^="if-priority"]')?.value||0},${q('.if-enabled')?.checked!==false},${q('[id^="if-description"]')?.value.trim()||''}`);lines.push(`beacon_interface_${name}=${q('.if-beacon')?.checked!==false},${q('.if-path')?.value.trim()||''}`);});return lines.join('\n')+'\n';}
+function settingsConfigText(){const v=id=>$(id)?.value.trim()||'',b=id=>Boolean($(id)?.checked);const notificationLines=["incoming_connection","outgoing_connection","terminal_message","disconnection","mailbox","yapp","tnc","critical"].flatMap(k=>[`notification_${k}_in_app=${notificationSetting(k,'in-app',b(`notification-${k}-in-app`))}`,`notification_${k}_telegram=${notificationSetting(k,'telegram',b(`notification-${k}-telegram`))}`,`notification_${k}_sound=${notificationSetting(k,'sound',v(`notification-${k}-sound`)||0)}`]);const lines=[...notificationLines,`telegram_enabled=${b('settings-telegram-enabled')}`,`telegram_chat_id=${v('settings-telegram-chat-id')}`,`telegram_token_file=telegram.bot-token`,`callsign=${v('settings-callsign')}`,`myname=${v('settings-myname')}`,`locator=${v('settings-locator')}`,`language=${v('settings-language')}`,`welcome_enabled=${b('settings-welcome')}`,`goodbye_enabled=${b('settings-goodbye')}`,`remote_commands=${b('settings-remote')}`,`beacon_enabled=${b('settings-beacon')}`,`beacon_seconds=${Math.round(Number(v('settings-beacon-seconds'))*60)}`,`beacon_to=${v('settings-beacon-to')}`,`digipeat_enabled=${b('settings-digipeat')}`,`t1_ms=${v('settings-t1')}`,`t3_ms=${v('settings-t3')}`,`retries=${v('settings-retries')}`,`paclen=${v('settings-paclen')}`,`accept_incoming=${b('settings-accept')}`,`ax25_autonegotiation=${b('settings-autoneg')}`,`mailbox_enabled=${b('settings-mailbox')}`,`mailbox_callsign=${v('settings-mailbox-call')}`,`yapp_enabled=${b('settings-yapp')}`,`yapp_auto_receive=${b('settings-yapp-auto')}`,`yapp_ask_location=${b('settings-yapp-location')}`,`yapp_download_dir=${v('settings-yapp-dir')}`,`yapp_max_files=${v('settings-yapp-max-files')||1000}`,`yapp_auto_cleanup=${b('settings-yapp-cleanup')}`];document.querySelectorAll('#interface-forms > .interface-form').forEach(card=>{const q=s=>card.querySelector(s),name=q('.if-name')?.value.trim()||'',transport=q('[id^="if-transport"]')?.value||'tcp',endpoint=q('[id^="if-endpoint"]')?.value.trim()||'',baud=q('[id^="if-baud"]')?.value||9600,encoded=transport==='serial'?`serial:${endpoint}@${baud}`:endpoint;lines.push(`interface_${name}=${encoded},${q('[id^="if-port"]')?.value||0},${q('[id^="if-priority"]')?.value||0},${q('.if-enabled')?.checked!==false},${q('[id^="if-description"]')?.value.trim()||''}`);lines.push(`beacon_interface_${name}=${q('.if-beacon')?.checked!==false},${q('.if-path')?.value.trim()||''}`);});return lines.join('\n')+'\n';}
 async function loadSettings(){const [details,templates,webDetails]=await Promise.all([request('config/details'),request('templates'),request('web/details')]);await loadLanguage(details.language);ensureWebSettings();field('settings-web-bind',webDetails.bind);field('settings-web-token-file',webDetails.tokenFile||'');checked('settings-web-auth',webDetails.authEnabled);field('settings-web-presence',webDetails.presenceMode||'auto');field('settings-web-profile',webDetails.absenceProfile||2);field('settings-web-timeout',webDetails.heartbeatTimeout||90);checked('settings-statistics',webDetails.statisticsEnabled);const warning=$('settings-web-warning');if(warning)warning.hidden=bool(webDetails.authEnabled)||String(webDetails.bind||'').startsWith('127.0.0.1:')||String(webDetails.bind||'').startsWith('localhost:');ensureLocatorField();field('settings-callsign',details.callsign);field('settings-myname',details.myname);field('settings-locator',details.locator);field('settings-language',details.language);[['welcome','welcome'],['goodbye','goodbye'],['remoteCommands','remote'],['beacon','beacon'],['digipeat','digipeat'],['accept','accept'],['ax25Autonegotiation','autoneg'],['mailboxEnabled','mailbox'],['yappEnabled','yapp'],['yappAutoReceive','yapp-auto'],['yappAskLocation','yapp-location']].forEach(([key,id])=>checked(`settings-${id}`,details[key]));field('settings-beacon-seconds',Math.max(10,Math.round(Number(details.beaconSeconds||600)/60)));field('settings-beacon-to',details.beaconTo);field('settings-t1',details.t1);field('settings-t3',details.t3);field('settings-retries',details.retries);field('settings-paclen',details.paclen);field('settings-mailbox-call',details.mailboxCall);field('settings-yapp-dir',details.yappDownloadDir);state.telegramTokenPresent=Boolean(details.telegramTokenPresent);field('settings-yapp-max-files',details.yappMaxFiles||1000);checked('settings-yapp-cleanup',details.yappAutoCleanup);checked('settings-telegram-enabled',details.telegramEnabled);field('settings-telegram-chat-id',details.telegramChatId||'');updateTelegramStatus();(details.notifications||[]).forEach(item=>{checked(`notification-${item.kind}-in-app`,item.inApp);checked(`notification-${item.kind}-native`,item.native);checked(`notification-${item.kind}-telegram`,item.telegram);field(`notification-${item.kind}-sound`,item.sound);});updateModuleNotificationState();renderInterfaceForms(details.interfaces);state.templates=templates;$('template-text').value=templates[Number($('template-select').value)]||'';$('config-text').value=settingsConfigText();state.configText=$('config-text').value;}
 function validateSettings(){const locator=v=>$(v)?.value.trim()||'',beaconMinutes=Number(locator('settings-beacon-seconds'));if(!Number.isInteger(beaconMinutes)||beaconMinutes<10||beaconMinutes>1440)throw settingsError('Interwał beaconu musi wynosić od 10 do 1440 minut.',$('settings-beacon-seconds'));if(locator('settings-locator')&&!/^[A-Ra-r]{2}[0-9]{2}([A-Xa-x]{2})?$/.test(locator('settings-locator')))throw settingsError('Lokator QTH musi mieć format Maidenhead, np. JO92AA.',$('settings-locator'));const cards=[...document.querySelectorAll('#interface-forms > .interface-form')],names=[];if(cards.length>10)throw settingsError('Można skonfigurować maksymalnie 10 interfejsów TNC.',cards[10]?.querySelector('.if-name'));for(const card of cards){const name=card.querySelector('.if-name'),transport=card.querySelector('.if-transport'),endpoint=card.querySelector('.if-endpoint'),baud=card.querySelector('.if-baud'),port=card.querySelector('.if-port'),priority=card.querySelector('.if-priority'),nameValue=name?.value.trim()||'';if(!/^[A-Za-z0-9_]{1,16}$/.test(nameValue))throw settingsError('Nazwa interfejsu musi mieć 1-16 znaków ASCII: litery, cyfry lub _.',name);if(names.includes(nameValue))throw settingsError('Nazwy interfejsów TNC muszą być unikalne.',name);names.push(nameValue);const endpointValue=endpoint?.value.trim()||'';if(transport?.value==='serial'){if(!endpointValue||(!/^COM[0-9]+$/i.test(endpointValue)&&!/^\/dev\/[^\s]+$/.test(endpointValue)))throw settingsError('Podaj poprawne urządzenie szeregowe, np. COM3 lub /dev/ttyUSB0.',endpoint);const baudValue=Number(baud?.value);if(![1200,2400,4800,9600,19200,38400,57600,115200].includes(baudValue))throw settingsError('Wybierz obsługiwaną prędkość portu szeregowego.',baud);}else{const match=endpointValue.match(/^(.+):([0-9]+)$/);if(!match||Number(match[2])<1||Number(match[2])>65535)throw settingsError('Adres TCP/IP musi mieć format host:port.',endpoint);}const kissPort=Number(port?.value);if(!Number.isInteger(kissPort)||kissPort<0||kissPort>15)throw settingsError('Port KISS musi mieć wartość od 0 do 15.',port);const interfacePriority=Number(priority?.value);if(!Number.isInteger(interfacePriority)||interfacePriority<0||interfacePriority>255)throw settingsError('Priorytet interfejsu musi mieć wartość od 0 do 255.',priority);}}
 
@@ -811,17 +809,15 @@ function normalizeNotificationLabels(){
   if(!section)return;
   ensureNotificationVolumeControl(section);
   const description=section.querySelector(':scope > .hint');
-  if(description)description.textContent=settingsDesktopRuntime()
-    ?(state.language==='en'?'Choose notification center, system notifications and sound for each event.':'Wybierz centrum powiadomień, dymki systemowe i dźwięk dla każdego zdarzenia.')
-    :(state.language==='en'?'Choose notification center, Telegram and sound for each event. Browser audio requires audio to be unlocked.':'Wybierz centrum powiadomień, Telegram i dźwięk dla każdego zdarzenia. Dźwięk w przeglądarce wymaga odblokowania audio.');
+  if(description)description.textContent=(state.language==='en'?'Choose notification center, Telegram and sound for each event. Browser audio requires audio to be unlocked.':'Wybierz centrum powiadomień, Telegram i dźwięk dla każdego zdarzenia. Dźwięk w przeglądarce wymaga odblokowania audio.');
   const heading=section.querySelector(':scope > h3');
   if(heading&&!heading.querySelector('.notification-test-hint')){
     const hint=node('span','hint-inline',' (kliknięcie nazwy kanału wysyła test)');
     hint.className='hint-inline notification-test-hint';
     heading.append(hint);
   }
-  const labels=state.language==='en'?['Notification center','System notification','Telegram','Sound']:['Centrum powiadomień','Dymek','Telegram','Dźwięk'];
-  const channels=['in-app','native','telegram','sound'];
+  const labels=state.language==='en'?['Notification center','Telegram','Sound']:['Centrum powiadomień','Telegram','Dźwięk'];
+  const channels=['in-app','telegram','sound'];
   section.querySelectorAll('.notification-table th').forEach((header,index)=>{
     if(index===0||!labels[index-1])return;
     let button=header.querySelector('.notification-channel-test');
@@ -995,19 +991,6 @@ function splitApplicationAndWebSettings(){
   [...web.querySelectorAll(':scope > .settings-collapsible')].forEach(card=>{
     if(card.querySelector('.telegram-settings,.notification-settings'))notifications.append(card);
   });
-  const application=node('div','form-section');
-  application.dataset.settingsKey='application';
-  application.hidden=true;
-  application.innerHTML='<h3>Aplikacja</h3><p class="section-help"></p><div class="desktop-settings"><label><input id="settings-desktop-autostart" type="checkbox" disabled> <span id="settings-desktop-autostart-label">Uruchamiaj UPR Terminal po zalogowaniu</span></label><p class="hint" id="settings-desktop-autostart-hint">Zmiana zapisywana automatycznie.</p></div>';
-  web.parentElement.insertBefore(application,web);
-  collapseApplicationSettings(application);
-  $('settings-desktop-autostart').onchange=()=>guard(async()=>{
-    const control=$('settings-desktop-autostart'),previous=!control.checked;
-    control.disabled=true;
-    try{const result=await request('desktop/autostart',{body:{enabled:String(control.checked)}});control.checked=result.enabled;}
-    catch(exception){control.checked=previous;throw exception;}
-    finally{control.disabled=false;}
-  });
   const messages=form.querySelector('.form-section[data-settings-key="messages"]');
   const template=messages?.querySelector('#template-select')?.closest('.panel');
   if(template&&messages)messages.append(template);
@@ -1025,7 +1008,7 @@ function settingsTabItemsSeparated(){
   return order.map(type=>{
     const element=sections.find(section=>section.dataset.settingsKey===type);
     if(!element)return null;
-    if(type==='application'&&!settingsDesktopRuntime())return null;
+    if(type==='application')return null;
     if(type==='web'&&(settingsDesktopRuntime()||state.webDetails?.webPanel===false))return null;
     const [key,fallback]=labels[type];
     return {element,key,fallback,section:type!=='application'};
@@ -1034,8 +1017,7 @@ function settingsTabItemsSeparated(){
 
 settingsTabItems=settingsTabItemsSeparated;
 staticTranslations['Uruchamianie']='Startup';
-helpDescriptions.notifications={pl:{title:'Powiadomienia',summary:'Kanały i dźwięki powiadomień.',items:['UPR Terminal udostępnia dymki systemowe.','UPR Station udostępnia Telegram i dźwięk w przeglądarce.']},en:{title:'Notifications',summary:'Notification channels and sounds.',items:['UPR Terminal provides system notifications.','UPR Station provides Telegram and browser audio.']}};
-helpDescriptions.application={pl:{title:'Aplikacja',summary:'Ustawienia UPR Terminal.',items:['Autostart uruchamia terminal po zalogowaniu do systemu.','Zmiana autostartu jest zapisywana automatycznie, bez restartu.']},en:{title:'Application',summary:'UPR Terminal settings.',items:['Autostart launches the terminal after signing in to the system.','Autostart changes are saved automatically, without restarting.']}};
+helpDescriptions.notifications={pl:{title:'Powiadomienia',summary:'Kanały i dźwięki powiadomień.',items:['Centrum powiadomień jest dostępne w panelu WWW.','UPR Station udostępnia Telegram i dźwięk w przeglądarce.']},en:{title:'Notifications',summary:'Notification channels and sounds.',items:['Notification center is available in the web panel.','UPR Station provides Telegram and browser audio.']}};
 helpDescriptions.web={pl:{title:'WWW',summary:'Panel WWW, dostęp operatora i ustawienia serwera.',items:['Desktop korzysta z lokalnego, dynamicznie wybranego portu.','Wariant server używa skonfigurowanego adresu, domyślnie portu 8080.','Ustawienia obecności i heartbeat dotyczą komunikacji panelu z backendem.']},en:{title:'Web',summary:'Web panel, operator access and server settings.',items:['Desktop uses a local dynamically selected port.','The server variant uses the configured address, port 8080 by default.','Presence and heartbeat settings control panel-to-backend communication.']}};
 helpDescriptions.mqtt={pl:{title:'MQTT',summary:'Bezpieczna publikacja statusu stacji do brokera MQTT.',items:['MQTT nie wymaga bota — potrzebny jest broker, np. Mosquitto lub broker Home Assistant.','Włącz MQTT dopiero po wpisaniu adresu brokera oraz opcjonalnych danych użytkownika.','Przycisk „Wyślij Home Assistant Discovery” publikuje konfigurację encji jednorazowo; po zmianie prefiksu lub znaku stacji użyj go ponownie.','Aplikacja publikuje tylko status aplikacji, TNC i MHeard; nie odbiera poleceń MQTT.']},en:{title:'MQTT',summary:'Secure publication of station status to an MQTT broker.',items:['MQTT does not use a bot — it requires a broker such as Mosquitto or a Home Assistant broker.','Enable MQTT after entering the broker address and optional credentials.','The “Send Home Assistant Discovery” button publishes entity configuration once; use it again after changing the prefix or station callsign.','The application publishes only application status, TNC and MHeard; it does not accept MQTT commands.']}};
 splitApplicationAndWebSettings();
@@ -1055,29 +1037,13 @@ function syncSettingsRuntime(){
   form.dataset.settingsRuntime=runtime;
   ensureSettingsTabs(true);
 }
-function settingsDesktopRuntime(){return Boolean(window.__UPR_DESKTOP__)||state.webDetails?.runtime==='desktop';}
+function settingsDesktopRuntime(){return false;}
 function syncNotificationChannels(){
-  const desktop=settingsDesktopRuntime();
-  document.querySelectorAll('.notification-table tr').forEach(row=>{
-    if(row.children[2])row.children[2].hidden=!desktop;
-    if(row.children[3])row.children[3].hidden=desktop;
-  });
-  document.querySelector('.telegram-settings')?.closest('.settings-collapsible')?.toggleAttribute('hidden',desktop);
   const heading=document.querySelector('.form-section[data-settings-key="notifications"] > h3');
   if(heading)heading.textContent=state.catalog['settings.notifications']||(state.language==='en'?'Notifications':'Powiadomienia');
-  const label=$('settings-desktop-autostart-label'),hint=$('settings-desktop-autostart-hint');
-  if(label)label.textContent=state.language==='en'?'Launch UPR Terminal after signing in':'Uruchamiaj UPR Terminal po zalogowaniu';
-  if(hint)hint.textContent=state.language==='en'?'Saved automatically.':'Zmiana zapisywana automatycznie.';
+
 }
-async function loadDesktopApplicationSettings(){
-  if(!settingsDesktopRuntime())return;
-  const control=$('settings-desktop-autostart');
-  if(!control)return;
-  control.disabled=true;
-  const result=await request('desktop/autostart');
-  control.checked=result.enabled;
-  control.disabled=false;
-}
+
 setInterval(syncSettingsRuntime,500);
 
 // Notification event split: keep legacy configuration readable while exposing separate controls.
@@ -1096,13 +1062,13 @@ setInterval(syncSettingsRuntime,500);
       if(tbody.querySelector('[data-notification-kind="'+kind+'"]'))return;
       const row=document.createElement('tr');
       row.dataset.notificationKind=kind;
-      row.innerHTML='<td>'+label+'</td><td><input id="notification-'+kind+'-in-app" type="checkbox"></td><td><input id="notification-'+kind+'-native" type="checkbox"></td><td><input id="notification-'+kind+'-telegram" type="checkbox"></td><td><select id="notification-'+kind+'-sound"><option value="0">Brak</option><option value="1">1 dzwonek</option><option value="2">2 dzwonki</option><option value="3">3 dzwonki</option></select></td>';
+      row.innerHTML='<td>'+label+'</td><td><input id="notification-'+kind+'-in-app" type="checkbox"></td><td><input id="notification-'+kind+'-telegram" type="checkbox"></td><td><select id="notification-'+kind+'-sound"><option value="0">Brak</option><option value="1">1 dzwonek</option><option value="2">2 dzwonki</option><option value="3">3 dzwonki</option></select></td>';
       const anchor=kind==='mheard_new_station'?tbody.querySelector('[data-notification-kind="mailbox"]'):critical;
       anchor?tbody.insertBefore(row,anchor):tbody.append(row);
     });
   }
   function notificationLines(){
-    const fields=[['in_app','in-app'],['native','native'],['telegram','telegram'],['sound','sound']];
+    const fields=[['in_app','in-app'],['telegram','telegram'],['sound','sound']];
     return rows.flatMap(([kind])=>fields.map(([fieldName,channel])=>`notification_${kind}_${fieldName}=${channel==='sound'?($('notification-'+kind+'-sound')?.value||0):notificationSetting(kind,channel,$('notification-'+kind+'-'+channel)?.checked||false)}`));
   }
   const oldSettingsConfigText=settingsConfigText;
@@ -1116,14 +1082,14 @@ setInterval(syncSettingsRuntime,500);
     const values=new Map();
     text.split(/\r?\n/).forEach(raw=>{const line=raw.trim(),index=line.indexOf('=');if(index>0)values.set(line.slice(0,index),line.slice(index+1));});
     const legacy=field=>values.get('notification_tnc_'+field);
-    rows.forEach(([kind])=>['in_app','native','telegram','sound'].forEach(fieldName=>{
+    rows.forEach(([kind])=>['in_app','telegram','sound'].forEach(fieldName=>{
       const value=values.get('notification_'+kind+'_'+fieldName)??(kind==='mheard_new_station'?(fieldName==='sound'?'0':'false'):legacy(fieldName));
       if(value===undefined)return;
       if(fieldName==='sound')field('notification-'+kind+'-sound',value);else checked('notification-'+kind+'-'+(fieldName==='in_app'?'in-app':fieldName),value==='true');
     }));
   };
   const oldLoadSettings=loadSettings;
-  loadSettings=async function(){ensureNotificationRows();await oldLoadSettings();syncNotificationChannels();await loadDesktopApplicationSettings();};
+  loadSettings=async function(){ensureNotificationRows();await oldLoadSettings();syncNotificationChannels();};
   document.addEventListener('DOMContentLoaded',ensureNotificationRows);
 })();
 

@@ -34,7 +34,7 @@ with tempfile.TemporaryDirectory() as directory:
     request=urllib.request.Request('https://api.github.com/a',headers={'Authorization':'Bearer isolated-test-token'})
     redirected=redirect.redirect_request(request,None,302,'Found',{},'https://release-assets.githubusercontent.com/a')
     assert not redirected.has_header('Authorization')
-for mode,asset in [('installer','install-server.sh'),('terminal','UPR-Terminal-vtest-linux-x86_64.deb')]:
+for mode,asset in [('docker','UPR-Station-vtest-docker-x86_64.tar.gz')]:
     name=asset
     release['assets'][0]['name']=name
     with tempfile.TemporaryDirectory() as directory:
@@ -50,4 +50,4 @@ with tempfile.TemporaryDirectory() as directory:
         except SystemExit as error: assert error.code==1
         else: raise AssertionError('Bad checksum was accepted')
     assert (Path(directory)/name).read_bytes()==payload, 'Checksum failure must be tested after downloading the selected asset'
-print('PASS: pinned/latest pre-release selection, draft exclusion, server/desktop assets, mandatory SHA-256 and no token forwarding to another host.')
+print('PASS: pinned/latest pre-release selection, draft exclusion, UPR Station assets, mandatory SHA-256 and no token forwarding to another host.')

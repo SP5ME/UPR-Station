@@ -4,7 +4,7 @@ fn run() -> Result<(), String> {
         return Ok(());
     };
     let path = options.config.clone();
-    let station = runtime::start(options, None)?;
+    let station = runtime::start(options)?;
     println!(
         "UPR Station: http://{}\nConfiguration: {}\nRadio services remain active independently of the browser.",
         station.address,

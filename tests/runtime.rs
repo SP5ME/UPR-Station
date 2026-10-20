@@ -99,18 +99,17 @@ fn post_raw_request(
     text
 }
 #[test]
-fn desktop_runtime_is_authenticated_locked_and_releases_resources_on_stop() {
+fn server_runtime_is_authenticated_locked_and_releases_resources_on_stop() {
     let dir = Temporary::new();
     let options = RuntimeOptions {
         address: "127.0.0.1:0".into(),
         config: dir.0.join("station.conf"),
         web_config: dir.0.join("web.conf"),
         web_config_explicit: true,
-        desktop: false,
-        desktop_token: Some("a".repeat(64)),
+        token_override: Some("a".repeat(64)),
         install_signals: false,
     };
-    let station = runtime::start(options.clone(), None).unwrap();
+    let station = runtime::start(options.clone()).unwrap();
     assert_ne!(station.address.port(), 0);
     assert!(request(station.address, "/healthz", "").starts_with("HTTP/1.1 200"));
     assert!(request(station.address, "/api/state", "").starts_with("HTTP/1.1 401"));
@@ -148,38 +147,11 @@ fn desktop_runtime_is_authenticated_locked_and_releases_resources_on_stop() {
         )
         .starts_with("HTTP/1.1 403")
     );
-    assert!(runtime::start(options.clone(), None).is_err());
+    assert!(runtime::start(options.clone()).is_err());
     station.request_stop();
     station.wait().unwrap();
-    let restarted = runtime::start(options, None).unwrap();
+    let restarted = runtime::start(options).unwrap();
     let address = restarted.address;
     drop(restarted); // Drop must stop and join rather than leave a radio worker orphaned.
     assert!(TcpStream::connect(address).is_err());
-}
-
-#[test]
-fn desktop_runtime_reports_desktop_profile() {
-    let dir = Temporary::new();
-    let options = RuntimeOptions {
-        address: "127.0.0.1:0".into(),
-        config: dir.0.join("station.conf"),
-        web_config: dir.0.join("web.conf"),
-        web_config_explicit: true,
-        desktop: true,
-        desktop_token: Some("b".repeat(64)),
-        install_signals: false,
-    };
-    let station = runtime::start(options, None).unwrap();
-    let auth = format!(
-        "X-Station-Request: 1\r\nAuthorization: Bearer {}\r\n",
-        "b".repeat(64)
-    );
-    let web_details = post_request(station.address, "/api/web/details", &auth);
-    assert!(web_details.contains("\"runtime\":\"desktop\""));
-    assert!(web_details.contains("\"webPanel\":true"));
-    let telegram = post_request(station.address, "/api/telegram/status", &auth);
-    assert!(telegram.starts_with("HTTP/1.1 400"));
-    assert!(telegram.contains("UPR Station"));
-    station.request_stop();
-    station.wait().unwrap();
 }

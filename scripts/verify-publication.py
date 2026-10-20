@@ -2,14 +2,14 @@
 from pathlib import Path
 import re
 import sys
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = {'.github', 'src', 'web', 'docs', 'scripts', 'tests', 'deploy',
-               'languages', 'messages', 'assets', 'licenses', 'desktop'}
+               'languages', 'messages', 'assets', 'licenses'}
 FILES = {'.gitignore', '.gitattributes', '.dockerignore', 'README.md', 'LICENSE',
          'TRADEMARKS.md', 'CONTRIBUTING.md', 'SECURITY.md', 'Cargo.toml', 'Cargo.lock',
-         'Dockerfile', 'docker-compose.yml', 'build-installer.ps1', 'build-windows.cmd',
-         'station-control.cmd', 'station-control.ps1', 'ultimatepr-logo.png',
+         'Dockerfile', 'docker-compose.yml', 'ultimatepr-logo.png',
          'ultimatepr-station-icon.ico', 'ultimatepr-station-icon.png'}
 IGNORED = {'.git', 'target', 'release', '__pycache__', 'node_modules', '.venv'}
 PRIVATE = {'data', 'backups', '.local-notes', 'github-ready', 'linux-transfer', 'prealpha'}
@@ -24,10 +24,16 @@ PATTERNS = {
 def inspect(root=ROOT):
     issues = []
     count = 0
-    for path in root.rglob('*'):
-        relative = path.relative_to(root)
-        if any(part in IGNORED or part.startswith('target-') for part in relative.parts):
-            continue
+    # Inspect the publication inventory, not adjacent ignored operator data.
+    # Tracked private files remain visible here even when .gitignore excludes them.
+    names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'], cwd=root).decode('utf-8').split('\0')
+    for name in sorted(set(filter(None,names))):
+        path = root / name
+        relative = Path(name)
+        if any(part in PRIVATE or part in IGNORED or part.startswith('target-') for part in relative.parts):
+            issues.append(f'{relative}: private/generated publication path'); continue
+        if not path.exists() and not path.is_symlink():
+            continue  # tracked source deletion in the working tree
         if path.is_symlink():
             issues.append(f'{relative}: symbolic link'); continue
         if path.is_dir():
